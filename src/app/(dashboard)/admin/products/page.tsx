@@ -1,0 +1,47 @@
+import { Badge } from "@/components/ui/badge";
+import { DataTable } from "@/components/dashboard/data-table";
+import { createClient } from "@/lib/supabase/server";
+import { formatSAR } from "@/lib/format";
+
+type Row = {
+  id: string;
+  title: string;
+  city: string;
+  condition: string;
+  price: number;
+  is_available: boolean;
+};
+
+export default async function AdminProductsPage() {
+  const supabase = await createClient();
+  const { data } = (await supabase
+    .from("products")
+    .select("id, title, city, condition, price, is_available")
+    .order("created_at", { ascending: false })) as { data: Row[] | null };
+
+  const rows = data || [];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-navy">All Products</h1>
+        <p className="text-sm text-muted-foreground">Global product listings overview for administrators.</p>
+      </div>
+
+      <DataTable
+        rows={rows}
+        columns={[
+          { key: "title", title: "Title" },
+          { key: "city", title: "City" },
+          { key: "condition", title: "Condition", render: (row) => row.condition.replaceAll("_", " ") },
+          { key: "price", title: "Price", render: (row) => formatSAR(row.price) },
+          {
+            key: "is_available",
+            title: "Availability",
+            render: (row) => <Badge>{row.is_available ? "Available" : "Hidden"}</Badge>,
+          },
+        ]}
+      />
+    </div>
+  );
+}

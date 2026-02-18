@@ -1,0 +1,45 @@
+import { Badge } from "@/components/ui/badge";
+import { DataTable } from "@/components/dashboard/data-table";
+import { createClient } from "@/lib/supabase/server";
+import { formatSAR } from "@/lib/format";
+
+type Row = {
+  id: string;
+  title: string;
+  city: string;
+  status: string;
+  price: number;
+};
+
+export default async function AdminPropertiesPage() {
+  const supabase = await createClient();
+  const { data } = (await supabase
+    .from("properties")
+    .select("id, title, city, status, price")
+    .order("created_at", { ascending: false })) as { data: Row[] | null };
+
+  const rows = data || [];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-navy">All Properties</h1>
+        <p className="text-sm text-muted-foreground">Global listings overview for administrators.</p>
+      </div>
+
+      <DataTable
+        rows={rows}
+        columns={[
+          { key: "title", title: "Title" },
+          { key: "city", title: "City" },
+          { key: "price", title: "Price", render: (row) => formatSAR(row.price) },
+          {
+            key: "status",
+            title: "Status",
+            render: (row) => <Badge className="capitalize">{row.status}</Badge>,
+          },
+        ]}
+      />
+    </div>
+  );
+}

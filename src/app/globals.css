@@ -2,26 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 43 96% 56%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 47% 11%;
+    --chart-1: 43 96% 56%;
+    --chart-2: 222 47% 31%;
+    --chart-3: 173 58% 39%;
+    --chart-4: 197 37% 24%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --gold: 43 96% 56%;
+    --navy: 222 47% 11%;
+    --navy-light: 222 30% 20%;
+  }
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 43 96% 56%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 222 30% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 30% 15%;
+    --muted-foreground: 215 16% 57%;
+    --accent: 43 96% 56%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 222 30% 18%;
+    --input: 222 30% 18%;
+    --ring: 43 96% 56%;
+    --chart-1: 43 96% 56%;
+    --chart-2: 222 47% 51%;
+    --chart-3: 173 58% 49%;
+    --chart-4: 197 37% 44%;
+    --chart-5: 27 87% 67%;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

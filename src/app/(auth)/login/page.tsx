@@ -1,0 +1,131 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { loginSchema, type LoginInput } from "@/lib/validators";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const supabase = createClient();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (values: LoginInput) => {
+    const redirect =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("redirect")
+        : null;
+
+    const { data, error } = await supabase.auth.signInWithPassword(values);
+
+    if (error) {
+      toast.error(error.message || "Login failed");
+      return;
+    }
+
+    if (!data.user) {
+      toast.error("Could not load your account");
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", data.user.id)
+      .single() as { data: { role: string } | null };
+
+    if (profile?.role === "admin") {
+      router.push("/admin");
+      return;
+    }
+
+    if (profile?.role === "agent") {
+      const { data: agent } = await supabase
+        .from("agents")
+        .select("status")
+        .eq("profile_id", data.user.id)
+        .single() as { data: { status: string } | null };
+
+      if (agent?.status !== "approved") {
+        router.push("/pending-approval");
+        return;
+      }
+
+      router.push(redirect || "/agent");
+      return;
+    }
+
+    router.push(redirect || "/");
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Sign in</CardTitle>
+        <CardDescription>Access your UrbanSaudi account.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
+            {errors.email && (
+              <p className="text-sm text-destructive">{errors.email.message}</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" type="password" {...register("password")} />
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password.message}</p>
+            )}
+          </div>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              "Sign in"
+            )}
+          </Button>
+        </form>
+
+        <div className="mt-6 space-y-2 text-center text-sm">
+          <p className="text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="font-medium text-navy hover:underline">
+              Create one
+            </Link>
+          </p>
+          <p className="text-muted-foreground">
+            Agent account?{" "}
+            <Link href="/signup/agent" className="font-medium text-navy hover:underline">
+              Register as agent
+            </Link>
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
