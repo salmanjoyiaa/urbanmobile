@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Pencil } from "lucide-react";
 import { DataTable } from "@/components/dashboard/data-table";
 import { DeleteItemButton } from "@/components/dashboard/delete-item-button";
@@ -10,9 +11,22 @@ import type { Property } from "@/types/database";
 
 export default async function AgentPropertiesPage() {
   const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: agent } = (await supabase
+    .from("agents")
+    .select("id")
+    .eq("profile_id", user.id)
+    .single()) as { data: { id: string } | null };
+
+  if (!agent) redirect("/pending-approval");
+
   const { data } = (await supabase
     .from("properties")
     .select("*")
+    .eq("agent_id", agent.id)
     .order("created_at", { ascending: false })) as { data: Property[] | null };
 
   const rows = data || [];

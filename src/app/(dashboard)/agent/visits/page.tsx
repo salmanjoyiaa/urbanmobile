@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatTime } from "@/lib/format";
+import { redirect } from "next/navigation";
 
 type VisitRow = {
   id: string;
@@ -18,18 +19,41 @@ type VisitRow = {
 
 export default async function AgentVisitsPage() {
   const supabase = await createClient();
-  const { data } = (await supabase
-    .from("visit_requests")
-    .select(
-      `
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: agent } = (await supabase
+    .from("agents")
+    .select("id")
+    .eq("profile_id", user.id)
+    .single()) as { data: { id: string } | null };
+
+  if (!agent) redirect("/pending-approval");
+
+  const { data: propertyIds } = (await supabase
+    .from("properties")
+    .select("id")
+    .eq("agent_id", agent.id)) as { data: Array<{ id: string }> | null };
+  const visitIdList = (propertyIds || []).map((item) => item.id);
+
+  let rows: VisitRow[] = [];
+
+  if (visitIdList.length > 0) {
+    const { data } = (await supabase
+      .from("visit_requests")
+      .select(
+        `
       id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status,
       properties:property_id (title)
     `
-    )
-    .neq("status", "pending")
-    .order("created_at", { ascending: false })) as { data: VisitRow[] | null };
+      )
+      .in("property_id", visitIdList)
+      .neq("status", "pending")
+      .order("created_at", { ascending: false })) as { data: VisitRow[] | null };
 
-  const rows = data || [];
+    rows = data || [];
+  }
 
   return (
     <div className="space-y-6">

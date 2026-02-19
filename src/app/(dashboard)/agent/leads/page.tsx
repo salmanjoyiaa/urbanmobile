@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 type LeadRow = {
   id: string;
@@ -16,18 +17,41 @@ type LeadRow = {
 
 export default async function AgentLeadsPage() {
   const supabase = await createClient();
-  const { data } = (await supabase
-    .from("buy_requests")
-    .select(
-      `
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: agent } = (await supabase
+    .from("agents")
+    .select("id")
+    .eq("profile_id", user.id)
+    .single()) as { data: { id: string } | null };
+
+  if (!agent) redirect("/pending-approval");
+
+  const { data: productIds } = (await supabase
+    .from("products")
+    .select("id")
+    .eq("agent_id", agent.id)) as { data: Array<{ id: string }> | null };
+  const leadIdList = (productIds || []).map((item) => item.id);
+
+  let rows: LeadRow[] = [];
+
+  if (leadIdList.length > 0) {
+    const { data } = (await supabase
+      .from("buy_requests")
+      .select(
+        `
       id, buyer_name, buyer_email, buyer_phone, message, status,
       products:product_id (title)
     `
-    )
-    .neq("status", "pending")
-    .order("created_at", { ascending: false })) as { data: LeadRow[] | null };
+      )
+      .in("product_id", leadIdList)
+      .neq("status", "pending")
+      .order("created_at", { ascending: false })) as { data: LeadRow[] | null };
 
-  const rows = data || [];
+    rows = data || [];
+  }
 
   return (
     <div className="space-y-6">
