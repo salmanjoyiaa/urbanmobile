@@ -19,7 +19,11 @@ export function SlotGrid({ slots, selectedSlot, onSelect }: SlotGridProps) {
             variant={active ? "default" : "outline"}
             disabled={!slot.available}
             onClick={() => onSelect(slot.time)}
-            className={!slot.available ? "cursor-not-allowed opacity-50" : ""}
+            className={
+              !slot.available
+                ? "cursor-not-allowed border-red-200 bg-red-50 text-red-500 opacity-60 hover:bg-red-50 hover:text-red-500"
+                : ""
+            }
           >
             {formatSlotLabel(slot.time)}
           </Button>
