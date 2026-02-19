@@ -24,6 +24,7 @@ export default async function AgentLeadsPage() {
       products:product_id (title)
     `
     )
+    .neq("status", "pending")
     .order("created_at", { ascending: false })) as { data: LeadRow[] | null };
 
   const rows = data || [];

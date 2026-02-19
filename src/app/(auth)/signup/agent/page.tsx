@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { agentSignupSchema, type AgentSignupInput } from "@/lib/validators";
-import type { Database } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -118,24 +117,23 @@ export default function AgentSignupPage() {
       documentPath = path;
     }
 
-    const payload: Database["public"]["Tables"]["agents"]["Insert"] = {
-      profile_id: userId,
+    const payloadForApi = {
       company_name: values.company_name,
       license_number: values.license_number || null,
-      document_url: documentPath,
+      document_url: documentPath || null,
       bio: null,
-      status: "pending",
     };
 
-    const { error: agentInsertError } = await (supabase
-      .from("agents") as never as {
-        insert: (
-          values: Database["public"]["Tables"]["agents"]["Insert"]
-        ) => Promise<{ error: { message?: string } | null }>;
-      }).insert(payload);
+    const res = await fetch("/api/agents", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payloadForApi),
+    });
 
-    if (agentInsertError) {
-      toast.error(agentInsertError.message || "Failed to submit agent profile");
+    const json = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      toast.error(json?.error || "Failed to submit agent profile");
       return;
     }
 

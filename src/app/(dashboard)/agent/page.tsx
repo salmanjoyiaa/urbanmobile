@@ -19,8 +19,8 @@ export default async function AgentOverviewPage() {
     .select("id, status")
     .eq("profile_id", user.id)
     .single()) as {
-    data: { id: string; status: string } | null;
-  };
+      data: { id: string; status: string } | null;
+    };
 
   if (!agent) {
     redirect("/pending-approval");
@@ -43,20 +43,20 @@ export default async function AgentOverviewPage() {
   const visitIdList = (propertyIds || []).map((item) => item.id);
   const leadIdList = (productIds || []).map((item) => item.id);
 
-  const [{ count: pendingVisits }, { count: pendingLeads }] = await Promise.all([
+  const [{ count: confirmedVisits }, { count: confirmedLeads }] = await Promise.all([
     visitIdList.length > 0
       ? supabase
-          .from("visit_requests")
-          .select("id", { count: "exact", head: true })
-          .in("property_id", visitIdList)
-          .eq("status", "pending")
+        .from("visit_requests")
+        .select("id", { count: "exact", head: true })
+        .in("property_id", visitIdList)
+        .eq("status", "confirmed")
       : Promise.resolve({ count: 0 }),
     leadIdList.length > 0
       ? supabase
-          .from("buy_requests")
-          .select("id", { count: "exact", head: true })
-          .in("product_id", leadIdList)
-          .eq("status", "pending")
+        .from("buy_requests")
+        .select("id", { count: "exact", head: true })
+        .in("product_id", leadIdList)
+        .eq("status", "confirmed")
       : Promise.resolve({ count: 0 }),
   ]);
 
@@ -70,8 +70,8 @@ export default async function AgentOverviewPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard title="Properties" value={propertiesCount || 0} />
         <StatCard title="Products" value={productsCount || 0} />
-        <StatCard title="Pending Visits" value={pendingVisits || 0} />
-        <StatCard title="Pending Leads" value={pendingLeads || 0} />
+        <StatCard title="Confirmed Visits" value={confirmedVisits || 0} />
+        <StatCard title="Confirmed Leads" value={confirmedLeads || 0} />
       </div>
 
       <Card>

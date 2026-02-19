@@ -1,0 +1,163 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - button [ref=e7]:
+            - img [ref=e8]
+          - link "UrbanSaudi" [ref=e9] [cursor=pointer]:
+            - /url: /
+        - navigation [ref=e10]:
+          - link "Properties" [ref=e11] [cursor=pointer]:
+            - /url: /properties
+          - link "Products" [ref=e12] [cursor=pointer]:
+            - /url: /products
+    - main [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - heading "Luxury Penthouse in Al-Olaya" [level=1] [ref=e16]
+          - paragraph [ref=e17]:
+            - img [ref=e18]
+            - text: Riyadh, Al-Olaya
+        - generic [ref=e21]:
+          - generic [ref=e22]:
+            - generic [ref=e23]:
+              - generic [ref=e24]:
+                - img "Luxury Penthouse in Al-Olaya" [ref=e25]
+                - button [ref=e26]:
+                  - img [ref=e27]
+                - button [ref=e29]:
+                  - img [ref=e30]
+              - generic [ref=e32]:
+                - button "Luxury Penthouse in Al-Olaya image 1" [ref=e33]:
+                  - img "Luxury Penthouse in Al-Olaya image 1" [ref=e34]
+                - button "Luxury Penthouse in Al-Olaya image 2" [ref=e35]:
+                  - img "Luxury Penthouse in Al-Olaya image 2" [ref=e36]
+            - generic [ref=e37]:
+              - heading "Property details" [level=2] [ref=e38]
+              - generic [ref=e39]:
+                - generic [ref=e40]: apartmentsaleSAR 2,850,000
+                - paragraph [ref=e41]: Stunning two-level penthouse with panoramic city views. Italian marble floors, smart home system, and private rooftop terrace.
+                - separator [ref=e42]
+                - generic [ref=e43]:
+                  - paragraph [ref=e44]: "Bedrooms: 4"
+                  - paragraph [ref=e45]: "Bathrooms: 5"
+                  - paragraph [ref=e46]: "Area: 320 m²"
+                  - paragraph [ref=e47]: "Year built: 2023"
+                  - paragraph [ref=e48]: "Address: —"
+                  - paragraph [ref=e49]: "Listed: February 19, 2026"
+                - separator [ref=e50]
+                - generic [ref=e51]:
+                  - paragraph [ref=e52]: Amenities
+                  - generic [ref=e53]: parkingpoolgymelevatorsecuritycentral ac
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - heading "Agent" [level=2] [ref=e56]
+              - generic [ref=e57]:
+                - paragraph [ref=e58]:
+                  - img [ref=e59]
+                  - text: Ahmed Al-Dosari
+                - paragraph [ref=e63]: "Company: Dosari Properties"
+                - paragraph [ref=e64]: "Phone: +966xx xxx xx8"
+            - generic [ref=e66]:
+              - generic [ref=e67]:
+                - generic [ref=e68]: Schedule a visit
+                - generic [ref=e69]: Book a time for Luxury Penthouse in Al-Olaya
+              - generic [ref=e70]:
+                - generic [ref=e71]:
+                  - generic [ref=e72]: 1. Date
+                  - generic [ref=e73]: 2. Slot
+                  - generic [ref=e74]: 3. Contact
+                - generic [ref=e75]:
+                  - generic [ref=e77]:
+                    - navigation "Navigation bar" [ref=e78]:
+                      - button "Go to the Previous Month" [ref=e79]:
+                        - img [ref=e80]
+                      - button "Go to the Next Month" [ref=e82]:
+                        - img [ref=e83]
+                    - generic [ref=e85]:
+                      - status [ref=e87]: February 2026
+                      - grid "February 2026" [ref=e88]:
+                        - rowgroup [ref=e89]:
+                          - row [ref=e90]:
+                            - columnheader [ref=e91]: Su
+                            - columnheader [ref=e92]: Mo
+                            - columnheader [ref=e93]: Tu
+                            - columnheader [ref=e94]: We
+                            - columnheader [ref=e95]: Th
+                            - columnheader [ref=e96]: Fr
+                            - columnheader [ref=e97]: Sa
+                        - rowgroup [ref=e98]:
+                          - row "Sunday, February 1st, 2026 Monday, February 2nd, 2026 Tuesday, February 3rd, 2026 Wednesday, February 4th, 2026 Thursday, February 5th, 2026 Friday, February 6th, 2026 Saturday, February 7th, 2026" [ref=e99]:
+                            - gridcell "Sunday, February 1st, 2026" [ref=e100]:
+                              - button "Sunday, February 1st, 2026" [disabled] [ref=e101]: "1"
+                            - gridcell "Monday, February 2nd, 2026" [ref=e102]:
+                              - button "Monday, February 2nd, 2026" [disabled] [ref=e103]: "2"
+                            - gridcell "Tuesday, February 3rd, 2026" [ref=e104]:
+                              - button "Tuesday, February 3rd, 2026" [disabled] [ref=e105]: "3"
+                            - gridcell "Wednesday, February 4th, 2026" [ref=e106]:
+                              - button "Wednesday, February 4th, 2026" [disabled] [ref=e107]: "4"
+                            - gridcell "Thursday, February 5th, 2026" [ref=e108]:
+                              - button "Thursday, February 5th, 2026" [disabled] [ref=e109]: "5"
+                            - gridcell "Friday, February 6th, 2026" [ref=e110]:
+                              - button "Friday, February 6th, 2026" [disabled] [ref=e111]: "6"
+                            - gridcell "Saturday, February 7th, 2026" [ref=e112]:
+                              - button "Saturday, February 7th, 2026" [disabled] [ref=e113]: "7"
+                          - row "Sunday, February 8th, 2026 Monday, February 9th, 2026 Tuesday, February 10th, 2026 Wednesday, February 11th, 2026 Thursday, February 12th, 2026 Friday, February 13th, 2026 Saturday, February 14th, 2026" [ref=e114]:
+                            - gridcell "Sunday, February 8th, 2026" [ref=e115]:
+                              - button "Sunday, February 8th, 2026" [disabled] [ref=e116]: "8"
+                            - gridcell "Monday, February 9th, 2026" [ref=e117]:
+                              - button "Monday, February 9th, 2026" [disabled] [ref=e118]: "9"
+                            - gridcell "Tuesday, February 10th, 2026" [ref=e119]:
+                              - button "Tuesday, February 10th, 2026" [disabled] [ref=e120]: "10"
+                            - gridcell "Wednesday, February 11th, 2026" [ref=e121]:
+                              - button "Wednesday, February 11th, 2026" [disabled] [ref=e122]: "11"
+                            - gridcell "Thursday, February 12th, 2026" [ref=e123]:
+                              - button "Thursday, February 12th, 2026" [disabled] [ref=e124]: "12"
+                            - gridcell "Friday, February 13th, 2026" [ref=e125]:
+                              - button "Friday, February 13th, 2026" [disabled] [ref=e126]: "13"
+                            - gridcell "Saturday, February 14th, 2026" [ref=e127]:
+                              - button "Saturday, February 14th, 2026" [disabled] [ref=e128]: "14"
+                          - row "Sunday, February 15th, 2026 Monday, February 16th, 2026 Tuesday, February 17th, 2026 Wednesday, February 18th, 2026 Today, Thursday, February 19th, 2026 Friday, February 20th, 2026 Saturday, February 21st, 2026" [ref=e129]:
+                            - gridcell "Sunday, February 15th, 2026" [ref=e130]:
+                              - button "Sunday, February 15th, 2026" [disabled] [ref=e131]: "15"
+                            - gridcell "Monday, February 16th, 2026" [ref=e132]:
+                              - button "Monday, February 16th, 2026" [disabled] [ref=e133]: "16"
+                            - gridcell "Tuesday, February 17th, 2026" [ref=e134]:
+                              - button "Tuesday, February 17th, 2026" [disabled] [ref=e135]: "17"
+                            - gridcell "Wednesday, February 18th, 2026" [ref=e136]:
+                              - button "Wednesday, February 18th, 2026" [disabled] [ref=e137]: "18"
+                            - gridcell "Today, Thursday, February 19th, 2026" [ref=e138]:
+                              - button "Today, Thursday, February 19th, 2026" [ref=e139]: "19"
+                            - gridcell "Friday, February 20th, 2026" [ref=e140]:
+                              - button "Friday, February 20th, 2026" [ref=e141]: "20"
+                            - gridcell "Saturday, February 21st, 2026" [ref=e142]:
+                              - button "Saturday, February 21st, 2026" [disabled] [ref=e143]: "21"
+                          - row "Sunday, February 22nd, 2026 Monday, February 23rd, 2026 Tuesday, February 24th, 2026 Wednesday, February 25th, 2026 Thursday, February 26th, 2026 Friday, February 27th, 2026 Saturday, February 28th, 2026" [ref=e144]:
+                            - gridcell "Sunday, February 22nd, 2026" [ref=e145]:
+                              - button "Sunday, February 22nd, 2026" [disabled] [ref=e146]: "22"
+                            - gridcell "Monday, February 23rd, 2026" [ref=e147]:
+                              - button "Monday, February 23rd, 2026" [ref=e148]: "23"
+                            - gridcell "Tuesday, February 24th, 2026" [ref=e149]:
+                              - button "Tuesday, February 24th, 2026" [ref=e150]: "24"
+                            - gridcell "Wednesday, February 25th, 2026" [ref=e151]:
+                              - button "Wednesday, February 25th, 2026" [ref=e152]: "25"
+                            - gridcell "Thursday, February 26th, 2026" [ref=e153]:
+                              - button "Thursday, February 26th, 2026" [ref=e154]: "26"
+                            - gridcell "Friday, February 27th, 2026" [ref=e155]:
+                              - button "Friday, February 27th, 2026" [ref=e156]: "27"
+                            - gridcell "Saturday, February 28th, 2026" [ref=e157]:
+                              - button "Saturday, February 28th, 2026" [disabled] [ref=e158]: "28"
+                  - button "Continue to slots" [disabled] [ref=e159]
+    - contentinfo [ref=e160]:
+      - generic [ref=e162]:
+        - paragraph [ref=e163]: UrbanSaudi
+        - generic [ref=e164]:
+          - link "Agent Login" [ref=e165] [cursor=pointer]:
+            - /url: /login
+          - generic [ref=e166]: © 2026 UrbanSaudi
+  - region "Notifications alt+T"
+```

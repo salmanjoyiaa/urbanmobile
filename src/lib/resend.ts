@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
 import { Resend } from "resend";
 import * as Sentry from "@sentry/nextjs";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const apiKey = process.env.RESEND_API_KEY;
 const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
@@ -32,6 +34,8 @@ export async function sendEmail(params: {
     return { success: false, error: "Resend is not configured" };
   }
 
+  const supabase = createAdminClient();
+
   try {
     const { data, error } = await resend.emails.send({
       from: `UrbanSaudi <${fromEmail}>`,
@@ -53,8 +57,29 @@ export async function sendEmail(params: {
         },
         level: "error",
       });
+
+      // @ts-expect-error -- notification_logs insert type mismatch
+      await supabase.from("notification_logs").insert({
+        channel: "email",
+        recipient: params.to,
+        subject: params.subject,
+        content: params.html,
+        status: "failed",
+        error_message: error.message,
+      });
+
       return { success: false, error: error.message };
     }
+
+    // @ts-expect-error -- notification_logs insert type mismatch
+    await supabase.from("notification_logs").insert({
+      channel: "email",
+      recipient: params.to,
+      subject: params.subject,
+      content: params.html,
+      status: "sent",
+      metadata: { resend_id: data?.id },
+    });
 
     return { success: true, id: data?.id };
   } catch (err) {
@@ -71,6 +96,17 @@ export async function sendEmail(params: {
       },
       level: "error",
     });
+
+    // @ts-expect-error -- notification_logs insert type mismatch
+    await supabase.from("notification_logs").insert({
+      channel: "email",
+      recipient: params.to,
+      subject: params.subject,
+      content: params.html,
+      status: "failed",
+      error_message: message,
+    });
+
     return { success: false, error: message };
   }
 }

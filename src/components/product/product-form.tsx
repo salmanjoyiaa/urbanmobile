@@ -23,9 +23,11 @@ import { Loader2 } from "lucide-react";
 type ProductFormProps = {
   mode: "create" | "edit";
   initialData?: Product;
+  submitEndpoint?: string;
+  redirectPath?: string;
 };
 
-export function ProductForm({ mode, initialData }: ProductFormProps) {
+export function ProductForm({ mode, initialData, submitEndpoint, redirectPath }: ProductFormProps) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -50,7 +52,8 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
         images,
       };
 
-      const endpoint = mode === "create" ? "/api/agent/products" : `/api/agent/products/${initialData?.id}`;
+      const defaultEndpoint = mode === "create" ? "/api/agent/products" : `/api/agent/products/${initialData?.id}`;
+      const endpoint = submitEndpoint || defaultEndpoint;
       const method = mode === "create" ? "POST" : "PATCH";
 
       const response = await fetch(endpoint, {
@@ -63,14 +66,14 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
       if (!response.ok) throw new Error(result.error || "Could not save product");
 
       toast.success(
-        mode === "create" 
-          ? "Product created successfully! Redirecting..." 
+        mode === "create"
+          ? "Product created successfully! Redirecting..."
           : "Product updated successfully! Redirecting..."
       );
-      
+
       // Redirect after a short delay
       setTimeout(() => {
-        router.push("/agent/products");
+        router.push(redirectPath || "/agent/products");
         router.refresh();
       }, 1500);
     } catch (error) {
@@ -89,8 +92,8 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label>Title</Label>
-          <Input 
-            value={title} 
+          <Input
+            value={title}
             onChange={(event) => setTitle(event.target.value)}
             disabled={isSubmitting}
             placeholder="e.g., Modern Dining Table Set"
@@ -98,8 +101,8 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
         </div>
         <div className="space-y-2">
           <Label>Description</Label>
-          <Textarea 
-            value={description} 
+          <Textarea
+            value={description}
             onChange={(event) => setDescription(event.target.value)}
             disabled={isSubmitting}
             placeholder="Describe your product in detail..."
@@ -133,9 +136,9 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Price (SAR)</Label>
-            <Input 
-              type="number" 
-              value={price} 
+            <Input
+              type="number"
+              value={price}
               onChange={(event) => setPrice(event.target.value)}
               disabled={isSubmitting}
               placeholder="0"
@@ -154,15 +157,15 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
           </div>
         </div>
 
-        <ImageUploader 
-          bucket="product-images" 
-          values={images} 
+        <ImageUploader
+          bucket="product-images"
+          values={images}
           onChange={setImages}
         />
 
-        <Button 
-          type="button" 
-          onClick={submit} 
+        <Button
+          type="button"
+          onClick={submit}
           disabled={isSubmitting}
           size="lg"
           className="w-full"

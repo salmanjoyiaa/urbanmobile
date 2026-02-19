@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { createClient } from "@/lib/supabase/server";
 import { formatSAR } from "@/lib/format";
+import { PropertyActions } from "@/components/admin/property-actions";
 
 type Row = {
   id: string;
@@ -37,6 +38,11 @@ export default async function AdminPropertiesPage() {
             key: "status",
             title: "Status",
             render: (row) => <Badge className="capitalize">{row.status}</Badge>,
+          },
+          {
+            key: "actions",
+            title: "Actions",
+            render: (row) => <PropertyActions id={row.id} title={row.title} />,
           },
         ]}
       />

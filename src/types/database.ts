@@ -109,13 +109,33 @@ export interface BuyRequest {
   updated_at: string;
 }
 
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export interface NotificationLog {
+  id: string;
+  channel: string;
+  recipient: string;
+  subject: string | null;
+  content: string | null;
+  status: string;
+  error_message: string | null;
+  metadata: Json | null;
+  created_at: string;
+}
+
 export interface Notification {
   id: string;
   user_id: string;
   title: string;
   body: string;
   type: string;
-  metadata: Record<string, unknown>;
+  metadata: Json;
   read: boolean;
   created_at: string;
 }
@@ -126,7 +146,7 @@ export interface AuditLog {
   action: string;
   entity_type: string;
   entity_id: string | null;
-  metadata: Record<string, unknown>;
+  metadata: Json;
   created_at: string;
 }
 
@@ -168,6 +188,11 @@ export interface Database {
         Row: Notification;
         Insert: Omit<Notification, "id" | "created_at" | "read"> & { id?: string; read?: boolean };
         Update: Partial<Omit<Notification, "id" | "created_at">>;
+      };
+      notification_logs: {
+        Row: NotificationLog;
+        Insert: Omit<NotificationLog, "id" | "created_at"> & { id?: string };
+        Update: never;
       };
       audit_log: {
         Row: AuditLog;

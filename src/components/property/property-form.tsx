@@ -24,11 +24,13 @@ import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 type PropertyFormProps = {
   mode: "create" | "edit";
   initialData?: Property;
+  submitEndpoint?: string;
+  redirectPath?: string;
 };
 
 type Step = 1 | 2 | 3 | 4;
 
-export function PropertyForm({ mode, initialData }: PropertyFormProps) {
+export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }: PropertyFormProps) {
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -82,7 +84,8 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
         images,
       };
 
-      const endpoint = mode === "create" ? "/api/agent/properties" : `/api/agent/properties/${initialData?.id}`;
+      const defaultEndpoint = mode === "create" ? "/api/agent/properties" : `/api/agent/properties/${initialData?.id}`;
+      const endpoint = submitEndpoint || defaultEndpoint;
       const method = mode === "create" ? "POST" : "PATCH";
 
       const response = await fetch(endpoint, {
@@ -95,14 +98,14 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
       if (!response.ok) throw new Error(result.error || "Could not save property");
 
       toast.success(
-        mode === "create" 
-          ? "Property created successfully! Redirecting..." 
+        mode === "create"
+          ? "Property created successfully! Redirecting..."
           : "Property updated successfully! Redirecting..."
       );
-      
+
       // Redirect after a short delay
       setTimeout(() => {
-        router.push("/agent/properties");
+        router.push(redirectPath || "/agent/properties");
         router.refresh();
       }, 1500);
     } catch (error) {
@@ -137,18 +140,18 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
               <Label>Title</Label>
-              <Input 
-                value={title} 
-                onChange={(event) => setTitle(event.target.value)} 
+              <Input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
                 disabled={isSubmitting}
                 placeholder="e.g., Beautiful Villa in Riyadh"
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label>Description</Label>
-              <Textarea 
-                value={description} 
-                onChange={(event) => setDescription(event.target.value)} 
+              <Textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
                 disabled={isSubmitting}
                 placeholder="Describe your property in detail..."
                 rows={4}
@@ -178,10 +181,10 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
             </div>
             <div className="space-y-2">
               <Label>Price (SAR)</Label>
-              <Input 
-                type="number" 
-                value={price} 
-                onChange={(event) => setPrice(event.target.value)} 
+              <Input
+                type="number"
+                value={price}
+                onChange={(event) => setPrice(event.target.value)}
                 disabled={isSubmitting}
                 placeholder="0"
               />
@@ -205,18 +208,18 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
               </div>
               <div className="space-y-2">
                 <Label>District</Label>
-                <Input 
-                  value={district} 
-                  onChange={(event) => setDistrict(event.target.value)} 
+                <Input
+                  value={district}
+                  onChange={(event) => setDistrict(event.target.value)}
                   disabled={isSubmitting}
                   placeholder="e.g., Al Malaz"
                 />
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label>Address</Label>
-                <Input 
-                  value={address} 
-                  onChange={(event) => setAddress(event.target.value)} 
+                <Input
+                  value={address}
+                  onChange={(event) => setAddress(event.target.value)}
                   disabled={isSubmitting}
                   placeholder="Street name and house number"
                 />
@@ -239,40 +242,40 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Bedrooms</Label>
-                <Input 
-                  type="number" 
-                  value={bedrooms} 
-                  onChange={(event) => setBedrooms(event.target.value)} 
+                <Input
+                  type="number"
+                  value={bedrooms}
+                  onChange={(event) => setBedrooms(event.target.value)}
                   disabled={isSubmitting}
                   placeholder="0"
                 />
               </div>
               <div className="space-y-2">
                 <Label>Bathrooms</Label>
-                <Input 
-                  type="number" 
-                  value={bathrooms} 
-                  onChange={(event) => setBathrooms(event.target.value)} 
+                <Input
+                  type="number"
+                  value={bathrooms}
+                  onChange={(event) => setBathrooms(event.target.value)}
                   disabled={isSubmitting}
                   placeholder="0"
                 />
               </div>
               <div className="space-y-2">
                 <Label>Area (sqm)</Label>
-                <Input 
-                  type="number" 
-                  value={area} 
-                  onChange={(event) => setArea(event.target.value)} 
+                <Input
+                  type="number"
+                  value={area}
+                  onChange={(event) => setArea(event.target.value)}
                   disabled={isSubmitting}
                   placeholder="0"
                 />
               </div>
               <div className="space-y-2">
                 <Label>Year built</Label>
-                <Input 
-                  type="number" 
-                  value={yearBuilt} 
-                  onChange={(event) => setYearBuilt(event.target.value)} 
+                <Input
+                  type="number"
+                  value={yearBuilt}
+                  onChange={(event) => setYearBuilt(event.target.value)}
                   disabled={isSubmitting}
                   placeholder="2020"
                 />
@@ -288,11 +291,10 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
                     type="button"
                     onClick={() => toggleAmenity(item)}
                     disabled={isSubmitting}
-                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors ${
-                      amenities.includes(item) 
-                        ? "border-primary bg-primary/10" 
-                        : "hover:bg-muted"
-                    } disabled:opacity-50`}
+                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors ${amenities.includes(item)
+                      ? "border-primary bg-primary/10"
+                      : "hover:bg-muted"
+                      } disabled:opacity-50`}
                   >
                     {item}
                   </button>
@@ -307,9 +309,9 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
         )}
 
         <div className="flex gap-2">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={() => setStep((current) => (Math.max(1, current - 1) as Step))}
             disabled={isSubmitting || step === 1}
           >
@@ -317,8 +319,8 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
             Back
           </Button>
           {step < 4 ? (
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               onClick={() => setStep((current) => (Math.min(4, current + 1) as Step))}
               disabled={isSubmitting}
             >
@@ -326,9 +328,9 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
-            <Button 
-              type="button" 
-              onClick={submit} 
+            <Button
+              type="button"
+              onClick={submit}
               disabled={isSubmitting}
               size="lg"
             >

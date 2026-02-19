@@ -15,11 +15,14 @@ type BuyRequestFormProps = {
   productTitle: string;
 };
 
+import { SuccessState } from "@/components/ui/success-state";
+
 export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const createLead = useCreateLeadRequest();
 
@@ -39,8 +42,9 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
       });
 
       toast.success("Buy request submitted successfully!");
-      
-      // Reset form
+      setIsSuccess(true);
+
+      // Reset form (though UI will switch)
       setName("");
       setEmail("");
       setPhone("");
@@ -53,6 +57,22 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
 
   const isLoading = createLead.isPending;
 
+  if (isSuccess) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <SuccessState
+            title="Request Sent!"
+            description={`Your interest in ${productTitle} has been sent to the seller.`}
+            actionLabel="Browse More"
+            actionHref="/products"
+            className="p-0"
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -62,10 +82,10 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="buyer-name">Full name</Label>
-          <Input 
-            id="buyer-name" 
-            value={name} 
-            onChange={(event) => setName(event.target.value)} 
+          <Input
+            id="buyer-name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
             disabled={isLoading}
             placeholder="Your full name"
           />
@@ -83,10 +103,10 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
         </div>
         <div className="space-y-2">
           <Label htmlFor="buyer-phone">Phone (+966...)</Label>
-          <Input 
-            id="buyer-phone" 
-            value={phone} 
-            onChange={(event) => setPhone(event.target.value)} 
+          <Input
+            id="buyer-phone"
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
             disabled={isLoading}
             placeholder="+966XXXXXXXXX"
           />

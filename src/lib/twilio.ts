@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
 import twilio from "twilio";
 import * as Sentry from "@sentry/nextjs";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 type SendResult = {
   success: boolean;
@@ -57,6 +59,7 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
     return { success: false, error: msg };
   }
 
+  const supabase = createAdminClient();
   let lastError: string | undefined;
 
   for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -65,6 +68,16 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
         from,
         to: normalizeWhatsAppTo(normalizedTo),
         body,
+      });
+
+      // @ts-expect-error -- notification_logs insert type mismatch
+      await supabase.from("notification_logs").insert({
+        channel: "whatsapp",
+        recipient: normalizedTo,
+        content: body,
+        subject: null,
+        status: "sent",
+        metadata: { sid: message.sid },
       });
 
       return { success: true, sid: message.sid };
@@ -87,6 +100,16 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
       },
     },
     level: "error",
+  });
+
+  // @ts-expect-error -- notification_logs insert type mismatch
+  await supabase.from("notification_logs").insert({
+    channel: "whatsapp",
+    recipient: normalizedTo,
+    content: body,
+    subject: null,
+    status: "failed",
+    error_message: lastError,
   });
 
   return { success: false, error: lastError || "Failed to send WhatsApp message" };

@@ -20,8 +20,7 @@ export const signupSchema = z.object({
   full_name: z
     .string()
     .min(2, "Name must be at least 2 characters")
-    .max(100, "Name must not exceed 100 characters")
-    .regex(/^[a-zA-Z\s'-]+$/, "Name contains invalid characters"),
+    .max(100, "Name must not exceed 100 characters"),
   email: z
     .string()
     .min(1, "Email is required")
@@ -133,8 +132,7 @@ export const visitRequestSchema = z.object({
   visitor_name: z
     .string()
     .min(2, "Name is required")
-    .max(100, "Name must not exceed 100 characters")
-    .regex(/^[a-zA-Z\s'-]+$/, "Name contains invalid characters"),
+    .max(100, "Name must not exceed 100 characters"),
   visitor_email: z
     .string()
     .min(1, "Email is required")
@@ -151,9 +149,8 @@ export const buyRequestSchema = z.object({
   product_id: z.string().regex(safeUUIDRegex, "Invalid product ID"),
   buyer_name: z
     .string()
-    .min(2, "Name is required")
-    .max(100, "Name must not exceed 100 characters")
-    .regex(/^[a-zA-Z\s'-]+$/, "Name contains invalid characters"),
+    .min(2, "Name must be at least 2 characters")
+    .max(100, "Name must not exceed 100 characters"),
   buyer_email: z
     .string()
     .min(1, "Email is required")

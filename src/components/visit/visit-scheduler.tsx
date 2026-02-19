@@ -13,6 +13,7 @@ import { SlotGrid } from "@/components/visit/slot-grid";
 import { useVisitSlots, useCreateVisitRequest } from "@/queries/visits";
 import { useRealtimeSlots } from "@/hooks/use-realtime-slots";
 import { isFutureDate, isWeekday } from "@/lib/slots";
+import { SuccessState } from "@/components/ui/success-state";
 import { toast } from "sonner";
 
 type VisitSchedulerProps = {
@@ -21,7 +22,7 @@ type VisitSchedulerProps = {
 };
 
 export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProps) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [slot, setSlot] = useState<string | null>(null);
 
@@ -68,18 +69,43 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
       });
 
       toast.success("Visit request submitted.");
-      setStep(1);
-      setDate(undefined);
-      setSlot(null);
-      setName("");
-      setEmail("");
-      setPhone("");
-      setMessage("");
+      setStep(4); // Success step
     } catch (error) {
       const messageText = error instanceof Error ? error.message : "Could not submit request";
       toast.error(messageText);
     }
   };
+
+  const reset = () => {
+    setStep(1);
+    setDate(undefined);
+    setSlot(null);
+    setName("");
+    setEmail("");
+    setPhone("");
+    setMessage("");
+  };
+
+  if (step === 4) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <SuccessState
+            title="Visit Scheduled!"
+            description={`Your visit for ${propertyTitle} has been requested. The agent will confirm shortly.`}
+            actionLabel="Book Another"
+            actionHref="#"
+            className="p-0"
+          />
+          <div className="mt-6 text-center">
+            <Button variant="outline" onClick={reset}>
+              Schedule another visit
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

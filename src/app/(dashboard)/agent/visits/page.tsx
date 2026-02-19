@@ -26,6 +26,7 @@ export default async function AgentVisitsPage() {
       properties:property_id (title)
     `
     )
+    .neq("status", "pending")
     .order("created_at", { ascending: false })) as { data: VisitRow[] | null };
 
   const rows = data || [];

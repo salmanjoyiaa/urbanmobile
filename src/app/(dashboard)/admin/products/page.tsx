@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { createClient } from "@/lib/supabase/server";
 import { formatSAR } from "@/lib/format";
+import { ProductActions } from "@/components/admin/product-actions";
 
 type Row = {
   id: string;
@@ -39,6 +40,11 @@ export default async function AdminProductsPage() {
             key: "is_available",
             title: "Availability",
             render: (row) => <Badge>{row.is_available ? "Available" : "Hidden"}</Badge>,
+          },
+          {
+            key: "actions",
+            title: "Actions",
+            render: (row) => <ProductActions id={row.id} title={row.title} />,
           },
         ]}
       />
