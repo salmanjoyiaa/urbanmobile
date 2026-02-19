@@ -35,11 +35,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(profile);
 
       if (profile?.role === "agent") {
-        const { data: agent } = (await supabase
+        let { data: agent } = (await supabase
           .from("agents")
           .select("*")
           .eq("profile_id", session.user.id)
           .single()) as { data: Agent | null };
+
+        // Auto-create agent row if it doesn't exist yet (after email confirmation)
+        if (!agent && session.user.user_metadata?.company_name) {
+          try {
+            const companyName = session.user.user_metadata.company_name;
+            const licenseNumber = session.user.user_metadata.license_number || null;
+
+            const res = await fetch("/api/agents", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                company_name: companyName,
+                license_number: licenseNumber,
+              }),
+            });
+            const json = await res.json();
+            if (res.ok && json.agent) {
+              agent = json.agent;
+            }
+          } catch (err) {
+            console.error("Auto-create agent failed:", err);
+          }
+        }
+
         setAgent(agent);
       } else {
         setAgent(null);

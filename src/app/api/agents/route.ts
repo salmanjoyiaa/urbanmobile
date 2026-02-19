@@ -42,14 +42,14 @@ export async function POST(request: NextRequest) {
   try {
     const { data, error } = await admin
       .from("agents")
-      .insert({
+      .upsert({
         profile_id: user.id,
         company_name: parsed.data.company_name,
         license_number: parsed.data.license_number ?? null,
         document_url: parsed.data.document_url ?? null,
         bio: parsed.data.bio ?? null,
         status: "pending",
-      } as never)
+      } as never, { onConflict: "profile_id" })
       .select()
       .single();
 

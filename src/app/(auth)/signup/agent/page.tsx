@@ -71,6 +71,8 @@ export default function AgentSignupPage() {
           full_name: values.full_name,
           phone: values.phone || null,
           role: "agent",
+          company_name: values.company_name,
+          license_number: values.license_number || null,
         },
       },
     });
