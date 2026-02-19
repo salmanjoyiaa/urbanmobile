@@ -21,7 +21,7 @@ export function SlotGrid({ slots, selectedSlot, onSelect }: SlotGridProps) {
             onClick={() => onSelect(slot.time)}
             className={
               !slot.available
-                ? "cursor-not-allowed border-red-200 bg-red-50 text-red-500 opacity-60 hover:bg-red-50 hover:text-red-500"
+                ? "border-red-200 bg-red-50 text-red-500 hover:bg-red-50 hover:text-red-500 disabled:opacity-100 disabled:bg-red-50 disabled:text-red-500 disabled:border-red-200"
                 : ""
             }
           >
