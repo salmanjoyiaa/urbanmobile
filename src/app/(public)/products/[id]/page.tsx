@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { MapPin, Package } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatPhone, formatSAR } from "@/lib/format";
 import { PropertyGallery } from "@/components/property/property-gallery";
