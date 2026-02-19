@@ -18,6 +18,7 @@ import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS, SAUDI_CITIES } from "@/lib/cons
 import type { Product } from "@/types/database";
 import { ImageUploader } from "@/components/dashboard/image-uploader";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 type ProductFormProps = {
   mode: "create" | "edit";
@@ -61,11 +62,20 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
       const result = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(result.error || "Could not save product");
 
-      toast.success(mode === "create" ? "Product created" : "Product updated");
-      router.push("/agent/products");
-      router.refresh();
+      toast.success(
+        mode === "create" 
+          ? "Product created successfully! Redirecting..." 
+          : "Product updated successfully! Redirecting..."
+      );
+      
+      // Redirect after a short delay
+      setTimeout(() => {
+        router.push("/agent/products");
+        router.refresh();
+      }, 1500);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
+      const errorMsg = error instanceof Error ? error.message : "Something went wrong";
+      toast.error(errorMsg);
     } finally {
       setSubmitting(false);
     }
@@ -79,16 +89,27 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label>Title</Label>
-          <Input value={title} onChange={(event) => setTitle(event.target.value)} />
+          <Input 
+            value={title} 
+            onChange={(event) => setTitle(event.target.value)}
+            disabled={isSubmitting}
+            placeholder="e.g., Modern Dining Table Set"
+          />
         </div>
         <div className="space-y-2">
           <Label>Description</Label>
-          <Textarea value={description} onChange={(event) => setDescription(event.target.value)} />
+          <Textarea 
+            value={description} 
+            onChange={(event) => setDescription(event.target.value)}
+            disabled={isSubmitting}
+            placeholder="Describe your product in detail..."
+            rows={4}
+          />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Category</Label>
-            <Select value={category} onValueChange={(value) => setCategory(value as typeof category)}>
+            <Select value={category} onValueChange={(value) => setCategory(value as typeof category)} disabled={isSubmitting}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {PRODUCT_CATEGORIES.map((item) => (
@@ -99,7 +120,7 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
           </div>
           <div className="space-y-2">
             <Label>Condition</Label>
-            <Select value={condition} onValueChange={(value) => setCondition(value as typeof condition)}>
+            <Select value={condition} onValueChange={(value) => setCondition(value as typeof condition)} disabled={isSubmitting}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {PRODUCT_CONDITIONS.map((item) => (
@@ -112,11 +133,17 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Price (SAR)</Label>
-            <Input type="number" value={price} onChange={(event) => setPrice(event.target.value)} />
+            <Input 
+              type="number" 
+              value={price} 
+              onChange={(event) => setPrice(event.target.value)}
+              disabled={isSubmitting}
+              placeholder="0"
+            />
           </div>
           <div className="space-y-2">
             <Label>City</Label>
-            <Select value={city} onValueChange={(value) => setCity(value as typeof city)}>
+            <Select value={city} onValueChange={(value) => setCity(value as typeof city)} disabled={isSubmitting}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {SAUDI_CITIES.map((item) => (
@@ -127,10 +154,27 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
           </div>
         </div>
 
-        <ImageUploader bucket="product-images" values={images} onChange={setImages} />
+        <ImageUploader 
+          bucket="product-images" 
+          values={images} 
+          onChange={setImages}
+        />
 
-        <Button type="button" onClick={submit} disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : mode === "create" ? "Create product" : "Save changes"}
+        <Button 
+          type="button" 
+          onClick={submit} 
+          disabled={isSubmitting}
+          size="lg"
+          className="w-full"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            mode === "create" ? "Create product" : "Save changes"
+          )}
         </Button>
       </CardContent>
     </Card>

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MapPin, Package } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatPhone, formatSAR } from "@/lib/format";
 import { BuyRequestForm } from "@/components/product/buy-request-form";
@@ -80,58 +78,55 @@ export default async function ProductDetailPage({ params }: PageProps) {
     : "Not provided";
 
   return (
-    <div className="container mx-auto space-y-8 px-4 py-8">
+    <div className="container mx-auto space-y-6 px-4 py-8">
       <div>
-        <h1 className="text-3xl font-bold text-navy">{product.title}</h1>
-        <p className="mt-2 inline-flex items-center gap-1 text-muted-foreground">
+        <h1 className="text-[24px] font-extrabold text-[#0f1419] sm:text-[28px]">{product.title}</h1>
+        <p className="mt-1 inline-flex items-center gap-1 text-[15px] text-[#536471]">
           <MapPin className="h-4 w-4" />
           {product.city}
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
-          <div className="overflow-hidden rounded-lg border bg-muted">
+          <div className="overflow-hidden rounded-2xl border border-[#eff3f4] bg-[#f7f9f9]">
             {product.images?.[0] ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={product.images[0]} alt={product.title} className="aspect-[16/10] w-full object-cover" />
             ) : (
-              <div className="flex aspect-[16/10] items-center justify-center text-muted-foreground">
-                <Package className="h-6 w-6" />
+              <div className="flex aspect-[16/10] items-center justify-center text-[#cfd9de]">
+                <Package className="h-10 w-10" />
               </div>
             )}
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Product details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div className="rounded-2xl border border-[#eff3f4] p-6">
+            <h2 className="text-[17px] font-bold text-[#0f1419]">Product details</h2>
+            <div className="mt-4 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="capitalize">{product.category}</Badge>
-                <Badge variant="outline" className="capitalize">{product.condition.replace("_", " ")}</Badge>
-                <Badge>{formatSAR(product.price)}</Badge>
+                <span className="rounded-full border border-[#cfd9de] px-3 py-1 text-[13px] font-medium capitalize text-[#0f1419]">{product.category}</span>
+                <span className="rounded-full border border-[#cfd9de] px-3 py-1 text-[13px] font-medium capitalize text-[#0f1419]">{product.condition.replace("_", " ")}</span>
+                <span className="rounded-full bg-[#1d9bf0] px-3 py-1 text-[13px] font-bold text-white">{formatSAR(product.price)}</span>
               </div>
-              <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{product.description}</p>
-              <div className="grid gap-3 text-sm sm:grid-cols-2">
-                <p><span className="font-medium">City:</span> {product.city}</p>
-                <p><span className="font-medium">Listed:</span> {formatDate(product.created_at)}</p>
+              <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#536471]">{product.description}</p>
+              <hr className="border-[#eff3f4]" />
+              <div className="grid gap-3 text-[14px] sm:grid-cols-2">
+                <p><span className="font-bold text-[#0f1419]">City:</span> <span className="text-[#536471]">{product.city}</span></p>
+                <p><span className="font-bold text-[#0f1419]">Listed:</span> <span className="text-[#536471]">{formatDate(product.created_at)}</span></p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Seller</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <p className="font-medium">{agentName}</p>
-              <p className="text-muted-foreground">Company: {product.agents?.company_name || "—"}</p>
-              <p className="text-muted-foreground">Phone: {maskedPhone}</p>
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl border border-[#eff3f4] p-6">
+            <h2 className="text-[17px] font-bold text-[#0f1419]">Seller</h2>
+            <div className="mt-4 space-y-2 text-[14px]">
+              <p className="font-bold text-[#0f1419]">{agentName}</p>
+              <p className="text-[#536471]">Company: {product.agents?.company_name || "—"}</p>
+              <p className="text-[#536471]">Phone: {maskedPhone}</p>
+            </div>
+          </div>
 
           <BuyRequestForm productId={product.id} productTitle={product.title} />
         </div>

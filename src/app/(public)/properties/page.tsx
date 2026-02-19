@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Building2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PropertyFilters } from "@/components/property/property-filters";
 import { PropertyCard } from "@/components/property/property-card";
 import type { Property } from "@/types/database";
-import { Button } from "@/components/ui/button";
 
 export const revalidate = 60;
 
@@ -52,8 +52,21 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   if (searchParams.maxPrice) query = query.lte("price", Number(searchParams.maxPrice));
   if (searchParams.bedrooms) query = query.gte("bedrooms", Number(searchParams.bedrooms));
 
-  const { data, count } = (await query) as { data: Property[] | null; count: number | null };
-  const properties = data || [];
+  let properties: Property[] = [];
+  let count: number | null = 0;
+
+  try {
+    const result = (await query) as { data: Property[] | null; error: { message: string } | null; count: number | null };
+    if (result.error) {
+      console.error("Failed to load properties:", result.error.message);
+    } else {
+      properties = result.data || [];
+      count = result.count;
+    }
+  } catch (e) {
+    console.error("Properties fetch error:", e);
+  }
+
   const totalPages = Math.max(Math.ceil((count || 0) / pageSize), 1);
 
   const params = new URLSearchParams();
@@ -70,34 +83,55 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   return (
     <div className="container mx-auto space-y-6 px-4 py-8">
       <div>
-        <h1 className="text-3xl font-bold text-navy">Property Listings</h1>
-        <p className="mt-2 text-muted-foreground">Find homes and commercial spaces across Saudi Arabia.</p>
+        <h1 className="text-[24px] font-extrabold text-[#0f1419]">Property Listings</h1>
+        <p className="mt-1 text-[15px] text-[#536471]">Find homes and commercial spaces across Saudi Arabia.</p>
       </div>
 
       <PropertyFilters initialValues={searchParams} />
 
       {properties.length === 0 ? (
-        <div className="rounded-lg border bg-card p-12 text-center text-muted-foreground">
-          No properties found for the current filters.
+        <div className="rounded-2xl border border-[#eff3f4] p-12 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#f7f9f9]">
+            <Building2 className="h-7 w-7 text-[#536471]" />
+          </div>
+          <h3 className="mt-4 text-[17px] font-bold text-[#0f1419]">No properties found</h3>
+          <p className="mt-1 text-[15px] text-[#536471]">
+            Try adjusting your filters or check back later.
+          </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {properties.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}
         </div>
       )}
 
-      <div className="flex items-center justify-end gap-2">
-        <Link href={withPage(Math.max(page - 1, 1))}>
-          <Button variant="outline" disabled={page <= 1}>Previous</Button>
-        </Link>
-        <span className="text-sm text-muted-foreground">
-          Page {page} of {totalPages}
-        </span>
-        <Link href={withPage(Math.min(page + 1, totalPages))}>
-          <Button variant="outline" disabled={page >= totalPages}>Next</Button>
-        </Link>
+      <div className="flex flex-col items-center justify-between gap-4 border-t border-[#eff3f4] pt-4 sm:flex-row">
+        <p className="text-[13px] text-[#536471]">
+          Showing {properties.length} {properties.length === 1 ? 'property' : 'properties'} {count && count > pageSize ? `of ${count} total` : ''}
+        </p>
+        <div className="flex items-center gap-2">
+          <Link href={withPage(Math.max(page - 1, 1))}>
+            <button
+              disabled={page <= 1}
+              className="rounded-full border border-[#cfd9de] px-4 py-1.5 text-[13px] font-bold text-[#0f1419] transition-colors hover:bg-[#f7f9f9] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
+          </Link>
+          <span className="text-[13px] text-[#536471]">
+            Page {page} of {totalPages}
+          </span>
+          <Link href={withPage(Math.min(page + 1, totalPages))}>
+            <button
+              disabled={page >= totalPages}
+              className="rounded-full border border-[#cfd9de] px-4 py-1.5 text-[13px] font-bold text-[#0f1419] transition-colors hover:bg-[#f7f9f9] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   );

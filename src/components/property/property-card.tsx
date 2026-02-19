@@ -1,54 +1,67 @@
 import Link from "next/link";
-import { BedDouble, Building2, MapPin } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { formatSAR } from "@/lib/format";
-import type { Property } from "@/types/database";
+import Image from "next/image";
+import { MapPin, BedDouble, Maximize, Package } from "lucide-react";
 
-type PropertyCardProps = {
-  property: Property;
+type Property = {
+  id: string;
+  title: string;
+  city: string;
+  price: number;
+  type: string;
+  purpose: string;
+  bedrooms: number | null;
+  area_sqm: number | null;
+  images: string[] | null;
 };
 
-export function PropertyCard({ property }: PropertyCardProps) {
-  const cover = property.images?.[0];
+export function PropertyCard({ property }: { property: Property }) {
+  const imgSrc = property.images?.[0] || null;
 
   return (
     <Link href={`/properties/${property.id}`}>
-      <Card className="h-full overflow-hidden transition hover:shadow-md">
-        <div className="relative aspect-[16/10] w-full bg-muted">
-          {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={cover}
+      <div className="group overflow-hidden rounded-2xl border border-[#eff3f4] bg-white transition-colors hover:bg-[#f7f9f9]">
+        <div className="relative aspect-[4/3] overflow-hidden bg-[#f7f9f9]">
+          {imgSrc ? (
+            <Image
+              src={imgSrc}
               alt={property.title}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              <Building2 className="h-6 w-6" />
+            <div className="flex h-full items-center justify-center">
+              <Package className="h-12 w-12 text-[#cfd9de]" />
             </div>
           )}
-        </div>
-        <CardHeader className="space-y-2 pb-2">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="line-clamp-1 text-base font-semibold">{property.title}</h3>
-            <Badge variant="outline" className="capitalize">
-              {property.type}
-            </Badge>
+          <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-[12px] font-bold capitalize text-[#0f1419] backdrop-blur-sm">
+            {property.purpose}
           </div>
-          <p className="text-lg font-bold text-navy">{formatSAR(property.price)}</p>
-        </CardHeader>
-        <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <MapPin className="h-4 w-4" />
-            {property.city}
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <BedDouble className="h-4 w-4" />
-            {property.bedrooms ?? 0} bd
-          </span>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="p-4">
+          <h3 className="truncate text-[15px] font-bold text-[#0f1419]">
+            {property.title}
+          </h3>
+          <p className="mt-0.5 text-[15px] font-bold text-[#1d9bf0]">
+            SAR {property.price.toLocaleString()}
+          </p>
+          <div className="mt-2 flex items-center gap-3 text-[13px] text-[#536471]">
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" /> {property.city}
+            </span>
+            {property.bedrooms != null && (
+              <span className="flex items-center gap-1">
+                <BedDouble className="h-3.5 w-3.5" /> {property.bedrooms}
+              </span>
+            )}
+            {property.area_sqm != null && (
+              <span className="flex items-center gap-1">
+                <Maximize className="h-3.5 w-3.5" /> {property.area_sqm}m²
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
     </Link>
   );
 }

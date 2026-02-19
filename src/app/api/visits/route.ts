@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
+import { createApiClient } from "@/lib/supabase/api";
 import { cacheAside, cacheDel } from "@/lib/redis";
 import { buildAvailabilitySlots, isFutureDate, isWeekday } from "@/lib/slots";
 import { visitRequestSchema } from "@/lib/validators";
-import type { Database } from "@/types/database";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-
-const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+const supabase = createApiClient();
 
 const redisEnabled =
   Boolean(process.env.UPSTASH_REDIS_REST_URL) &&
@@ -18,13 +14,13 @@ const redisEnabled =
 
 const ratelimit = redisEnabled
   ? new Ratelimit({
-      redis: new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL!,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-      }),
-      limiter: Ratelimit.fixedWindow(3, "1 h"),
-      analytics: true,
-    })
+    redis: new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    }),
+    limiter: Ratelimit.fixedWindow(3, "1 h"),
+    analytics: true,
+  })
   : null;
 
 const memoryHits = new Map<string, { count: number; resetAt: number }>();
@@ -85,9 +81,9 @@ export async function GET(request: NextRequest) {
           .eq("property_id", propertyId)
           .eq("visit_date", date)
           .in("status", ["pending", "confirmed"])) as {
-          data: Array<{ visit_time: string }> | null;
-          error: { message: string } | null;
-        };
+            data: Array<{ visit_time: string }> | null;
+            error: { message: string } | null;
+          };
 
         if (error) {
           throw new Error(error.message);
@@ -124,7 +120,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
   const parsed = visitRequestSchema.safeParse(body);
 
   if (!parsed.success) {
@@ -144,8 +145,8 @@ export async function POST(request: NextRequest) {
     .eq("visit_time", payload.visit_time)
     .in("status", ["pending", "confirmed"])
     .limit(1)) as {
-    data: Array<{ id: string }> | null;
-  };
+      data: Array<{ id: string }> | null;
+    };
 
   if (existing && existing.length > 0) {
     return NextResponse.json({ error: "This slot is no longer available" }, { status: 409 });
@@ -156,9 +157,9 @@ export async function POST(request: NextRequest) {
     .insert(payload as never)
     .select("id")
     .single()) as {
-    data: { id: string } | null;
-    error: { code?: string; message: string } | null;
-  };
+      data: { id: string } | null;
+      error: { code?: string; message: string } | null;
+    };
 
   if (error) {
     if ((error as { code?: string }).code === "23505") {

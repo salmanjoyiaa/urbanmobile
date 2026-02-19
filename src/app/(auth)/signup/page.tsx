@@ -55,36 +55,36 @@ export default function SignupPage() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Create account</CardTitle>
-        <CardDescription>Sign up as a customer to request visits and leads.</CardDescription>
+      <CardHeader className="space-y-2">
+        <CardTitle className="text-2xl">Create Account</CardTitle>
+        <CardDescription>Join UrbanSaudi to browse properties and products</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-2">
-            <Label htmlFor="full_name">Full name</Label>
-            <Input id="full_name" {...register("full_name")} />
+            <Label htmlFor="full_name">Full Name</Label>
+            <Input id="full_name" placeholder="John Doe" {...register("full_name")} />
             {errors.full_name && (
               <p className="text-sm text-destructive">{errors.full_name.message}</p>
             )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register("email")} />
+            <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
             {errors.email && (
               <p className="text-sm text-destructive">{errors.email.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone (+966...)</Label>
-            <Input id="phone" placeholder="+9665XXXXXXXX" {...register("phone")} />
+            <Label htmlFor="phone">Phone (Optional)</Label>
+            <Input id="phone" type="tel" placeholder="+966 5XX XXX XXXX" {...register("phone")} />
             {errors.phone && (
               <p className="text-sm text-destructive">{errors.phone.message}</p>
             )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" {...register("password")} />
+            <Input id="password" type="password" placeholder="Set a strong password" {...register("password")} />
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
@@ -96,17 +96,21 @@ export default function SignupPage() {
                 Creating account...
               </>
             ) : (
-              "Create account"
+              "Sign Up"
             )}
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <div className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-navy hover:underline">
+          <Link href="/login" className="font-medium text-primary hover:underline">
             Sign in
           </Link>
-        </p>
+          {" "} or{" "}
+          <Link href="/signup/agent" className="font-medium text-primary hover:underline">
+            become an agent
+          </Link>
+        </div>
       </CardContent>
     </Card>
   );

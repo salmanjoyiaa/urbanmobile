@@ -8,7 +8,7 @@ type StatCardProps = {
 
 export function StatCard({ title, value, description }: StatCardProps) {
   return (
-    <Card>
+    <Card className="border-l-4 border-l-gold">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
       </CardHeader>

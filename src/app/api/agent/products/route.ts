@@ -36,9 +36,9 @@ export async function GET() {
     .select("*")
     .eq("agent_id", agentId)
     .order("created_at", { ascending: false })) as {
-    data: Database["public"]["Tables"]["products"]["Row"][] | null;
-    error: { message: string } | null;
-  };
+      data: Database["public"]["Tables"]["products"]["Row"][] | null;
+      error: { message: string } | null;
+    };
 
   if (queryError) {
     return NextResponse.json({ error: queryError.message }, { status: 500 });
@@ -51,7 +51,12 @@ export async function POST(request: Request) {
   const { supabase, agentId, error, status } = await getApprovedAgentId();
   if (!agentId) return NextResponse.json({ error }, { status });
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
   const parsed = productSchema.safeParse(body);
 
   if (!parsed.success) {
@@ -62,6 +67,7 @@ export async function POST(request: Request) {
     ...parsed.data,
     agent_id: agentId,
     is_available: true,
+    images: parsed.data.images || [],
   };
 
   const { data, error: insertError } = (await supabase
@@ -69,9 +75,9 @@ export async function POST(request: Request) {
     .insert(payload as never)
     .select("id")
     .single()) as {
-    data: { id: string } | null;
-    error: { message: string } | null;
-  };
+      data: { id: string } | null;
+      error: { message: string } | null;
+    };
 
   if (insertError) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });

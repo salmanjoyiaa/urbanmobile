@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
 import { sendWhatsApp } from "@/lib/twilio";
+import { sendEmail } from "@/lib/resend";
 import { leadConfirmedAgent, leadConfirmedBuyer } from "@/lib/whatsapp-templates";
+import {
+  leadConfirmedCustomerEmail,
+  leadConfirmedAgentEmail,
+  leadRejectedCustomerEmail,
+} from "@/lib/email-templates";
 
 const payloadSchema = z.object({
   status: z.enum(["confirmed", "rejected", "completed"]),
@@ -15,7 +21,12 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
   const parsed = payloadSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
@@ -39,57 +50,91 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     .from("buy_requests")
     .select(
       `
-      id, buyer_name, buyer_phone,
+      id, buyer_name, buyer_email, buyer_phone,
       products:product_id (
         title,
         agents:agent_id (
           profile_id,
-          profiles:profile_id (full_name, phone)
+          profiles:profile_id (full_name, phone, email)
         )
       )
     `
     )
     .eq("id", context.params.id)
     .single()) as {
-    data: {
-      buyer_name: string;
-      buyer_phone: string;
-      products: {
-        title: string;
-        agents: {
-          profile_id: string;
-          profiles: {
-            full_name: string;
-            phone: string | null;
+      data: {
+        buyer_name: string;
+        buyer_email: string;
+        buyer_phone: string;
+        products: {
+          title: string;
+          agents: {
+            profile_id: string;
+            profiles: {
+              full_name: string;
+              phone: string | null;
+              email: string | null;
+            } | null;
           } | null;
         } | null;
       } | null;
-    } | null;
-  };
+    };
 
-  const whatsappJobs: Array<Promise<unknown>> = [];
+  const notifyJobs: Array<Promise<unknown>> = [];
 
-  if (leadDetails?.products && parsed.data.status === "confirmed") {
-    whatsappJobs.push(
-      sendWhatsApp(
-        leadDetails.buyer_phone,
-        leadConfirmedBuyer({
-          buyerName: leadDetails.buyer_name,
-          productTitle: leadDetails.products.title,
-        })
-      )
-    );
+  if (leadDetails?.products) {
+    const agent = leadDetails.products.agents;
 
-    if (leadDetails.products.agents?.profiles?.phone) {
-      whatsappJobs.push(
+    if (parsed.data.status === "confirmed") {
+      // WhatsApp + Email to buyer
+      notifyJobs.push(
         sendWhatsApp(
-          leadDetails.products.agents.profiles.phone,
-          leadConfirmedAgent({
-            agentName: leadDetails.products.agents.profiles.full_name || "Agent",
+          leadDetails.buyer_phone,
+          leadConfirmedBuyer({
+            buyerName: leadDetails.buyer_name,
             productTitle: leadDetails.products.title,
           })
         )
       );
+      if (leadDetails.buyer_email) {
+        const emailTpl = leadConfirmedCustomerEmail({
+          buyerName: leadDetails.buyer_name,
+          productTitle: leadDetails.products.title,
+        });
+        notifyJobs.push(sendEmail({ to: leadDetails.buyer_email, ...emailTpl }));
+      }
+
+      // WhatsApp + Email to agent
+      if (agent?.profiles?.phone) {
+        notifyJobs.push(
+          sendWhatsApp(
+            agent.profiles.phone,
+            leadConfirmedAgent({
+              agentName: agent.profiles.full_name || "Agent",
+              productTitle: leadDetails.products.title,
+            })
+          )
+        );
+      }
+      if (agent?.profiles?.email) {
+        const agentEmailTpl = leadConfirmedAgentEmail({
+          agentName: agent.profiles.full_name || "Agent",
+          productTitle: leadDetails.products.title,
+          buyerName: leadDetails.buyer_name,
+        });
+        notifyJobs.push(sendEmail({ to: agent.profiles.email, ...agentEmailTpl }));
+      }
+    }
+
+    if (parsed.data.status === "rejected") {
+      // Email to buyer on rejection
+      if (leadDetails.buyer_email) {
+        const emailTpl = leadRejectedCustomerEmail({
+          buyerName: leadDetails.buyer_name,
+          productTitle: leadDetails.products.title,
+        });
+        notifyJobs.push(sendEmail({ to: leadDetails.buyer_email, ...emailTpl }));
+      }
     }
   }
 
@@ -103,8 +148,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     } as never);
   }
 
-  if (whatsappJobs.length > 0) {
-    await Promise.allSettled(whatsappJobs);
+  if (notifyJobs.length > 0) {
+    await Promise.allSettled(notifyJobs);
   }
 
   await writeAuditLog({

@@ -2,11 +2,17 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
 import { sendWhatsApp } from "@/lib/twilio";
+import { sendEmail } from "@/lib/resend";
 import {
   visitCancelled,
   visitConfirmedAgent,
   visitConfirmedVisitor,
 } from "@/lib/whatsapp-templates";
+import {
+  visitConfirmedCustomerEmail,
+  visitConfirmedAgentEmail,
+  visitCancelledCustomerEmail,
+} from "@/lib/email-templates";
 
 const payloadSchema = z.object({
   status: z.enum(["confirmed", "cancelled", "completed"]),
@@ -19,7 +25,12 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
   const parsed = payloadSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
@@ -43,78 +54,91 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     .from("visit_requests")
     .select(
       `
-      id, visitor_name, visitor_phone, visit_date, visit_time,
+      id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time,
       properties:property_id (
         id, title,
         agents:agent_id (
           profile_id,
-          profiles:profile_id (full_name, phone)
+          profiles:profile_id (full_name, phone, email)
         )
       )
     `
     )
     .eq("id", context.params.id)
     .single()) as {
-    data: {
-      visitor_name: string;
-      visitor_phone: string;
-      visit_date: string;
-      visit_time: string;
-      properties: {
-        title: string;
-        agents: {
-          profile_id: string;
-          profiles: {
-            full_name: string;
-            phone: string | null;
+      data: {
+        visitor_name: string;
+        visitor_email: string;
+        visitor_phone: string;
+        visit_date: string;
+        visit_time: string;
+        properties: {
+          title: string;
+          agents: {
+            profile_id: string;
+            profiles: {
+              full_name: string;
+              phone: string | null;
+              email: string | null;
+            } | null;
           } | null;
         } | null;
       } | null;
-    } | null;
-  };
+    };
 
-  const whatsappJobs: Array<Promise<unknown>> = [];
+  const notifyJobs: Array<Promise<unknown>> = [];
   if (visitDetails?.properties) {
-    if (parsed.data.status === "confirmed") {
-      whatsappJobs.push(
-        sendWhatsApp(
-          visitDetails.visitor_phone,
-          visitConfirmedVisitor({
-            visitorName: visitDetails.visitor_name,
-            propertyTitle: visitDetails.properties.title,
-            visitDate: visitDetails.visit_date,
-            visitTime: visitDetails.visit_time,
-          })
-        )
-      );
+    const templateParams = {
+      visitorName: visitDetails.visitor_name,
+      propertyTitle: visitDetails.properties.title,
+      visitDate: visitDetails.visit_date,
+      visitTime: visitDetails.visit_time,
+    };
 
-      if (visitDetails.properties.agents?.profiles?.phone) {
-        whatsappJobs.push(
+    if (parsed.data.status === "confirmed") {
+      // WhatsApp + Email to visitor
+      notifyJobs.push(
+        sendWhatsApp(visitDetails.visitor_phone, visitConfirmedVisitor(templateParams))
+      );
+      if (visitDetails.visitor_email) {
+        const emailTpl = visitConfirmedCustomerEmail(templateParams);
+        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
+      }
+
+      // WhatsApp + Email to agent
+      const agent = visitDetails.properties.agents;
+      if (agent?.profiles?.phone) {
+        notifyJobs.push(
           sendWhatsApp(
-            visitDetails.properties.agents.profiles.phone,
+            agent.profiles.phone,
             visitConfirmedAgent({
-              agentName: visitDetails.properties.agents.profiles.full_name || "Agent",
-              propertyTitle: visitDetails.properties.title,
-              visitDate: visitDetails.visit_date,
-              visitTime: visitDetails.visit_time,
+              agentName: agent.profiles.full_name || "Agent",
+              ...templateParams,
             })
           )
         );
       }
+      if (agent?.profiles?.email) {
+        const agentEmailTpl = visitConfirmedAgentEmail({
+          agentName: agent.profiles.full_name || "Agent",
+          visitorName: visitDetails.visitor_name,
+          propertyTitle: visitDetails.properties.title,
+          visitDate: visitDetails.visit_date,
+          visitTime: visitDetails.visit_time,
+        });
+        notifyJobs.push(sendEmail({ to: agent.profiles.email, ...agentEmailTpl }));
+      }
     }
 
     if (parsed.data.status === "cancelled") {
-      whatsappJobs.push(
-        sendWhatsApp(
-          visitDetails.visitor_phone,
-          visitCancelled({
-            visitorName: visitDetails.visitor_name,
-            propertyTitle: visitDetails.properties.title,
-            visitDate: visitDetails.visit_date,
-            visitTime: visitDetails.visit_time,
-          })
-        )
+      // WhatsApp + Email to visitor
+      notifyJobs.push(
+        sendWhatsApp(visitDetails.visitor_phone, visitCancelled(templateParams))
       );
+      if (visitDetails.visitor_email) {
+        const emailTpl = visitCancelledCustomerEmail(templateParams);
+        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
+      }
     }
 
     if (visitDetails.properties.agents?.profile_id) {
@@ -128,8 +152,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     }
   }
 
-  if (whatsappJobs.length > 0) {
-    await Promise.allSettled(whatsappJobs);
+  if (notifyJobs.length > 0) {
+    await Promise.allSettled(notifyJobs);
   }
 
   await writeAuditLog({

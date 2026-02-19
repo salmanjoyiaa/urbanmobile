@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -12,7 +13,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
+import { COUNTRIES, getCountryByCode } from "@/lib/country-data";
 
 function sanitizeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -21,10 +30,16 @@ function sanitizeFileName(name: string) {
 export default function AgentSignupPage() {
   const router = useRouter();
   const supabase = createClient();
+  const [selectedCountry, setSelectedCountry] = useState("SA");
+  const [phoneNumber, setPhoneNumber] = useState("");
+
+  const country = useMemo(() => getCountryByCode(selectedCountry), [selectedCountry]);
+  const cities = country?.cities || [];
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<AgentSignupInput>({
     resolver: zodResolver(agentSignupSchema),
@@ -37,6 +52,13 @@ export default function AgentSignupPage() {
       license_number: "",
     },
   });
+
+  const handlePhoneChange = (value: string) => {
+    // Only allow digits, limit length
+    const digits = value.replace(/\D/g, "").slice(0, country?.phoneDigits || 15);
+    setPhoneNumber(digits);
+    setValue("phone", `${country?.dialCode || ""}${digits}`);
+  };
 
   const onSubmit = async (values: AgentSignupInput) => {
     const fileInput = document.getElementById("document") as HTMLInputElement | null;
@@ -97,10 +119,10 @@ export default function AgentSignupPage() {
 
     const { error: agentInsertError } = await (supabase
       .from("agents") as never as {
-      insert: (
-        values: Database["public"]["Tables"]["agents"]["Insert"]
-      ) => Promise<{ error: { message?: string } | null }>;
-    }).insert(payload);
+        insert: (
+          values: Database["public"]["Tables"]["agents"]["Insert"]
+        ) => Promise<{ error: { message?: string } | null }>;
+      }).insert(payload);
 
     if (agentInsertError) {
       toast.error(agentInsertError.message || "Failed to submit agent profile");
@@ -112,7 +134,7 @@ export default function AgentSignupPage() {
   };
 
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>Agent registration</CardTitle>
         <CardDescription>
@@ -128,6 +150,7 @@ export default function AgentSignupPage() {
               <p className="text-sm text-destructive">{errors.full_name.message}</p>
             )}
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="company_name">Company name</Label>
             <Input id="company_name" {...register("company_name")} />
@@ -135,10 +158,52 @@ export default function AgentSignupPage() {
               <p className="text-sm text-destructive">{errors.company_name.message}</p>
             )}
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="license_number">License number</Label>
             <Input id="license_number" {...register("license_number")} />
           </div>
+
+          {/* Country selector */}
+          <div className="space-y-2">
+            <Label>Country</Label>
+            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select country" />
+              </SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* City selector (populated from country) */}
+          {cities.length > 0 && (
+            <div className="space-y-2">
+              <Label>City</Label>
+              <Select
+                onValueChange={() => {
+                  // Optional — store in form if needed
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select city" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cities.map((city) => (
+                    <SelectItem key={city} value={city}>
+                      {city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" {...register("email")} />
@@ -146,13 +211,40 @@ export default function AgentSignupPage() {
               <p className="text-sm text-destructive">{errors.email.message}</p>
             )}
           </div>
+
+          {/* Phone with country code */}
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone (+966...)</Label>
-            <Input id="phone" placeholder="+9665XXXXXXXX" {...register("phone")} />
+            <Label htmlFor="phone">Phone</Label>
+            <div className="flex gap-2">
+              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                <SelectTrigger className="w-[140px] shrink-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.dialCode} {c.code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder={`${"0".repeat(country?.phoneDigits || 9)}`}
+                value={phoneNumber}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+                maxLength={country?.phoneDigits || 15}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {country?.dialCode} + {country?.phoneDigits} digits
+            </p>
             {errors.phone && (
               <p className="text-sm text-destructive">{errors.phone.message}</p>
             )}
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" {...register("password")} />
@@ -160,11 +252,13 @@ export default function AgentSignupPage() {
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="document">License document (optional)</Label>
             <Input id="document" type="file" accept=".pdf,.jpg,.jpeg,.png" />
           </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+
+          <Button type="submit" className="w-full bg-primary text-white" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -178,7 +272,7 @@ export default function AgentSignupPage() {
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-navy hover:underline">
+          <Link href="/login" className="font-medium text-primary hover:underline">
             Sign in
           </Link>
         </p>

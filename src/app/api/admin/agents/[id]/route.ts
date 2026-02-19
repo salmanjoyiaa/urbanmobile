@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
 import { sendWhatsApp } from "@/lib/twilio";
+import { sendEmail } from "@/lib/resend";
 import { agentApproved, agentRejected } from "@/lib/whatsapp-templates";
+import { agentApprovedEmail, agentRejectedEmail } from "@/lib/email-templates";
 
 const payloadSchema = z.object({
   status: z.enum(["approved", "rejected", "suspended"]),
@@ -15,7 +17,12 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
   const parsed = payloadSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
@@ -40,17 +47,18 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
   const { data: updatedAgent } = (await admin.supabase
     .from("agents")
-    .select("profile_id, profiles:profile_id(full_name, phone)")
+    .select("profile_id, profiles:profile_id(full_name, phone, email)")
     .eq("id", context.params.id)
     .single()) as {
-    data: {
-      profile_id: string;
-      profiles: {
-        full_name: string;
-        phone: string | null;
+      data: {
+        profile_id: string;
+        profiles: {
+          full_name: string;
+          phone: string | null;
+          email: string | null;
+        } | null;
       } | null;
-    } | null;
-  };
+    };
 
   if (updatedAgent?.profile_id) {
     await admin.supabase.from("notifications").insert({
@@ -62,30 +70,33 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     } as never);
   }
 
-  const whatsappJobs: Array<Promise<unknown>> = [];
-  if (updatedAgent?.profiles?.phone && parsed.data.status === "approved") {
-    whatsappJobs.push(
-      sendWhatsApp(
-        updatedAgent.profiles.phone,
-        agentApproved({ agentName: updatedAgent.profiles.full_name || "Agent" })
-      )
-    );
+  const notifyJobs: Array<Promise<unknown>> = [];
+  const agentName = updatedAgent?.profiles?.full_name || "Agent";
+
+  if (parsed.data.status === "approved") {
+    if (updatedAgent?.profiles?.phone) {
+      notifyJobs.push(sendWhatsApp(updatedAgent.profiles.phone, agentApproved({ agentName })));
+    }
+    if (updatedAgent?.profiles?.email) {
+      const emailTpl = agentApprovedEmail({ agentName });
+      notifyJobs.push(sendEmail({ to: updatedAgent.profiles.email, ...emailTpl }));
+    }
   }
 
-  if (updatedAgent?.profiles?.phone && parsed.data.status === "rejected") {
-    whatsappJobs.push(
-      sendWhatsApp(
-        updatedAgent.profiles.phone,
-        agentRejected({
-          agentName: updatedAgent.profiles.full_name || "Agent",
-          reason: parsed.data.rejection_reason,
-        })
-      )
-    );
+  if (parsed.data.status === "rejected") {
+    if (updatedAgent?.profiles?.phone) {
+      notifyJobs.push(
+        sendWhatsApp(updatedAgent.profiles.phone, agentRejected({ agentName, reason: parsed.data.rejection_reason }))
+      );
+    }
+    if (updatedAgent?.profiles?.email) {
+      const emailTpl = agentRejectedEmail({ agentName, reason: parsed.data.rejection_reason });
+      notifyJobs.push(sendEmail({ to: updatedAgent.profiles.email, ...emailTpl }));
+    }
   }
 
-  if (whatsappJobs.length > 0) {
-    await Promise.allSettled(whatsappJobs);
+  if (notifyJobs.length > 0) {
+    await Promise.allSettled(notifyJobs);
   }
 
   await writeAuditLog({

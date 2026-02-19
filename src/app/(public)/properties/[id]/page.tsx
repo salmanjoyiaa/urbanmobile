@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Building2, MapPin } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatPhone, formatSAR } from "@/lib/format";
 import { PropertyGallery } from "@/components/property/property-gallery";
@@ -92,77 +89,73 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     : "Not provided";
 
   return (
-    <div className="container mx-auto space-y-8 px-4 py-8">
+    <div className="container mx-auto space-y-6 px-4 py-8">
       <div>
-        <h1 className="text-3xl font-bold text-navy">{property.title}</h1>
-        <p className="mt-2 inline-flex items-center gap-1 text-muted-foreground">
+        <h1 className="text-[24px] font-extrabold text-[#0f1419] sm:text-[28px]">{property.title}</h1>
+        <p className="mt-1 inline-flex items-center gap-1 text-[15px] text-[#536471]">
           <MapPin className="h-4 w-4" />
           {property.city}
           {property.district ? `, ${property.district}` : ""}
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
           <PropertyGallery images={property.images || []} title={property.title} />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Property details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div className="rounded-2xl border border-[#eff3f4] p-6">
+            <h2 className="text-[17px] font-bold text-[#0f1419]">Property details</h2>
+            <div className="mt-4 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="capitalize">{property.type}</Badge>
-                <Badge variant="outline" className="capitalize">{property.purpose}</Badge>
-                <Badge>{formatSAR(property.price)}</Badge>
+                <span className="rounded-full border border-[#cfd9de] px-3 py-1 text-[13px] font-medium capitalize text-[#0f1419]">{property.type}</span>
+                <span className="rounded-full border border-[#cfd9de] px-3 py-1 text-[13px] font-medium capitalize text-[#0f1419]">{property.purpose}</span>
+                <span className="rounded-full bg-[#1d9bf0] px-3 py-1 text-[13px] font-bold text-white">{formatSAR(property.price)}</span>
               </div>
 
-              <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+              <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#536471]">
                 {property.description}
               </p>
 
-              <Separator />
+              <hr className="border-[#eff3f4]" />
 
-              <div className="grid gap-3 text-sm sm:grid-cols-2">
-                <p><span className="font-medium">Bedrooms:</span> {property.bedrooms ?? "—"}</p>
-                <p><span className="font-medium">Bathrooms:</span> {property.bathrooms ?? "—"}</p>
-                <p><span className="font-medium">Area:</span> {property.area_sqm ? `${property.area_sqm} m²` : "—"}</p>
-                <p><span className="font-medium">Year built:</span> {property.year_built ?? "—"}</p>
-                <p><span className="font-medium">Address:</span> {property.address || "—"}</p>
-                <p><span className="font-medium">Listed:</span> {formatDate(property.created_at)}</p>
+              <div className="grid gap-3 text-[14px] sm:grid-cols-2">
+                <p><span className="font-bold text-[#0f1419]">Bedrooms:</span> <span className="text-[#536471]">{property.bedrooms ?? "—"}</span></p>
+                <p><span className="font-bold text-[#0f1419]">Bathrooms:</span> <span className="text-[#536471]">{property.bathrooms ?? "—"}</span></p>
+                <p><span className="font-bold text-[#0f1419]">Area:</span> <span className="text-[#536471]">{property.area_sqm ? `${property.area_sqm} m²` : "—"}</span></p>
+                <p><span className="font-bold text-[#0f1419]">Year built:</span> <span className="text-[#536471]">{property.year_built ?? "—"}</span></p>
+                <p><span className="font-bold text-[#0f1419]">Address:</span> <span className="text-[#536471]">{property.address || "—"}</span></p>
+                <p><span className="font-bold text-[#0f1419]">Listed:</span> <span className="text-[#536471]">{formatDate(property.created_at)}</span></p>
               </div>
 
               {property.amenities?.length > 0 && (
                 <>
-                  <Separator />
+                  <hr className="border-[#eff3f4]" />
                   <div>
-                    <p className="mb-2 font-medium">Amenities</p>
+                    <p className="mb-2 font-bold text-[#0f1419]">Amenities</p>
                     <div className="flex flex-wrap gap-2">
                       {property.amenities.map((item) => (
-                        <Badge key={item} variant="secondary">{item}</Badge>
+                        <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
                       ))}
                     </div>
                   </div>
                 </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Agent</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <p className="inline-flex items-center gap-2 font-medium">
-                <Building2 className="h-4 w-4" />
+          <div className="rounded-2xl border border-[#eff3f4] p-6">
+            <h2 className="text-[17px] font-bold text-[#0f1419]">Agent</h2>
+            <div className="mt-4 space-y-2 text-[14px]">
+              <p className="inline-flex items-center gap-2 font-bold text-[#0f1419]">
+                <Building2 className="h-4 w-4 text-[#1d9bf0]" />
                 {agentName}
               </p>
-              <p className="text-muted-foreground">Company: {property.agents?.company_name || "—"}</p>
-              <p className="text-muted-foreground">Phone: {maskedPhone}</p>
-            </CardContent>
-          </Card>
+              <p className="text-[#536471]">Company: {property.agents?.company_name || "—"}</p>
+              <p className="text-[#536471]">Phone: {maskedPhone}</p>
+            </div>
+          </div>
 
           <div id="visit-scheduler">
             <VisitScheduler propertyId={property.id} propertyTitle={property.title} />

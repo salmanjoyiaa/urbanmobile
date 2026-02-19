@@ -53,6 +53,9 @@ export default function LoginPage() {
       .eq("id", data.user.id)
       .single() as { data: { role: string } | null };
 
+    // Refresh server-side session before navigating so middleware sees the new auth cookies
+    router.refresh();
+
     if (profile?.role === "admin") {
       router.push("/admin");
       return;
@@ -79,51 +82,58 @@ export default function LoginPage() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Sign in</CardTitle>
+      <CardHeader className="space-y-2">
+        <CardTitle className="text-2xl">Sign In</CardTitle>
         <CardDescription>Access your UrbanSaudi account.</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              {...register("email")}
+            />
             {errors.email && (
               <p className="text-sm text-destructive">{errors.email.message}</p>
             )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" {...register("password")} />
+            <Input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              {...register("password")}
+            />
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
           </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button type="submit" className="w-full bg-primary text-white" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Signing in...
               </>
             ) : (
-              "Sign in"
+              "Sign In"
             )}
           </Button>
         </form>
 
-        <div className="mt-6 space-y-2 text-center text-sm">
-          <p className="text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="font-medium text-navy hover:underline">
-              Create one
-            </Link>
-          </p>
-          <p className="text-muted-foreground">
-            Agent account?{" "}
-            <Link href="/signup/agent" className="font-medium text-navy hover:underline">
-              Register as agent
-            </Link>
-          </p>
+        <div className="mt-6 text-center text-sm text-muted-foreground">
+          Don&apos;t have an account?{" "}
+          <Link href="/signup" className="font-medium text-primary hover:underline">
+            Sign up
+          </Link>
+          {" "} or{" "}
+          <Link href="/signup/agent" className="font-medium text-primary hover:underline">
+            become an agent
+          </Link>
         </div>
       </CardContent>
     </Card>

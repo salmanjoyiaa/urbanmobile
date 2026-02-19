@@ -1,49 +1,52 @@
 import Link from "next/link";
-import { MapPin, Package } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { formatSAR } from "@/lib/format";
-import type { Product } from "@/types/database";
+import Image from "next/image";
+import { Package } from "lucide-react";
 
-type ProductCardProps = {
-  product: Product;
+type Product = {
+  id: string;
+  title: string;
+  price: number;
+  category: string;
+  condition: string;
+  images: string[] | null;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
-  const cover = product.images?.[0];
+export function ProductCard({ product }: { product: Product }) {
+  const imgSrc = product.images?.[0] || null;
 
   return (
     <Link href={`/products/${product.id}`}>
-      <Card className="h-full overflow-hidden transition hover:shadow-md">
-        <div className="relative aspect-[16/10] w-full bg-muted">
-          {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={cover} alt={product.title} className="h-full w-full object-cover" />
+      <div className="group overflow-hidden rounded-2xl border border-[#eff3f4] bg-white transition-colors hover:bg-[#f7f9f9]">
+        <div className="relative aspect-[4/3] overflow-hidden bg-[#f7f9f9]">
+          {imgSrc ? (
+            <Image
+              src={imgSrc}
+              alt={product.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
           ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              <Package className="h-6 w-6" />
+            <div className="flex h-full items-center justify-center">
+              <Package className="h-12 w-12 text-[#cfd9de]" />
             </div>
           )}
-        </div>
-
-        <CardHeader className="space-y-2 pb-2">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="line-clamp-1 text-base font-semibold">{product.title}</h3>
-            <Badge variant="outline" className="capitalize">
-              {product.condition.replace("_", " ")}
-            </Badge>
+          <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-[12px] font-bold capitalize text-[#0f1419] backdrop-blur-sm">
+            {product.condition.replace("_", " ")}
           </div>
-          <p className="text-lg font-bold text-navy">{formatSAR(product.price)}</p>
-        </CardHeader>
-
-        <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
-          <span className="capitalize">{product.category}</span>
-          <span className="inline-flex items-center gap-1">
-            <MapPin className="h-4 w-4" />
-            {product.city}
+        </div>
+        <div className="p-4">
+          <h3 className="truncate text-[15px] font-bold text-[#0f1419]">
+            {product.title}
+          </h3>
+          <p className="mt-0.5 text-[15px] font-bold text-[#1d9bf0]">
+            SAR {product.price.toLocaleString()}
+          </p>
+          <span className="mt-2 inline-block rounded-full bg-[#eff3f4] px-2.5 py-0.5 text-[12px] font-medium capitalize text-[#536471]">
+            {product.category}
           </span>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </Link>
   );
 }

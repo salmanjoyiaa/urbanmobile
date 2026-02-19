@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/types/database";
+import { createApiClient } from "@/lib/supabase/api";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+const supabase = createApiClient();
 
 export async function GET(_request: Request, context: { params: { id: string } }) {
   const { data, error } = await supabase

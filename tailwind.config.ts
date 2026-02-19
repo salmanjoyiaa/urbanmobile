@@ -60,6 +60,11 @@ const config: Config = {
           light: "hsl(222 30% 20%)",
           dark: "hsl(222 47% 6%)",
         },
+        xblue: {
+          DEFAULT: "hsl(204 88% 53%)",
+          light: "hsl(204 88% 63%)",
+          dark: "hsl(204 88% 43%)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -67,7 +72,7 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ['"Segoe UI"', "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
       },
     },
   },

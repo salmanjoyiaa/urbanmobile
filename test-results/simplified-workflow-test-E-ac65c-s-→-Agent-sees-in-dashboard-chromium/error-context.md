@@ -1,0 +1,107 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "UrbanSaudi" [ref=e6] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=e7]:
+          - link "Properties" [ref=e8] [cursor=pointer]:
+            - /url: /properties
+          - link "Products" [ref=e9] [cursor=pointer]:
+            - /url: /products
+    - main [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - heading "Luxury Penthouse in Al-Olaya" [level=1] [ref=e13]
+          - paragraph [ref=e14]:
+            - img [ref=e15]
+            - text: Riyadh, Al-Olaya
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - generic [ref=e20]:
+              - generic [ref=e21]:
+                - img "Luxury Penthouse in Al-Olaya" [ref=e22]
+                - button [ref=e23] [cursor=pointer]:
+                  - img
+                - button [ref=e24] [cursor=pointer]:
+                  - img
+              - generic [ref=e25]:
+                - button "Luxury Penthouse in Al-Olaya image 1" [ref=e26] [cursor=pointer]:
+                  - img "Luxury Penthouse in Al-Olaya image 1" [ref=e27]
+                - button "Luxury Penthouse in Al-Olaya image 2" [ref=e28] [cursor=pointer]:
+                  - img "Luxury Penthouse in Al-Olaya image 2" [ref=e29]
+            - generic [ref=e30]:
+              - heading "Property details" [level=2] [ref=e31]
+              - generic [ref=e32]:
+                - generic [ref=e33]:
+                  - generic [ref=e34]: apartment
+                  - generic [ref=e35]: sale
+                  - generic [ref=e36]: SAR 2,850,000
+                - paragraph [ref=e37]: Stunning two-level penthouse with panoramic city views. Italian marble floors, smart home system, and private rooftop terrace.
+                - separator [ref=e38]
+                - generic [ref=e39]:
+                  - paragraph [ref=e40]: "Bedrooms: 4"
+                  - paragraph [ref=e41]: "Bathrooms: 5"
+                  - paragraph [ref=e42]: "Area: 320 m²"
+                  - paragraph [ref=e43]: "Year built: 2023"
+                  - paragraph [ref=e44]: "Address: —"
+                  - paragraph [ref=e45]: "Listed: February 19, 2026"
+                - separator [ref=e46]
+                - generic [ref=e47]:
+                  - paragraph [ref=e48]: Amenities
+                  - generic [ref=e49]:
+                    - generic [ref=e50]: parking
+                    - generic [ref=e51]: pool
+                    - generic [ref=e52]: gym
+                    - generic [ref=e53]: elevator
+                    - generic [ref=e54]: security
+                    - generic [ref=e55]: central ac
+          - generic [ref=e56]:
+            - generic [ref=e57]:
+              - heading "Agent" [level=2] [ref=e58]
+              - generic [ref=e59]:
+                - paragraph [ref=e60]:
+                  - img [ref=e61]
+                  - text: Ahmed Al-Dosari
+                - paragraph [ref=e65]: "Company: Dosari Properties"
+                - paragraph [ref=e66]: "Phone: +966xx xxx xx8"
+            - generic [ref=e68]:
+              - generic [ref=e69]:
+                - generic [ref=e70]: Schedule a visit
+                - generic [ref=e71]: Book a time for Luxury Penthouse in Al-Olaya
+              - generic [ref=e72]:
+                - generic [ref=e73]:
+                  - generic [ref=e74]: 1. Date
+                  - generic [ref=e75]: 2. Slot
+                  - generic [ref=e76]: 3. Contact
+                - generic [ref=e77]:
+                  - generic [ref=e78]:
+                    - text: Full name
+                    - textbox "Full name" [active] [ref=e79]
+                  - generic [ref=e80]:
+                    - text: Email
+                    - textbox "Email" [ref=e81]
+                  - generic [ref=e82]:
+                    - text: Phone (+966...)
+                    - textbox "Phone (+966...)" [ref=e83]:
+                      - /placeholder: +966XXXXXXXXX
+                      - text: "+966"
+                  - generic [ref=e84]:
+                    - text: Message (optional)
+                    - textbox "Message (optional)" [ref=e85]
+                  - generic [ref=e86]:
+                    - button "Back" [ref=e87] [cursor=pointer]
+                    - button "Submit visit request" [ref=e88] [cursor=pointer]
+    - contentinfo [ref=e89]:
+      - generic [ref=e91]:
+        - paragraph [ref=e92]: UrbanSaudi
+        - generic [ref=e93]:
+          - link "Agent Login" [ref=e94] [cursor=pointer]:
+            - /url: /login
+          - generic [ref=e95]: © 2026 UrbanSaudi
+  - region "Notifications alt+T"
+  - alert [ref=e96]
+```

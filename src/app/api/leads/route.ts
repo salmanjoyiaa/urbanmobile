@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
+import { createApiClient } from "@/lib/supabase/api";
 import { buyRequestSchema } from "@/lib/validators";
-import type { Database } from "@/types/database";
+import * as Sentry from "@sentry/nextjs";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-
-const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+const supabase = createApiClient();
 
 const redisEnabled =
   Boolean(process.env.UPSTASH_REDIS_REST_URL) &&
@@ -16,13 +13,13 @@ const redisEnabled =
 
 const ratelimit = redisEnabled
   ? new Ratelimit({
-      redis: new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL!,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-      }),
-      limiter: Ratelimit.fixedWindow(3, "1 h"),
-      analytics: true,
-    })
+    redis: new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    }),
+    limiter: Ratelimit.fixedWindow(3, "1 h"),
+    analytics: true,
+  })
   : null;
 
 const memoryHits = new Map<string, { count: number; resetAt: number }>();
@@ -59,24 +56,64 @@ export async function POST(request: NextRequest) {
   const limit = await enforceRateLimit(ip);
 
   if (!limit.allowed) {
+    Sentry.captureMessage("Rate limit exceeded for lead creation", {
+      level: "info",
+      contexts: {
+        rate_limit: {
+          ip,
+          limit: limit.limit,
+          endpoint: "/api/leads",
+        },
+      },
+    });
+    
     return NextResponse.json(
-      { error: "Too many requests. Limit is 3 lead requests per hour." },
+      { error: "Too many requests. Limit is 3 lead requests per hour. Please try again later." },
       {
         status: 429,
         headers: {
           "X-RateLimit-Limit": String(limit.limit),
           "X-RateLimit-Remaining": String(limit.remaining),
+          "Retry-After": "3600",
         },
       }
     );
   }
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch (err) {
+    Sentry.captureException(err, {
+      contexts: {
+        request: {
+          endpoint: "/api/leads",
+          method: "POST",
+          error_type: "json_parse_error",
+        },
+      },
+    });
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+  
   const parsed = buyRequestSchema.safeParse(body);
 
   if (!parsed.success) {
+    const firstError = parsed.error.issues[0]?.message || "Invalid payload";
+    Sentry.captureMessage(`Validation failed for lead creation: ${firstError}`, {
+      level: "debug",
+      contexts: {
+        validation: {
+          endpoint: "/api/leads",
+          errors: parsed.error.issues.map(e => ({
+            path: e.path.join("."),
+            message: e.message,
+          })),
+        },
+      },
+    });
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message || "Invalid payload" },
+      { error: firstError },
       { status: 400 }
     );
   }
@@ -86,12 +123,21 @@ export async function POST(request: NextRequest) {
     .insert(parsed.data as never)
     .select("id")
     .single()) as {
-    data: { id: string } | null;
-    error: { message: string } | null;
-  };
+      data: { id: string } | null;
+      error: { message: string } | null;
+    };
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    Sentry.captureException(new Error(error.message), {
+      contexts: {
+        database: {
+          endpoint: "/api/leads",
+          table: "buy_requests",
+          error: error.message,
+        },
+      },
+    });
+    return NextResponse.json({ error: "Failed to create lead request" }, { status: 500 });
   }
 
   return NextResponse.json(

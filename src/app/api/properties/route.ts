@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createApiClient } from "@/lib/supabase/api";
 import { cacheAside } from "@/lib/redis";
-import type { Database } from "@/types/database";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+const supabase = createApiClient();
 
 function toNumber(value: string | null, fallback: number) {
   const parsed = value ? Number(value) : NaN;

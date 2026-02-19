@@ -27,7 +27,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("+966");
   const [message, setMessage] = useState("");
 
   const dateKey = useMemo(() => (date ? format(date, "yyyy-MM-dd") : ""), [date]);
@@ -136,19 +136,19 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="visitor-name">Full name</Label>
-              <Input id="visitor-name" value={name} onChange={(event) => setName(event.target.value)} />
+              <Input id="visitor-name" value={name} onChange={(event) => setName(event.target.value)} disabled={createVisit.isPending} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="visitor-email">Email</Label>
-              <Input id="visitor-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+              <Input id="visitor-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} disabled={createVisit.isPending} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="visitor-phone">Phone (+966...)</Label>
-              <Input id="visitor-phone" value={phone} onChange={(event) => setPhone(event.target.value)} />
+              <Input id="visitor-phone" placeholder="+966XXXXXXXXX" value={phone} onChange={(event) => setPhone(event.target.value)} disabled={createVisit.isPending} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="visitor-message">Message (optional)</Label>
-              <Textarea id="visitor-message" value={message} onChange={(event) => setMessage(event.target.value)} />
+              <Textarea id="visitor-message" value={message} onChange={(event) => setMessage(event.target.value)} disabled={createVisit.isPending} />
             </div>
 
             <div className="flex gap-2">

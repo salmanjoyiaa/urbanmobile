@@ -1,4 +1,5 @@
 import twilio from "twilio";
+import * as Sentry from "@sentry/nextjs";
 
 type SendResult = {
   success: boolean;
@@ -27,13 +28,33 @@ function normalizeWhatsAppTo(value: string) {
 
 export async function sendWhatsApp(to: string, body: string): Promise<SendResult> {
   if (!client || !from) {
-    return { success: false, error: "Twilio is not configured" };
+    const msg = "Twilio is not configured";
+    Sentry.captureMessage(msg, {
+      level: "warning",
+      contexts: {
+        twilio_whatsapp: {
+          recipient: to,
+          configured: !!client && !!from,
+        },
+      },
+    });
+    return { success: false, error: msg };
   }
 
   const normalizedTo = to.replace(/^whatsapp:/, "").trim();
 
   if (!isE164Phone(normalizedTo)) {
-    return { success: false, error: "Recipient phone must be in E.164 format" };
+    const msg = "Recipient phone must be in E.164 format";
+    Sentry.captureMessage(msg, {
+      level: "warning",
+      contexts: {
+        twilio_whatsapp: {
+          recipient: normalizedTo,
+          validation_failed: true,
+        },
+      },
+    });
+    return { success: false, error: msg };
   }
 
   let lastError: string | undefined;
@@ -54,6 +75,19 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
       }
     }
   }
+
+  // Log failure after all retries exhausted
+  Sentry.captureException(new Error(lastError || "Failed to send WhatsApp message"), {
+    contexts: {
+      twilio_whatsapp: {
+        recipient: normalizedTo,
+        body_length: body.length,
+        retry_attempts: 3,
+        final_error: lastError,
+      },
+    },
+    level: "error",
+  });
 
   return { success: false, error: lastError || "Failed to send WhatsApp message" };
 }

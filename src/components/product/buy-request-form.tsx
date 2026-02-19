@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCreateLeadRequest } from "@/queries/leads";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 type BuyRequestFormProps = {
   productId: string;
@@ -37,7 +38,9 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
         message: message || undefined,
       });
 
-      toast.success("Buy request submitted.");
+      toast.success("Buy request submitted successfully!");
+      
+      // Reset form
       setName("");
       setEmail("");
       setPhone("");
@@ -48,6 +51,8 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
     }
   };
 
+  const isLoading = createLead.isPending;
+
   return (
     <Card>
       <CardHeader>
@@ -57,7 +62,13 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="buyer-name">Full name</Label>
-          <Input id="buyer-name" value={name} onChange={(event) => setName(event.target.value)} />
+          <Input 
+            id="buyer-name" 
+            value={name} 
+            onChange={(event) => setName(event.target.value)} 
+            disabled={isLoading}
+            placeholder="Your full name"
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="buyer-email">Email</Label>
@@ -66,11 +77,19 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            disabled={isLoading}
+            placeholder="your@email.com"
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="buyer-phone">Phone (+966...)</Label>
-          <Input id="buyer-phone" value={phone} onChange={(event) => setPhone(event.target.value)} />
+          <Input 
+            id="buyer-phone" 
+            value={phone} 
+            onChange={(event) => setPhone(event.target.value)} 
+            disabled={isLoading}
+            placeholder="+966XXXXXXXXX"
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="buyer-message">Message (optional)</Label>
@@ -78,11 +97,21 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
             id="buyer-message"
             value={message}
             onChange={(event) => setMessage(event.target.value)}
+            disabled={isLoading}
+            placeholder="Tell the seller more about your interest..."
+            rows={3}
           />
         </div>
 
-        <Button onClick={submit} disabled={createLead.isPending} className="w-full">
-          {createLead.isPending ? "Submitting..." : "Submit buy request"}
+        <Button onClick={submit} disabled={isLoading} className="w-full" size="lg">
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            "Submit buy request"
+          )}
         </Button>
       </CardContent>
     </Card>
