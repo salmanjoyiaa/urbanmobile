@@ -12,49 +12,25 @@ import {
 export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-[#eff3f4] bg-white/95 backdrop-blur-sm">
-        <div className="container mx-auto flex h-[53px] items-center justify-between px-4">
-          <Link href="/" className="text-xl font-bold text-[#0f1419]">
-            Urban<span className="text-[#1d9bf0]">Saudi</span>
-          </Link>
-          <nav className="flex items-center gap-1">
-            <Link
-              href="/properties"
-              className="rounded-full px-4 py-2 text-[15px] font-medium text-[#536471] transition-colors hover:bg-[#eff3f4] hover:text-[#0f1419]"
-            >
-              Properties
-            </Link>
-            <Link
-              href="/products"
-              className="rounded-full px-4 py-2 text-[15px] font-medium text-[#536471] transition-colors hover:bg-[#eff3f4] hover:text-[#0f1419]"
-            >
-              Products
-            </Link>
-          </nav>
-        </div>
-      </header>
-
-      {/* Hero */}
       <section className="border-b border-[#eff3f4]">
         <div className="container mx-auto px-4 py-16 text-center sm:py-20 lg:py-28">
-          <h1 className="text-[32px] font-extrabold leading-tight tracking-tight text-[#0f1419] sm:text-[42px] lg:text-[56px]">
-            Find Your Perfect Property
+          <h1 className="text-[36px] font-extrabold leading-tight tracking-tight text-[#0f1419] sm:text-[46px] lg:text-[64px]">
+            Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1d9bf0] to-[#006ee6]">Perfect Property</span>
           </h1>
-          <p className="mx-auto mt-4 max-w-lg text-[17px] leading-relaxed text-[#536471]">
+          <p className="mx-auto mt-6 max-w-2xl text-[18px] leading-relaxed text-[#536471]">
             Browse premium listings across Saudi Arabia. Schedule visits and
-            request items — no account needed.
+            request items instantly with our verified agents — <span className="font-semibold text-[#0f1419]">no account needed.</span>
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/properties">
-              <button className="inline-flex items-center rounded-full bg-[#0f1419] px-6 py-3 text-[15px] font-bold text-white transition-colors hover:bg-[#272c30]">
-                <Building2 className="mr-2 h-[18px] w-[18px]" />
+              <button className="inline-flex h-14 items-center justify-center rounded-full bg-[#1d9bf0] px-8 text-[16px] font-bold text-white transition-all hover:bg-[#1a8cd8] hover:shadow-lg hover:shadow-[#1d9bf0]/20">
+                <Building2 className="mr-2 h-5 w-5" />
                 Browse Properties
               </button>
             </Link>
             <Link href="/products">
-              <button className="inline-flex items-center rounded-full border border-[#cfd9de] bg-white px-6 py-3 text-[15px] font-bold text-[#0f1419] transition-colors hover:bg-[#f7f9f9]">
-                <Package className="mr-2 h-[18px] w-[18px]" />
+              <button className="inline-flex h-14 items-center justify-center rounded-full border-2 border-[#eff3f4] bg-white px-8 text-[16px] font-bold text-[#0f1419] transition-all hover:border-[#cfd9de] hover:bg-[#f7f9f9]">
+                <Package className="mr-2 h-5 w-5" />
                 Shop Products
               </button>
             </Link>
