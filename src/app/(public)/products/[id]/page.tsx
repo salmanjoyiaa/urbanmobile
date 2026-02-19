@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { MapPin, Package } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatPhone, formatSAR } from "@/lib/format";
+import { PropertyGallery } from "@/components/property/property-gallery";
 import { BuyRequestForm } from "@/components/product/buy-request-form";
 
 type ProductDetail = {
@@ -89,16 +90,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
-          <div className="overflow-hidden rounded-2xl border border-[#eff3f4] bg-[#f7f9f9]">
-            {product.images?.[0] ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={product.images[0]} alt={product.title} className="aspect-[16/10] w-full object-cover" />
-            ) : (
-              <div className="flex aspect-[16/10] items-center justify-center text-[#cfd9de]">
-                <Package className="h-10 w-10" />
-              </div>
-            )}
-          </div>
+          <PropertyGallery images={product.images || []} title={product.title} />
 
           <div className="rounded-2xl border border-[#eff3f4] p-6">
             <h2 className="text-[17px] font-bold text-[#0f1419]">Product details</h2>

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
-import { createApiClient } from "@/lib/supabase/api";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { buyRequestSchema } from "@/lib/validators";
 import * as Sentry from "@sentry/nextjs";
 
-const supabase = createApiClient();
+const supabase = createAdminClient();
 
 const redisEnabled =
   Boolean(process.env.UPSTASH_REDIS_REST_URL) &&
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         },
       },
     });
-    
+
     return NextResponse.json(
       { error: "Too many requests. Limit is 3 lead requests per hour. Please try again later." },
       {
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
-  
+
   const parsed = buyRequestSchema.safeParse(body);
 
   if (!parsed.success) {
