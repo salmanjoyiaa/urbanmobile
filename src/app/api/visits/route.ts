@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
-import { createApiClient } from "@/lib/supabase/api";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { cacheAside, cacheDel } from "@/lib/redis";
 import { buildAvailabilitySlots, isFutureDate, isWeekday } from "@/lib/slots";
 import { visitRequestSchema } from "@/lib/validators";
 
-const supabase = createApiClient();
+const supabase = createAdminClient();
 
 const redisEnabled =
   Boolean(process.env.UPSTASH_REDIS_REST_URL) &&
