@@ -89,6 +89,16 @@ export default function AgentSignupPage() {
       return;
     }
 
+    // If there's no active session after signup (email confirm flows), avoid attempting
+    // to perform an authenticated insert under the new user. Prompt the user to
+    // sign in to complete their agent application instead of failing with a DB error.
+    const session = await supabase.auth.getSession();
+    if (!session?.data?.session) {
+      toast.success("Account created. Please verify your email (if required) and sign in to complete your agent application.");
+      router.push("/login");
+      return;
+    }
+
     let documentPath: string | null = null;
 
     if (documentFile) {

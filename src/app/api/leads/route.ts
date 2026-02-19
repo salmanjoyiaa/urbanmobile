@@ -128,6 +128,8 @@ export async function POST(request: NextRequest) {
     };
 
   if (error) {
+    // Log full error for debugging
+    console.error("[api/leads] insert error:", error);
     Sentry.captureException(new Error(error.message), {
       contexts: {
         database: {
@@ -137,7 +139,8 @@ export async function POST(request: NextRequest) {
         },
       },
     });
-    return NextResponse.json({ error: "Failed to create lead request" }, { status: 500 });
+    // Include database message in response for clearer debugging in dev
+    return NextResponse.json({ error: error.message || "Failed to create lead request" }, { status: 500 });
   }
 
   return NextResponse.json(
