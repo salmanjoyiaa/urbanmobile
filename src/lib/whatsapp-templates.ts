@@ -47,3 +47,11 @@ export function agentRejected(params: { agentName: string; reason?: string }) {
   const reasonText = params.reason ? ` Reason: ${params.reason}.` : "";
   return `Hello ${params.agentName}, your UrbanSaudi agent application was rejected.${reasonText}`;
 }
+
+export function maintenanceApproved(params: { customerName: string; serviceType: string }) {
+  return `Hello ${params.customerName}, your UrbanSaudi maintenance request for ${params.serviceType} has been APPROVED. Our team will contact you shortly with arrival details.`;
+}
+
+export function maintenanceRejected(params: { customerName: string; serviceType: string }) {
+  return `Hello ${params.customerName}, we regret to inform you that your maintenance request for ${params.serviceType} could not be approved at this time.`;
+}

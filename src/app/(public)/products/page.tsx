@@ -89,19 +89,19 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   return (
     <div className="container mx-auto space-y-6 px-4 py-8">
       <div>
-        <h1 className="text-[24px] font-extrabold text-[#0f1419]">Products</h1>
-        <p className="mt-1 text-[15px] text-[#536471]">Find quality used household items from trusted agents.</p>
+        <h1 className="text-[24px] font-extrabold text-[#2A201A]">Products</h1>
+        <p className="mt-1 text-[15px] text-[#6B5A4E]">Find quality used household items from trusted agents.</p>
       </div>
 
       <ProductFilters initialValues={searchParams} />
 
       {products.length === 0 ? (
-        <div className="rounded-2xl border border-[#eff3f4] p-12 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#f7f9f9]">
-            <Package className="h-7 w-7 text-[#536471]" />
+        <div className="rounded-2xl border border-[#D9C5B2]/40 bg-[#FCF9F2] p-12 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#E5D5C5]">
+            <Package className="h-7 w-7 text-[#6B5A4E]" />
           </div>
-          <h3 className="mt-4 text-[17px] font-bold text-[#0f1419]">No products found</h3>
-          <p className="mt-1 text-[15px] text-[#536471]">
+          <h3 className="mt-4 text-[17px] font-bold text-[#2A201A]">No products found</h3>
+          <p className="mt-1 text-[15px] text-[#6B5A4E]">
             Try adjusting your filters or check back later.
           </p>
         </div>

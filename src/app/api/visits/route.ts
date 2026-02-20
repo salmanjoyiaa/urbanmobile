@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { notifyAdmins } from "@/lib/admin";
 import { cacheAside, cacheDel } from "@/lib/redis";
 import { buildAvailabilitySlots, isFutureDate, isWeekday } from "@/lib/slots";
 import { visitRequestSchema } from "@/lib/validators";
@@ -168,6 +169,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ error: "Failed to submit visit request" }, { status: 500 });
   }
+
+  // Notify admins of new visit request
+  await notifyAdmins({
+    title: "New Property Visit Request",
+    body: `A new visit has been booked by ${payload.visitor_name} for ${payload.visit_date} at ${payload.visit_time}.`,
+    type: "visit_request",
+    metadata: { visit_id: data?.id, property_id: payload.property_id },
+  });
 
   await cacheDel(`slots:${payload.property_id}:${payload.visit_date}`);
 

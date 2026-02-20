@@ -28,3 +28,5 @@ export type ProductCategory =
 export type VisitStatus = "pending" | "confirmed" | "cancelled" | "completed";
 
 export type LeadStatus = "pending" | "confirmed" | "rejected" | "completed";
+
+export type MaintenanceStatus = "pending" | "approved" | "completed" | "rejected";

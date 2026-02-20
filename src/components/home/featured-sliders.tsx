@@ -20,15 +20,15 @@ export async function FeaturedSliders() {
     .not("images", "eq", "{}")
     .order("created_at", { ascending: false })
     .limit(10)) as {
-    data: Array<{
-      id: string;
-      title: string;
-      images: string[];
-      price: number;
-      city: string;
-      purpose: string;
-    }> | null;
-  };
+      data: Array<{
+        id: string;
+        title: string;
+        images: string[];
+        price: number;
+        city: string;
+        purpose: string;
+      }> | null;
+    };
 
   // Fetch 5 random available products with images
   const { data: products } = (await supabase
@@ -38,15 +38,15 @@ export async function FeaturedSliders() {
     .not("images", "eq", "{}")
     .order("created_at", { ascending: false })
     .limit(10)) as {
-    data: Array<{
-      id: string;
-      title: string;
-      images: string[];
-      price: number;
-      city: string;
-      condition: string;
-    }> | null;
-  };
+      data: Array<{
+        id: string;
+        title: string;
+        images: string[];
+        price: number;
+        city: string;
+        condition: string;
+      }> | null;
+    };
 
   // Shuffle and take 5
   const shuffled = <T,>(arr: T[]): T[] => {
@@ -85,70 +85,68 @@ export async function FeaturedSliders() {
   if (propertySlides.length === 0 && productSlides.length === 0) return null;
 
   return (
-    <section className="bg-[#0f1419] py-16 sm:py-20">
-      <div className="container mx-auto px-6">
-        {/* Properties Slider */}
-        {propertySlides.length > 0 && (
-          <div>
-            <div className="mb-8 flex items-end justify-between">
-              <div>
-                <p className="text-[12px] font-semibold uppercase tracking-widest text-[#1d9bf0]">
-                  Curated Selection
-                </p>
-                <h2 className="mt-1 text-[28px] font-extrabold tracking-tight text-white sm:text-[36px]">
-                  Featured Properties
-                </h2>
-              </div>
-              <Link
-                href="/properties"
-                className="group hidden items-center gap-1 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-[13px] font-bold text-white backdrop-blur-sm transition-all hover:border-[#1d9bf0]/50 hover:bg-[#1d9bf0]/10 hover:text-[#1d9bf0] sm:inline-flex"
-              >
-                View All
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+    <div className="w-full">
+      {/* Properties Slider */}
+      {propertySlides.length > 0 && (
+        <div>
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-widest text-[#B69780] mb-2">
+                Curated Selection
+              </p>
+              <h2 className="text-[28px] font-extrabold tracking-tight text-[#2A201A] sm:text-[40px] leading-[1.1]">
+                Featured Properties
+              </h2>
             </div>
-            <ImageSlider items={propertySlides} />
             <Link
               href="/properties"
-              className="mt-6 flex items-center justify-center gap-1 text-[13px] font-bold text-[#1d9bf0] sm:hidden"
+              className="group hidden items-center gap-1 rounded-2xl border-2 border-[#D9C5B2]/40 bg-transparent px-6 py-2.5 text-[14px] font-bold text-[#6B5A4E] transition-all hover:border-[#2A201A] hover:bg-[#2A201A] hover:text-[#FCF9F2] sm:inline-flex"
             >
-              View All Properties
-              <ArrowRight className="h-3.5 w-3.5" />
+              View All
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
-        )}
+          <ImageSlider items={propertySlides} />
+          <Link
+            href="/properties"
+            className="mt-6 flex items-center justify-center gap-1 text-[13px] font-bold text-[#B69780] hover:text-[#2A201A] sm:hidden transition-colors"
+          >
+            View All Properties
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      )}
 
-        {/* Products Slider */}
-        {productSlides.length > 0 && (
-          <div className={propertySlides.length > 0 ? "mt-20" : ""}>
-            <div className="mb-8 flex items-end justify-between">
-              <div>
-                <p className="text-[12px] font-semibold uppercase tracking-widest text-[#1d9bf0]">
-                  Marketplace
-                </p>
-                <h2 className="mt-1 text-[28px] font-extrabold tracking-tight text-white sm:text-[36px]">
-                  Featured Products
-                </h2>
-              </div>
-              <Link
-                href="/products"
-                className="group hidden items-center gap-1 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-[13px] font-bold text-white backdrop-blur-sm transition-all hover:border-[#1d9bf0]/50 hover:bg-[#1d9bf0]/10 hover:text-[#1d9bf0] sm:inline-flex"
-              >
-                View All
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+      {/* Products Slider */}
+      {productSlides.length > 0 && (
+        <div className={propertySlides.length > 0 ? "mt-24" : ""}>
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-widest text-[#B69780] mb-2">
+                Marketplace
+              </p>
+              <h2 className="text-[28px] font-extrabold tracking-tight text-[#2A201A] sm:text-[40px] leading-[1.1]">
+                Featured Products
+              </h2>
             </div>
-            <ImageSlider items={productSlides} />
             <Link
               href="/products"
-              className="mt-6 flex items-center justify-center gap-1 text-[13px] font-bold text-[#1d9bf0] sm:hidden"
+              className="group hidden items-center gap-1 rounded-2xl border-2 border-[#D9C5B2]/40 bg-transparent px-6 py-2.5 text-[14px] font-bold text-[#6B5A4E] transition-all hover:border-[#2A201A] hover:bg-[#2A201A] hover:text-[#FCF9F2] sm:inline-flex"
             >
-              View All Products
-              <ArrowRight className="h-3.5 w-3.5" />
+              View All
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
-        )}
-      </div>
-    </section>
+          <ImageSlider items={productSlides} />
+          <Link
+            href="/products"
+            className="mt-6 flex items-center justify-center gap-1 text-[13px] font-bold text-[#B69780] hover:text-[#2A201A] sm:hidden transition-colors"
+          >
+            View All Products
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      )}
+    </div>
   );
 }

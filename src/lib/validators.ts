@@ -140,7 +140,7 @@ export const visitRequestSchema = z.object({
     .regex(emailRegex, "Valid email is required"),
   visitor_phone: z
     .string()
-    .regex(/^\+[0-9]{10,15}$/, "Phone must be in format +966XXXXXXXXX"),
+    .regex(/^(05|\+9665)[0-9]{8}$/, "Must be a valid 10-digit Saudi WhatsApp number starting with 05 or +9665"),
   visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
   visit_time: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format"),
 });
@@ -158,10 +158,33 @@ export const buyRequestSchema = z.object({
     .regex(emailRegex, "Valid email is required"),
   buyer_phone: z
     .string()
-    .regex(/^\+[0-9]{10,15}$/, "Phone must be in format +966XXXXXXXXX"),
+    .regex(/^(05|\+9665)[0-9]{8}$/, "Must be a valid 10-digit Saudi WhatsApp number starting with 05 or +9665"),
   message: z
     .string()
     .max(5000, "Message must not exceed 5000 characters")
+    .optional(),
+});
+
+export const maintenanceRequestSchema = z.object({
+  service_type: z
+    .string()
+    .min(2, "Service type is required")
+    .max(100, "Service type must not exceed 100 characters"),
+  customer_name: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .max(100, "Name must not exceed 100 characters"),
+  customer_email: z
+    .string()
+    .min(1, "Email is required")
+    .max(255, "Email must not exceed 255 characters")
+    .regex(emailRegex, "Valid email is required"),
+  customer_phone: z
+    .string()
+    .regex(/^(05|\+9665)[0-9]{8}$/, "Must be a valid 10-digit Saudi WhatsApp number starting with 05 or +9665"),
+  details: z
+    .string()
+    .max(5000, "Details must not exceed 5000 characters")
     .optional(),
 });
 
@@ -172,3 +195,4 @@ export type PropertyInput = z.infer<typeof propertySchema>;
 export type ProductInput = z.infer<typeof productSchema>;
 export type VisitRequestInput = z.infer<typeof visitRequestSchema>;
 export type BuyRequestInput = z.infer<typeof buyRequestSchema>;
+export type MaintenanceRequestInput = z.infer<typeof maintenanceRequestSchema>;

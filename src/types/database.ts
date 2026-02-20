@@ -8,6 +8,7 @@ import type {
   ProductCategory,
   VisitStatus,
   LeadStatus,
+  MaintenanceStatus,
 } from "./enums";
 
 export interface Profile {
@@ -109,6 +110,19 @@ export interface BuyRequest {
   updated_at: string;
 }
 
+export interface MaintenanceRequest {
+  id: string;
+  service_type: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  details: string | null;
+  status: MaintenanceStatus;
+  admin_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export type Json =
   | string
   | number
@@ -183,6 +197,11 @@ export interface Database {
         Row: BuyRequest;
         Insert: Omit<BuyRequest, "id" | "created_at" | "updated_at" | "status" | "admin_notes" | "confirmed_by" | "confirmed_at"> & { id?: string; status?: LeadStatus };
         Update: Partial<Omit<BuyRequest, "id" | "created_at">>;
+      };
+      maintenance_requests: {
+        Row: MaintenanceRequest;
+        Insert: Omit<MaintenanceRequest, "id" | "created_at" | "updated_at" | "status" | "admin_notes"> & { id?: string; status?: MaintenanceStatus };
+        Update: Partial<Omit<MaintenanceRequest, "id" | "created_at">>;
       };
       notifications: {
         Row: Notification;

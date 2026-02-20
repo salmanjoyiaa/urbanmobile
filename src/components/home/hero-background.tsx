@@ -53,29 +53,29 @@ export function HeroBackground() {
     if (!mounted) {
         // SSR Fallback (just the orbs)
         return (
-            <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-                <div className="absolute top-20 right-20 w-72 h-72 bg-blue-500 rounded-full blur-[100px] animate-float" />
-                <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500 rounded-full blur-[120px] animate-float" style={{ animationDelay: "3s" }} />
-                <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-indigo-500 rounded-full blur-[100px] animate-float" style={{ animationDelay: "1.5s" }} />
+            <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03]">
+                <div className="absolute top-20 right-20 w-72 h-72 bg-[#1d9bf0] rounded-full blur-[100px] animate-float" />
+                <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-400 rounded-full blur-[120px] animate-float" style={{ animationDelay: "3s" }} />
+                <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-indigo-300 rounded-full blur-[100px] animate-float" style={{ animationDelay: "1.5s" }} />
             </div>
         );
     }
 
     return (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {/* Ambient gradient orbs */}
-            <div className="absolute inset-0 opacity-15">
-                <div className="absolute top-20 right-20 w-72 h-72 bg-blue-500 rounded-full blur-[100px] animate-float" />
-                <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500 rounded-full blur-[120px] animate-float" style={{ animationDelay: "3s" }} />
-                <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-indigo-500 rounded-full blur-[100px] animate-float" style={{ animationDelay: "1.5s" }} />
+            {/* Ambient gradient orbs (Light Theme) */}
+            <div className="absolute inset-0 opacity-[0.05]">
+                <div className="absolute top-20 right-20 w-72 h-72 bg-[#1d9bf0] rounded-full blur-[100px] animate-float" />
+                <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-400 rounded-full blur-[120px] animate-float" style={{ animationDelay: "3s" }} />
+                <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-indigo-300 rounded-full blur-[100px] animate-float" style={{ animationDelay: "1.5s" }} />
             </div>
 
             {/* Floating Property/Household Icons */}
-            <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 z-0 opacity-40">
                 {elements.map((el) => (
                     <div
                         key={el.id}
-                        className="absolute text-white animate-float transition-opacity duration-1000"
+                        className="absolute text-[#536471] animate-float transition-opacity duration-1000"
                         style={{
                             top: `${el.top}%`,
                             left: `${el.left}%`,

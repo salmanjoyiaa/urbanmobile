@@ -61,7 +61,7 @@ export function ImageSlider({ items }: ImageSliderProps) {
   if (items.length === 0) return null;
 
   return (
-    <div className="relative">
+    <div className="relative w-full overflow-hidden">
       <div className="overflow-hidden rounded-2xl" ref={emblaRef}>
         <div className="flex touch-pan-y">
           {items.map((item, index) => (
@@ -82,12 +82,12 @@ export function ImageSlider({ items }: ImageSliderProps) {
                     )}
                   />
                   {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2A201A]/90 via-[#2A201A]/20 to-transparent" />
 
                   {/* Badge */}
                   {item.badge && (
                     <div className="absolute left-3 top-3">
-                      <span className="rounded-full bg-[#1d9bf0] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-lg">
+                      <span className="rounded-full bg-[#2A201A] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-lg">
                         {item.badge}
                       </span>
                     </div>
@@ -99,14 +99,14 @@ export function ImageSlider({ items }: ImageSliderProps) {
                       {item.title}
                     </h3>
                     {item.price && (
-                      <p className="mt-1 text-[14px] font-semibold text-[#1d9bf0]">
+                      <p className="mt-1 text-[14px] font-semibold text-[#F3E8DB]">
                         {item.price}
                       </p>
                     )}
                   </div>
 
                   {/* Hover glow */}
-                  <div className="absolute inset-0 rounded-2xl opacity-0 ring-2 ring-[#1d9bf0]/50 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="absolute inset-0 rounded-2xl opacity-0 ring-2 ring-[#D9C5B2]/50 transition-opacity duration-300 group-hover:opacity-100" />
                 </div>
               </Link>
             </div>
@@ -123,8 +123,8 @@ export function ImageSlider({ items }: ImageSliderProps) {
             className={cn(
               "h-1.5 rounded-full transition-all duration-300",
               selectedIndex === index
-                ? "w-8 bg-[#1d9bf0]"
-                : "w-1.5 bg-white/30 hover:bg-white/50"
+                ? "w-8 bg-[#2A201A]"
+                : "w-1.5 bg-[#D9C5B2] hover:bg-[#B69780]"
             )}
           />
         ))}

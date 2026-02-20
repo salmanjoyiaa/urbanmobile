@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   Users,
   ScrollText,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 
@@ -31,6 +32,7 @@ export const adminNav: NavItem[] = [
   { title: "Products", href: "/admin/products", icon: Package },
   { title: "Visit Requests", href: "/admin/visits", icon: Calendar },
   { title: "Buy Requests", href: "/admin/leads", icon: ShoppingBag },
+  { title: "Maintenance", href: "/admin/maintenance", icon: Wrench },
   { title: "Audit Log", href: "/admin/audit-log", icon: ScrollText },
 ];
 
@@ -38,4 +40,5 @@ export const publicNav = [
   { title: "Home", href: "/" },
   { title: "Properties", href: "/properties" },
   { title: "Products", href: "/products" },
+  { title: "Maintenance", href: "/maintenance" },
 ];

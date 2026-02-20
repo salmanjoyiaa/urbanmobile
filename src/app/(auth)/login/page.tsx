@@ -81,10 +81,10 @@ export default function LoginPage() {
   };
 
   return (
-    <Card>
+    <Card className="border-[#D9C5B2]/40 bg-[#FCF9F2] shadow-xl shadow-[#2A201A]/5">
       <CardHeader className="space-y-2">
-        <CardTitle className="text-2xl">Sign In</CardTitle>
-        <CardDescription>Access your UrbanSaudi account.</CardDescription>
+        <CardTitle className="text-2xl font-extrabold text-[#2A201A]">Sign In</CardTitle>
+        <CardDescription className="text-[#6B5A4E]">Access your UrbanSaudi account.</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -113,7 +113,7 @@ export default function LoginPage() {
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
           </div>
-          <Button type="submit" className="w-full bg-primary text-white" disabled={isSubmitting}>
+          <Button type="submit" className="w-full bg-[#2A201A] hover:bg-black text-white rounded-xl h-11" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -125,9 +125,9 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-muted-foreground">
+        <div className="mt-6 text-center text-sm text-[#6B5A4E]">
           Don&apos;t have an account?{" "}
-          <Link href="/signup/agent" className="font-medium text-primary hover:underline">
+          <Link href="/signup/agent" className="font-bold text-[#2A201A] hover:underline">
             Apply to become an agent
           </Link>
         </div>

@@ -5,6 +5,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { z } from "zod";
 import { createRouteClient } from "@/lib/supabase/route";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { notifyAdmins } from "@/lib/admin";
 
 const bodySchema = z.object({
   company_name: z.string().min(2).max(100),
@@ -121,6 +122,14 @@ export async function POST(request: NextRequest) {
       });
       return NextResponse.json({ error: "Failed to create agent application" }, { status: 500 });
     }
+
+    // Notify admins of new agent registration
+    await notifyAdmins({
+      title: "New Agent Application",
+      body: `Company ${parsed.data.company_name} has applied to become an agent.`,
+      type: "agent_signup",
+      metadata: { profile_id: user.id },
+    });
 
     return NextResponse.json({ success: true, agent: data }, { status: 201 });
   } catch (err) {

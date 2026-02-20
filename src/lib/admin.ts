@@ -1,4 +1,5 @@
 import { createRouteClient } from "@/lib/supabase/route";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function getAdminRouteContext() {
   const supabase = await createRouteClient();
@@ -58,4 +59,25 @@ export async function writeAuditLog(params: {
     entity_id: params.entityId || null,
     metadata: params.metadata || {},
   } as never);
+}
+
+export async function notifyAdmins(params: {
+  title: string;
+  body: string;
+  type: string;
+  metadata?: Record<string, unknown>;
+}) {
+  const supabase = createAdminClient();
+  const { data: admins } = (await supabase.from("profiles").select("id").eq("role", "admin")) as { data: { id: string }[] | null };
+  if (!admins || admins.length === 0) return;
+
+  const notifications = admins.map((admin) => ({
+    user_id: admin.id,
+    title: params.title,
+    body: params.body,
+    type: params.type,
+    metadata: params.metadata || {},
+  }));
+
+  await supabase.from("notifications").insert(notifications as never);
 }

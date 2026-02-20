@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { notifyAdmins } from "@/lib/admin";
 import { buyRequestSchema } from "@/lib/validators";
 import * as Sentry from "@sentry/nextjs";
 
@@ -142,6 +143,14 @@ export async function POST(request: NextRequest) {
     // Include database message in response for clearer debugging in dev
     return NextResponse.json({ error: error.message || "Failed to create lead request" }, { status: 500 });
   }
+
+  // Notify admins of new buy request
+  await notifyAdmins({
+    title: "New Product Buy Request",
+    body: `A new buy request has been submitted by ${parsed.data.buyer_name}.`,
+    type: "lead_status",
+    metadata: { lead_id: data?.id, product_id: parsed.data.product_id },
+  });
 
   return NextResponse.json(
     { id: data?.id, success: true },
