@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Menu } from "lucide-react";
@@ -20,17 +21,21 @@ type SidebarProps = {
   title: string;
 };
 
-function SidebarNav({ items }: { items: NavItem[] }) {
+function SidebarNav({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
     <nav className="space-y-1">
       {items.map((item) => {
-        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const isRootNav = item.href.split("/").filter(Boolean).length <= 1;
+        const active = isRootNav
+          ? pathname === item.href
+          : pathname === item.href || pathname.startsWith(`${item.href}/`);
         return (
           <Link
             key={item.href}
             href={item.href}
+            onClick={onNavigate}
             className={cn(
               "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition",
               active
@@ -55,6 +60,7 @@ function SidebarNav({ items }: { items: NavItem[] }) {
 export function Sidebar({ items, title }: SidebarProps) {
   const router = useRouter();
   const supabase = createClient();
+  const [open, setOpen] = useState(false);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -77,9 +83,8 @@ export function Sidebar({ items, title }: SidebarProps) {
       </aside>
 
       <div className="border-b bg-white px-4 py-3 lg:hidden">
-        <div className="flex items-center justify-between">
-          <p className="font-semibold text-navy">{title}</p>
-          <Sheet>
+        <div className="flex items-center gap-3">
+          <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline">
                 <Menu className="h-4 w-4" />
@@ -90,7 +95,7 @@ export function Sidebar({ items, title }: SidebarProps) {
                 <SheetTitle>{title}</SheetTitle>
               </SheetHeader>
               <div className="mt-6">
-                <SidebarNav items={items} />
+                <SidebarNav items={items} onNavigate={() => setOpen(false)} />
                 <Button variant="outline" className="mt-6 w-full" onClick={signOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
@@ -98,6 +103,7 @@ export function Sidebar({ items, title }: SidebarProps) {
               </div>
             </SheetContent>
           </Sheet>
+          <p className="font-semibold text-navy">{title}</p>
         </div>
       </div>
     </>

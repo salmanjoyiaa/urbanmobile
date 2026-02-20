@@ -2,17 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Package } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS, SAUDI_CITIES } from "@/lib/constants";
 import type { Product } from "@/types/database";
 import { ProductCard } from "@/components/product/product-card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ProductFilters } from "@/components/product/product-filters";
 
 export const revalidate = 60;
 
@@ -101,68 +93,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         <p className="mt-1 text-[15px] text-[#536471]">Find quality used household items from trusted agents.</p>
       </div>
 
-      <form className="grid gap-4 rounded-2xl border border-[#eff3f4] p-4 sm:grid-cols-2 lg:grid-cols-6" method="get">
-        <div className="space-y-1.5">
-          <label className="text-[13px] font-bold text-[#0f1419]">City</label>
-          <Select name="city" defaultValue={searchParams.city || "all"}>
-            <SelectTrigger className="rounded-lg border-[#cfd9de]">
-              <SelectValue placeholder="All cities" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All cities</SelectItem>
-              {SAUDI_CITIES.map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[13px] font-bold text-[#0f1419]">Category</label>
-          <Select name="category" defaultValue={searchParams.category || "all"}>
-            <SelectTrigger className="rounded-lg border-[#cfd9de]">
-              <SelectValue placeholder="All categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All categories</SelectItem>
-              {PRODUCT_CATEGORIES.map((item) => (
-                <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[13px] font-bold text-[#0f1419]">Condition</label>
-          <Select name="condition" defaultValue={searchParams.condition || "all"}>
-            <SelectTrigger className="rounded-lg border-[#cfd9de]">
-              <SelectValue placeholder="Any condition" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Any condition</SelectItem>
-              {PRODUCT_CONDITIONS.map((item) => (
-                <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[13px] font-bold text-[#0f1419]">Min price</label>
-          <Input type="number" name="minPrice" defaultValue={searchParams.minPrice || ""} placeholder="Min" className="rounded-lg border-[#cfd9de]" />
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[13px] font-bold text-[#0f1419]">Max price</label>
-          <Input type="number" name="maxPrice" defaultValue={searchParams.maxPrice || ""} placeholder="Max" className="rounded-lg border-[#cfd9de]" />
-        </div>
-
-        <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
-          <button type="submit" className="w-full rounded-full bg-[#0f1419] px-4 py-2 text-[15px] font-bold text-white transition-colors hover:bg-[#272c30]">
-            Apply
-          </button>
-        </div>
-      </form>
+      <ProductFilters initialValues={searchParams} />
 
       {products.length === 0 ? (
         <div className="rounded-2xl border border-[#eff3f4] p-12 text-center">
