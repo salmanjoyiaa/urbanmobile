@@ -95,9 +95,9 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ slots });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to load slots" },
+      { error: "Failed to load slots" },
       { status: 500 }
     );
   }
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "This slot is already booked" }, { status: 409 });
     }
 
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to submit visit request" }, { status: 500 });
   }
 
   await cacheDel(`slots:${payload.property_id}:${payload.visit_date}`);
