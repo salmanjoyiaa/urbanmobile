@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Building2, Shield, Star, Clock } from "lucide-react";
 
 import { FeaturedSliders } from "@/components/home/featured-sliders";
+import { HeroBackground } from "@/components/home/hero-background";
 
 export default function HomePage() {
   return (
@@ -53,12 +54,8 @@ export default function HomePage() {
 
       {/* Hero Section — compact */}
       <section className="relative min-h-[75vh] flex items-center gradient-primary overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute inset-0 opacity-15">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-blue-500 rounded-full blur-[100px] animate-float" />
-          <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500 rounded-full blur-[120px] animate-float" style={{ animationDelay: "3s" }} />
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-indigo-500 rounded-full blur-[100px] animate-float" style={{ animationDelay: "1.5s" }} />
-        </div>
+        {/* Animated Background Icons & Orbs */}
+        <HeroBackground />
 
         <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-32 mt-10">
           <div className="flex flex-col items-center justify-center text-center">
