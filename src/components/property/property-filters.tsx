@@ -1,7 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -52,9 +53,21 @@ export function PropertyFilters({ initialValues }: PropertyFiltersProps) {
     });
   };
 
+  const [open, setOpen] = useState(false);
+
   return (
     <section className="rounded-2xl border border-[#eff3f4] p-4">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6" key={filterKey}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between text-[14px] font-bold text-[#0f1419] lg:hidden"
+      >
+        <span className="flex items-center gap-2">
+          <SlidersHorizontal className="h-4 w-4" />
+          Filters
+        </span>
+        {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+      </button>
+      <div className={`${open ? "mt-4 grid" : "hidden"} grid-cols-2 gap-4 lg:grid lg:grid-cols-6`} key={filterKey}>
         <div className="space-y-1.5">
           <label className="text-[13px] font-bold text-[#0f1419]">City</label>
           <Select
@@ -144,7 +157,7 @@ export function PropertyFilters({ initialValues }: PropertyFiltersProps) {
         </div>
       </div>
 
-      <div className="mt-3 flex justify-end">
+      <div className={`${open ? "flex" : "hidden"} mt-3 justify-end lg:flex`}>
         <button
           onClick={clearFilters}
           disabled={isPending}
