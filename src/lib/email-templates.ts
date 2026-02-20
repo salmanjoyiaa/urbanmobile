@@ -200,3 +200,41 @@ export function agentRejectedEmail(params: {
     `),
   };
 }
+
+// ── Maintenance Request Emails ──
+
+export function maintenanceApprovedEmail(params: {
+  customerName: string;
+  serviceType: string;
+}) {
+  return {
+    subject: `Maintenance Request Approved — ${params.serviceType}`,
+    html: layout(`
+      ${heading("Your maintenance request has been approved")}
+      ${paragraph(`Hello ${params.customerName},`)}
+      ${paragraph("Your maintenance request has been approved and scheduled by our team.")}
+      ${divider()}
+      ${detail("Service Type", params.serviceType)}
+      ${divider()}
+      ${paragraph("Our team will contact you shortly to confirm the timing.")}
+    `),
+  };
+}
+
+export function maintenanceRejectedEmail(params: {
+  customerName: string;
+  serviceType: string;
+}) {
+  return {
+    subject: `Maintenance Request Update — ${params.serviceType}`,
+    html: layout(`
+      ${heading("Your maintenance request could not be approved")}
+      ${paragraph(`Hello ${params.customerName},`)}
+      ${paragraph("Unfortunately, your maintenance request could not be approved at this time.")}
+      ${divider()}
+      ${detail("Service Type", params.serviceType)}
+      ${divider()}
+      ${paragraph("Please contact support if you have any questions.")}
+    `),
+  };
+}

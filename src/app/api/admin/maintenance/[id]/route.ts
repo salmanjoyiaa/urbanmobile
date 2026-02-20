@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
 import { sendWhatsApp } from "@/lib/twilio";
+import { sendEmail } from "@/lib/resend";
 import { maintenanceApproved, maintenanceRejected } from "@/lib/whatsapp-templates";
+import { maintenanceApprovedEmail, maintenanceRejectedEmail } from "@/lib/email-templates";
 
 const payloadSchema = z.object({
     status: z.enum(["approved", "rejected", "completed"]),
@@ -55,25 +57,51 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
     if (requestDetails) {
         if (parsed.data.status === "approved") {
-            notifyJobs.push(
-                sendWhatsApp(
-                    requestDetails.customer_phone,
-                    maintenanceApproved({
-                        customerName: requestDetails.customer_name,
-                        serviceType: requestDetails.service_type,
+            if (requestDetails.customer_phone) {
+                notifyJobs.push(
+                    sendWhatsApp(
+                        requestDetails.customer_phone,
+                        maintenanceApproved({
+                            customerName: requestDetails.customer_name,
+                            serviceType: requestDetails.service_type,
+                        })
+                    )
+                );
+            }
+            if (requestDetails.customer_email) {
+                notifyJobs.push(
+                    sendEmail({
+                        to: requestDetails.customer_email,
+                        ...maintenanceApprovedEmail({
+                            customerName: requestDetails.customer_name,
+                            serviceType: requestDetails.service_type,
+                        }),
                     })
-                )
-            );
+                );
+            }
         } else if (parsed.data.status === "rejected") {
-            notifyJobs.push(
-                sendWhatsApp(
-                    requestDetails.customer_phone,
-                    maintenanceRejected({
-                        customerName: requestDetails.customer_name,
-                        serviceType: requestDetails.service_type,
+            if (requestDetails.customer_phone) {
+                notifyJobs.push(
+                    sendWhatsApp(
+                        requestDetails.customer_phone,
+                        maintenanceRejected({
+                            customerName: requestDetails.customer_name,
+                            serviceType: requestDetails.service_type,
+                        })
+                    )
+                );
+            }
+            if (requestDetails.customer_email) {
+                notifyJobs.push(
+                    sendEmail({
+                        to: requestDetails.customer_email,
+                        ...maintenanceRejectedEmail({
+                            customerName: requestDetails.customer_name,
+                            serviceType: requestDetails.service_type,
+                        }),
                     })
-                )
-            );
+                );
+            }
         }
     }
 

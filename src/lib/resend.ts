@@ -19,6 +19,8 @@ export async function sendEmail(params: {
   subject: string;
   html: string;
 }): Promise<SendEmailResult> {
+  const supabase = createAdminClient();
+
   if (!resend) {
     console.log("[email:skip] Resend not configured");
     Sentry.captureMessage("Resend email service not configured", {
@@ -31,10 +33,19 @@ export async function sendEmail(params: {
         },
       },
     });
+
+    // @ts-expect-error -- notification_logs insert type mismatch
+    await supabase.from("notification_logs").insert({
+      channel: "email",
+      recipient: params.to,
+      subject: params.subject,
+      content: params.html,
+      status: "failed",
+      error_message: "Resend is not configured",
+    });
+
     return { success: false, error: "Resend is not configured" };
   }
-
-  const supabase = createAdminClient();
 
   try {
     const { data, error } = await resend.emails.send({

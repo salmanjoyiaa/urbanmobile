@@ -29,6 +29,8 @@ function normalizeWhatsAppTo(value: string) {
 }
 
 export async function sendWhatsApp(to: string, body: string): Promise<SendResult> {
+  const supabase = createAdminClient();
+
   if (!client || !from) {
     const msg = "Twilio is not configured";
     Sentry.captureMessage(msg, {
@@ -40,6 +42,17 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
         },
       },
     });
+
+    // @ts-expect-error -- notification_logs insert type mismatch
+    await supabase.from("notification_logs").insert({
+      channel: "whatsapp",
+      recipient: to,
+      content: body,
+      subject: null,
+      status: "failed",
+      error_message: msg,
+    });
+
     return { success: false, error: msg };
   }
 
@@ -56,10 +69,20 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
         },
       },
     });
+
+    // @ts-expect-error -- notification_logs insert type mismatch
+    await supabase.from("notification_logs").insert({
+      channel: "whatsapp",
+      recipient: normalizedTo,
+      content: body,
+      subject: null,
+      status: "failed",
+      error_message: msg,
+    });
+
     return { success: false, error: msg };
   }
 
-  const supabase = createAdminClient();
   let lastError: string | undefined;
 
   for (let attempt = 1; attempt <= 3; attempt += 1) {
