@@ -20,13 +20,10 @@
             - generic [ref=e16]:
               - text: Password
               - textbox "Password" [ref=e17]
-            - button "Sign In" [ref=e18]
+            - button "Sign In" [ref=e18] [cursor=pointer]
           - generic [ref=e19]:
             - text: Don't have an account?
-            - link "Sign up" [ref=e20] [cursor=pointer]:
-              - /url: /signup
-            - text: or
-            - link "become an agent" [ref=e21] [cursor=pointer]:
+            - link "Apply to become an agent" [ref=e20] [cursor=pointer]:
               - /url: /signup/agent
   - region "Notifications alt+T"
 ```

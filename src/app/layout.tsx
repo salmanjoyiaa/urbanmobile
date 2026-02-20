@@ -1,24 +1,72 @@
 import type { Metadata } from "next";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ToastProvider } from "@/providers/toast-provider";
 import NextTopLoader from "nextjs-toploader";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+});
+
 export const metadata: Metadata = {
   title: {
-    default: "UrbanSaudi — Premium Property & Household Marketplace",
-    template: "%s | UrbanSaudi",
+    default: "The Urban Real Estate | UrbanSaudi - Premium Property Network",
+    template: "%s | The Urban Real Estate",
   },
   description:
-    "Discover premium property listings and quality used household items across Saudi Arabia. Schedule visits, connect with verified agents.",
+    "Discover premium property listings, luxury real estate, and quality used household items across Saudi Arabia. Connect with verified elite agents at The Urban Real Estate.",
+  keywords: [
+    "the urban real estate",
+    "urban real estate",
+    "urbansaudi",
+    "urban saudi real estate",
+    "saudi arabia property",
+    "luxury homes riyadh",
+    "buy property ksa",
+    "real estate agents saudi",
+  ],
+  authors: [{ name: "The Urban Real Estate" }],
+  creator: "The Urban Real Estate",
+  publisher: "The Urban Real Estate",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    process.env.NEXT_PUBLIC_SITE_URL || "https://theurbanrealestate.com"
   ),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "UrbanSaudi",
+    url: "/",
+    title: "The Urban Real Estate | UrbanSaudi",
+    description: "The Premier Digital Property Network in Saudi Arabia. Browse exclusive real estate portfolios and connect with verified agents.",
+    siteName: "The Urban Real Estate",
+    images: [
+      {
+        url: "/images/home_hero.png",
+        width: 1200,
+        height: 630,
+        alt: "The Urban Real Estate Hub",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Urban Real Estate | UrbanSaudi",
+    description: "The Premier Digital Property Network in Saudi Arabia.",
+    images: ["/images/home_hero.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -29,7 +77,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">
+      <body className={`${inter.variable} ${outfit.variable} font-sans antialiased`}>
         <NextTopLoader color="#1e3a8a" showSpinner={false} />
         <QueryProvider>
           <AuthProvider>
