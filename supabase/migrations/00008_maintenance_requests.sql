@@ -58,4 +58,4 @@ CREATE POLICY "Admins can delete maintenance requests"
 CREATE TRIGGER update_maintenance_requests_modtime
     BEFORE UPDATE ON public.maintenance_requests
     FOR EACH ROW
-    EXECUTE FUNCTION update_modified_column();
+    EXECUTE FUNCTION update_updated_at();
