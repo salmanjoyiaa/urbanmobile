@@ -19,45 +19,57 @@ export function MobileNav() {
         <div className="md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-[#0f1419]">
-                        <Menu className="h-5 w-5" />
+                    <Button variant="ghost" size="icon" className="text-[#2A201A] hover:bg-[#2A201A]/5">
+                        <Menu className="h-6 w-6 stroke-[2.5]" />
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-72 bg-white">
+                <SheetContent side="left" className="w-[85vw] max-w-sm bg-[#FCF9F2] p-6 border-r border-[#D9C5B2]/30">
                     <SheetHeader>
-                        <SheetTitle className="text-left text-xl font-bold text-[#0f1419]">
-                            Urban<span className="text-[#1d9bf0]">Saudi</span>
+                        <SheetTitle className="text-left py-4 border-b border-[#D9C5B2]/30">
+                            <span className="text-2xl font-black tracking-tight text-[#2A201A] flex items-center">
+                                <span className="text-4xl leading-none -mt-1">T</span>heUrbanRealEstate<span className="font-medium">Saudi</span>
+                            </span>
                         </SheetTitle>
                     </SheetHeader>
-                    <nav className="mt-6 flex flex-col gap-1">
+                    <nav className="mt-8 flex flex-col gap-2 px-2">
+                        <Link
+                            href="/"
+                            onClick={() => setOpen(false)}
+                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-[#2A201A] transition-all hover:bg-[#2A201A]/5 active:scale-95"
+                        >
+                            Home
+                        </Link>
                         <Link
                             href="/properties"
                             onClick={() => setOpen(false)}
-                            className="rounded-full px-4 py-2.5 text-[15px] font-medium text-[#536471] transition-colors hover:bg-[#eff3f4] hover:text-[#0f1419]"
+                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-[#2A201A] transition-all hover:bg-[#2A201A]/5 active:scale-95"
                         >
                             Properties
                         </Link>
                         <Link
                             href="/products"
                             onClick={() => setOpen(false)}
-                            className="rounded-full px-4 py-2.5 text-[15px] font-medium text-[#536471] transition-colors hover:bg-[#eff3f4] hover:text-[#0f1419]"
+                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-[#2A201A] transition-all hover:bg-[#2A201A]/5 active:scale-95"
                         >
                             Products
                         </Link>
                         <Link
                             href="/maintenance"
                             onClick={() => setOpen(false)}
-                            className="rounded-full px-4 py-2.5 text-[15px] font-medium text-[#536471] transition-colors hover:bg-[#eff3f4] hover:text-[#0f1419]"
+                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-[#2A201A] transition-all hover:bg-[#2A201A]/5 active:scale-95"
                         >
                             Maintenance
                         </Link>
-                        <Link
-                            href="/login"
-                            onClick={() => setOpen(false)}
-                            className="mt-2 rounded-full px-4 py-2.5 text-[15px] font-bold text-[#0f1419] transition-colors hover:bg-[#eff3f4]"
-                        >
-                            Agent <span className="text-[#1d9bf0]">Login</span>
-                        </Link>
+
+                        <div className="mt-8 pt-6 border-t border-[#D9C5B2]/30">
+                            <Link
+                                href="/login"
+                                onClick={() => setOpen(false)}
+                                className="flex w-full items-center justify-center rounded-xl bg-[#2A201A] px-4 py-3.5 text-[15px] font-bold text-white transition-all hover:bg-black active:scale-95 shadow-md"
+                            >
+                                Agent login
+                            </Link>
+                        </div>
                     </nav>
                 </SheetContent>
             </Sheet>

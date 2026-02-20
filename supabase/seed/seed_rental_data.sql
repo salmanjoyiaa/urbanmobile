@@ -9,13 +9,13 @@
 -- CLEANUP: Remove old seed properties & products so re-runs work
 -- =============================================
 DELETE FROM public.visit_requests WHERE property_id IN (
-  SELECT id FROM public.properties WHERE id LIKE 'r0%'
+  SELECT id FROM public.properties WHERE id::text LIKE 'r0%'
 );
 DELETE FROM public.buy_requests WHERE product_id IN (
-  SELECT id FROM public.products WHERE id LIKE 'p0%'
+  SELECT id FROM public.products WHERE id::text LIKE 'p0%'
 );
-DELETE FROM public.products WHERE id LIKE 'p0%';
-DELETE FROM public.properties WHERE id LIKE 'r0%';
+DELETE FROM public.products WHERE id::text LIKE 'p0%';
+DELETE FROM public.properties WHERE id::text LIKE 'r0%';
 
 -- =============================================
 -- RENTAL PROPERTIES (UUIDs: r0xxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx)

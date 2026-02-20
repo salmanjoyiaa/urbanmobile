@@ -7,6 +7,7 @@ import {
   Users,
   ScrollText,
   Wrench,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -33,6 +34,7 @@ export const adminNav: NavItem[] = [
   { title: "Visit Requests", href: "/admin/visits", icon: Calendar },
   { title: "Buy Requests", href: "/admin/leads", icon: ShoppingBag },
   { title: "Maintenance", href: "/admin/maintenance", icon: Wrench },
+  { title: "Message Logs", href: "/admin/logs", icon: MessageSquare },
   { title: "Audit Log", href: "/admin/audit-log", icon: ScrollText },
 ];
 
