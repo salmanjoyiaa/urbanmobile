@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Star
 } from "lucide-react";
+import { FeaturedSliders } from "@/components/home/featured-sliders";
 
 export default function HomePage() {
   return (
@@ -101,6 +102,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Featured Sliders Section */}
+      <FeaturedSliders />
 
       {/* Trust & Stats Section */}
       <section className="bg-[#0f1419] pb-20 pt-10 text-white">
