@@ -105,16 +105,16 @@ export function PropertyFilters({ initialValues }: PropertyFiltersProps) {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[13px] font-bold text-[#0f1419]">Purpose</label>
+          <label className="text-[13px] font-bold text-[#0f1419]">Rental Type</label>
           <Select
             defaultValue={initialValues.purpose || "all"}
             onValueChange={(value) => applyFilter({ purpose: value })}
           >
             <SelectTrigger className="rounded-lg border-[#cfd9de]">
-              <SelectValue placeholder="All" />
+              <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">All types</SelectItem>
               {LISTING_PURPOSES.map((item) => (
                 <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
               ))}

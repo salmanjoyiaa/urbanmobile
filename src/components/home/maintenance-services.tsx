@@ -1,4 +1,4 @@
-import { Wrench, ShieldCheck, Zap, Droplets, PaintRoller, ArrowRight } from "lucide-react";
+import { Wrench, ShieldCheck, Zap, Droplets, PaintRoller, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
 
 const services = [
@@ -37,6 +37,16 @@ export function MaintenanceServices() {
                         <p className="text-[17px] text-[#6B5A4E] leading-relaxed">
                             We provide end-to-end maintenance services managed by certified professionals. Keep your property in pristine condition effortlessly.
                         </p>
+                        <div className="mt-4 flex flex-wrap items-center gap-4">
+                            <div className="inline-flex items-center gap-2 rounded-full bg-[#2A201A] px-4 py-2">
+                                <Clock className="w-4 h-4 text-red-400" />
+                                <span className="text-[13px] font-bold text-white">Emergency: 1-Hour Response</span>
+                            </div>
+                            <div className="inline-flex items-center gap-2 rounded-full bg-[#D9C5B2]/30 px-4 py-2">
+                                <Clock className="w-4 h-4 text-[#6B5A4E]" />
+                                <span className="text-[13px] font-bold text-[#2A201A]">Standard: 24-Hour Service</span>
+                            </div>
+                        </div>
                     </div>
                     <Link href="/maintenance">
                         <button className="h-12 border-2 border-[#2A201A] text-[#2A201A] px-8 rounded-xl font-bold flex items-center gap-2 hover:bg-[#2A201A] hover:text-white transition-all group">

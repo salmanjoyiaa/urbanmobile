@@ -21,7 +21,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             <Link href="/" className="text-[15px] font-bold tracking-wide hover:opacity-70 transition-opacity">Home</Link>
             <Link href="/properties" className="text-[15px] font-bold tracking-wide hover:opacity-70 transition-opacity">Properties</Link>
             <Link href="/products" className="text-[15px] font-bold tracking-wide hover:opacity-70 transition-opacity">Products</Link>
-            <Link href="#" className="text-[15px] font-bold tracking-wide hover:opacity-70 transition-opacity">Maintenance</Link>
+            <Link href="/maintenance" className="text-[15px] font-bold tracking-wide hover:opacity-70 transition-opacity">Maintenance</Link>
           </nav>
 
           {/* Action Buttons */}

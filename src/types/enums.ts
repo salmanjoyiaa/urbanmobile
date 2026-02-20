@@ -10,9 +10,9 @@ export type PropertyType =
   | "studio"
   | "duplex";
 
-export type ListingStatus = "draft" | "active" | "sold" | "rented" | "archived";
+export type ListingStatus = "draft" | "active" | "rented" | "archived";
 
-export type ListingPurpose = "sale" | "rent";
+export type ListingPurpose = "short_term" | "long_term" | "contract";
 
 export type ProductCondition = "new" | "like_new" | "good" | "fair";
 

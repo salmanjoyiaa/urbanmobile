@@ -58,7 +58,7 @@ export const propertySchema = z.object({
     .min(10, "Description must be at least 10 characters")
     .max(5000, "Description must not exceed 5000 characters"),
   type: z.enum(["apartment", "villa", "office", "land", "studio", "duplex"]),
-  purpose: z.enum(["sale", "rent"]),
+  purpose: z.enum(["short_term", "long_term", "contract"]),
   price: z
     .coerce
     .number()

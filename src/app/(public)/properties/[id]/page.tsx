@@ -108,8 +108,12 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             <div className="mt-4 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-[#cfd9de] px-3 py-1 text-[13px] font-medium capitalize text-[#0f1419]">{property.type}</span>
-                <span className="rounded-full border border-[#cfd9de] px-3 py-1 text-[13px] font-medium capitalize text-[#0f1419]">{property.purpose}</span>
-                <span className="rounded-full bg-[#1d9bf0] px-3 py-1 text-[13px] font-bold text-white">{formatSAR(property.price)}</span>
+                <span className="rounded-full border border-[#cfd9de] px-3 py-1 text-[13px] font-medium text-[#0f1419]">
+                  {property.purpose === "short_term" ? "Short-term" : property.purpose === "long_term" ? "Long-term" : property.purpose === "contract" ? "Contract" : property.purpose}
+                </span>
+                <span className="rounded-full bg-[#1d9bf0] px-3 py-1 text-[13px] font-bold text-white">
+                  {formatSAR(property.price)}{property.purpose === "short_term" ? "/night" : property.purpose === "long_term" ? "/mo" : property.purpose === "contract" ? "/yr" : ""}
+                </span>
               </div>
 
               <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#536471]">

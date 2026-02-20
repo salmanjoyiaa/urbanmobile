@@ -29,8 +29,9 @@ export const PROPERTY_TYPES = [
 ] as const;
 
 export const LISTING_PURPOSES = [
-  { value: "sale", label: "For Sale" },
-  { value: "rent", label: "For Rent" },
+  { value: "short_term", label: "Short-term" },
+  { value: "long_term", label: "Long-term" },
+  { value: "contract", label: "Contract" },
 ] as const;
 
 export const PRODUCT_CATEGORIES = [

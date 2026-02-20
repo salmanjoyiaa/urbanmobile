@@ -21,7 +21,7 @@ export default function HomePage() {
             <Link href="/" className="text-[15px] font-bold tracking-wide hover:opacity-70 transition-opacity">Home</Link>
             <Link href="/properties" className="text-[15px] font-bold tracking-wide hover:opacity-70 transition-opacity">Properties</Link>
             <Link href="/products" className="text-[15px] font-bold tracking-wide hover:opacity-70 transition-opacity">Products</Link>
-            <Link href="#" className="text-[15px] font-bold tracking-wide hover:opacity-70 transition-opacity">Maintenance</Link>
+            <Link href="/maintenance" className="text-[15px] font-bold tracking-wide hover:opacity-70 transition-opacity">Maintenance</Link>
           </nav>
 
           {/* Action Buttons */}
@@ -42,14 +42,20 @@ export default function HomePage() {
           {/* Left Text */}
           <div className="w-full lg:w-1/2 z-10 pt-10 pb-4 lg:pb-8">
             <h1 className="text-[56px] md:text-[72px] lg:text-[88px] font-extrabold tracking-[-0.03em] leading-[1.05] mb-6">
-              Find Your<br />Dream Home
+              Affordable<br />Rentals, Your Way
             </h1>
-            <p className="text-[#6B5A4E] max-w-md text-[17px] leading-relaxed mb-10 font-medium">
-              Explore our curated selection of exquisite properties meticulously tailored to your unique dream home vision
+            <p className="text-[#6B5A4E] max-w-md text-[17px] leading-relaxed mb-6 font-medium">
+              Short-term, long-term, or contract — find properties, products, and maintenance services that fit your budget and lifestyle.
             </p>
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#2A201A]/10 px-4 py-2 mb-8">
+              <span className="text-[13px] font-bold text-[#2A201A] tracking-wide">
+                1-Hour Emergency Response &bull; 24-Hour Standard Service
+              </span>
+            </div>
+            <br />
             <Link href="/properties">
               <button className="h-14 bg-[#2A201A] text-white px-10 rounded-xl text-[16px] font-bold transition-all hover:bg-black hover:scale-[1.02]">
-                Rent/Buy
+                Browse Rentals
               </button>
             </Link>
           </div>

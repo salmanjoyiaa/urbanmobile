@@ -66,7 +66,7 @@ export async function FeaturedSliders() {
       title: p.title,
       image: p.images[0],
       href: `/properties/${p.id}`,
-      badge: p.purpose === "rent" ? "For Rent" : "For Sale",
+      badge: p.purpose === "short_term" ? "Short-term" : p.purpose === "long_term" ? "Long-term" : p.purpose === "contract" ? "Contract" : "Rental",
       price: formatPrice(p.price),
     }));
 
@@ -92,10 +92,10 @@ export async function FeaturedSliders() {
           <div className="mb-8 flex items-end justify-between">
             <div>
               <p className="text-[12px] font-semibold uppercase tracking-widest text-[#B69780] mb-2">
-                Curated Selection
+                Affordable Rentals
               </p>
               <h2 className="text-[28px] font-extrabold tracking-tight text-[#2A201A] sm:text-[40px] leading-[1.1]">
-                Featured Properties
+                Featured Rentals
               </h2>
             </div>
             <Link
@@ -123,7 +123,7 @@ export async function FeaturedSliders() {
           <div className="mb-8 flex items-end justify-between">
             <div>
               <p className="text-[12px] font-semibold uppercase tracking-widest text-[#B69780] mb-2">
-                Marketplace
+                Affordable Essentials
               </p>
               <h2 className="text-[28px] font-extrabold tracking-tight text-[#2A201A] sm:text-[40px] leading-[1.1]">
                 Featured Products

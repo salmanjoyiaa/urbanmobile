@@ -83,8 +83,8 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   return (
     <div className="container mx-auto space-y-6 px-4 py-8">
       <div>
-        <h1 className="text-[24px] font-extrabold text-[#2A201A]">Property Listings</h1>
-        <p className="mt-1 text-[15px] text-[#6B5A4E]">Find homes and commercial spaces across Saudi Arabia.</p>
+        <h1 className="text-[24px] font-extrabold text-[#2A201A]">Rental Listings</h1>
+        <p className="mt-1 text-[15px] text-[#6B5A4E]">Find affordable homes and spaces for rent across Saudi Arabia.</p>
       </div>
 
       <PropertyFilters initialValues={searchParams} />

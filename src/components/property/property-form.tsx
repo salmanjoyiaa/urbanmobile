@@ -38,7 +38,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [title, setTitle] = useState(initialData?.title || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [type, setType] = useState(initialData?.type || "apartment");
-  const [purpose, setPurpose] = useState(initialData?.purpose || "sale");
+  const [purpose, setPurpose] = useState(initialData?.purpose || "long_term");
   const [price, setPrice] = useState(String(initialData?.price || ""));
 
   const [city, setCity] = useState(initialData?.city || SAUDI_CITIES[0]);
@@ -169,7 +169,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Purpose</Label>
+              <Label>Rental Type</Label>
               <Select value={purpose} onValueChange={(value) => setPurpose(value as typeof purpose)} disabled={isSubmitting}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>

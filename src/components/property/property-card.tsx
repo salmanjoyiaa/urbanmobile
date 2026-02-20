@@ -14,8 +14,22 @@ type Property = {
   images: string[] | null;
 };
 
+const RENTAL_LABELS: Record<string, string> = {
+  short_term: "Short-term",
+  long_term: "Long-term",
+  contract: "Contract",
+};
+
+const PRICE_SUFFIX: Record<string, string> = {
+  short_term: "/night",
+  long_term: "/mo",
+  contract: "/yr",
+};
+
 export function PropertyCard({ property }: { property: Property }) {
   const imgSrc = property.images?.[0] || null;
+  const rentalLabel = RENTAL_LABELS[property.purpose] || property.purpose;
+  const priceSuffix = PRICE_SUFFIX[property.purpose] || "";
 
   return (
     <Link href={`/properties/${property.id}`}>
@@ -34,8 +48,8 @@ export function PropertyCard({ property }: { property: Property }) {
               <Package className="h-12 w-12 text-[#cfd9de]" />
             </div>
           )}
-          <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-[12px] font-bold capitalize text-[#0f1419] backdrop-blur-sm">
-            {property.purpose}
+          <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-[12px] font-bold text-[#0f1419] backdrop-blur-sm">
+            {rentalLabel}
           </div>
         </div>
         <div className="p-4">
@@ -43,7 +57,7 @@ export function PropertyCard({ property }: { property: Property }) {
             {property.title}
           </h3>
           <p className="mt-0.5 text-[15px] font-bold text-[#1d9bf0]">
-            SAR {property.price.toLocaleString()}
+            SAR {property.price.toLocaleString()}<span className="text-[12px] font-medium text-[#536471]">{priceSuffix}</span>
           </p>
           <div className="mt-2 flex items-center gap-3 text-[13px] text-[#536471]">
             <span className="flex items-center gap-1">
