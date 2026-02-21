@@ -56,7 +56,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       `
       id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time,
       properties:property_id (
-        id, title,
+        id, title, location_url,
         agents:agent_id (
           profile_id,
           profiles:profile_id (full_name, phone, email)
@@ -74,6 +74,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         visit_time: string;
         properties: {
           title: string;
+          location_url: string | null;
           agents: {
             profile_id: string;
             profiles: {
@@ -93,6 +94,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       propertyTitle: visitDetails.properties.title,
       visitDate: visitDetails.visit_date,
       visitTime: visitDetails.visit_time,
+      locationUrl: visitDetails.properties.location_url,
     };
 
     if (parsed.data.status === "confirmed") {

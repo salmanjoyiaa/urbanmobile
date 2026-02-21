@@ -127,7 +127,6 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 <p><span className="font-bold text-[#0f1419]">Bathrooms:</span> <span className="text-[#536471]">{property.bathrooms ?? "—"}</span></p>
                 <p><span className="font-bold text-[#0f1419]">Area:</span> <span className="text-[#536471]">{property.area_sqm ? `${property.area_sqm} m²` : "—"}</span></p>
                 <p><span className="font-bold text-[#0f1419]">Year built:</span> <span className="text-[#536471]">{property.year_built ?? "—"}</span></p>
-                <p><span className="font-bold text-[#0f1419]">Address:</span> <span className="text-[#536471]">{property.address || "—"}</span></p>
                 <p><span className="font-bold text-[#0f1419]">Listed:</span> <span className="text-[#536471]">{formatDate(property.created_at)}</span></p>
               </div>
 

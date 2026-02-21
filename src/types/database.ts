@@ -59,6 +59,17 @@ export interface Property {
   images: string[];
   featured: boolean;
   views_count: number;
+  property_ref: string | null;
+  layout: string | null;
+  building_features: string[];
+  apartment_features: string[];
+  location_url: string | null;
+  rental_period: string | null;
+  office_fee: string | null;
+  water_bill_included: string | null;
+  security_deposit: string | null;
+  nearby_places: string[];
+  drive_link: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -180,7 +191,7 @@ export interface Database {
       };
       properties: {
         Row: Property;
-        Insert: Omit<Property, "id" | "created_at" | "updated_at" | "views_count" | "featured"> & { id?: string; featured?: boolean };
+        Insert: Omit<Property, "id" | "created_at" | "updated_at" | "views_count" | "featured" | "building_features" | "apartment_features" | "nearby_places"> & { id?: string; featured?: boolean; building_features?: string[]; apartment_features?: string[]; nearby_places?: string[] };
         Update: Partial<Omit<Property, "id" | "created_at">>;
       };
       products: {

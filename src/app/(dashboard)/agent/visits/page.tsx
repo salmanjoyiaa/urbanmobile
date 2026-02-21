@@ -1,10 +1,8 @@
-import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/dashboard/data-table";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, formatTime } from "@/lib/format";
 import { redirect } from "next/navigation";
+import { AgentVisitsClient } from "@/components/visit/agent-visits-client";
 
-type VisitRow = {
+export type VisitRow = {
   id: string;
   visitor_name: string;
   visitor_email: string;
@@ -59,28 +57,10 @@ export default async function AgentVisitsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-navy">Visit Requests</h1>
-        <p className="text-sm text-muted-foreground">Read-only queue for visits on your properties.</p>
+        <p className="text-sm text-muted-foreground">Manage your confirmed and completed property visits.</p>
       </div>
 
-      <DataTable
-        rows={rows}
-        columns={[
-          { key: "property", title: "Property", render: (row) => row.properties?.title || "—" },
-          { key: "visitor_name", title: "Visitor" },
-          { key: "visitor_email", title: "Email" },
-          { key: "visitor_phone", title: "Phone" },
-          {
-            key: "schedule",
-            title: "Schedule",
-            render: (row) => `${formatDate(row.visit_date)} · ${formatTime(row.visit_time)}`,
-          },
-          {
-            key: "status",
-            title: "Status",
-            render: (row) => <Badge className="capitalize">{row.status}</Badge>,
-          },
-        ]}
-      />
+      <AgentVisitsClient rows={rows} />
     </div>
   );
 }

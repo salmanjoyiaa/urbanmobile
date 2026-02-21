@@ -76,3 +76,65 @@ export const AMENITIES = [
   "Furnished",
   "Pet Friendly",
 ] as const;
+
+export const BUILDING_FEATURES = [
+  "Family Building",
+  "New Family Building",
+  "Elevator",
+  "Street Parking",
+  "Private Parking",
+  "Parking (First come first serve)",
+  "Cameras External",
+  "Swimming Pool",
+] as const;
+
+export const APARTMENT_FEATURES = [
+  "Two enterences",
+  "Internal",
+  "External",
+  "Corner External",
+  "Hot Water",
+  "AC installed",
+  "Ground floor",
+  "1st Floor",
+  "2nd Floor",
+  "3rd Floor",
+  "4th Floor",
+  "Roof top",
+  "Terrace",
+  "Balcony",
+] as const;
+
+export const RENTAL_PERIODS = [
+  "Monthly",
+  "3 Months",
+  "6 Months",
+  "12 Months",
+] as const;
+
+export const FEE_OPTIONS = [
+  "500",
+  "1000",
+  "2000",
+] as const;
+
+export const WATER_OPTIONS = [
+  "Yes",
+  "No",
+  "Maybe",
+] as const;
+
+export const SECURITY_DEPOSITS = [
+  "500",
+  "1000",
+  "1500",
+] as const;
+
+export const NEARBY_PLACES = [
+  "School",
+  "Hospital",
+  "Mosque",
+  "Supermarket",
+  "Park",
+  "Gym",
+] as const;

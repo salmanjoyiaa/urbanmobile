@@ -3,8 +3,10 @@ export function visitConfirmedVisitor(params: {
   propertyTitle: string;
   visitDate: string;
   visitTime: string;
+  locationUrl?: string | null;
 }) {
-  return `Hello ${params.visitorName}, your visit for "${params.propertyTitle}" is confirmed on ${params.visitDate} at ${params.visitTime}.`;
+  const mapText = params.locationUrl ? ` Property Map: ${params.locationUrl}` : "";
+  return `Hello ${params.visitorName}, your visit for "${params.propertyTitle}" is confirmed on ${params.visitDate} at ${params.visitTime}.${mapText}`;
 }
 
 export function visitConfirmedAgent(params: {
@@ -12,8 +14,10 @@ export function visitConfirmedAgent(params: {
   propertyTitle: string;
   visitDate: string;
   visitTime: string;
+  locationUrl?: string | null;
 }) {
-  return `Hello ${params.agentName}, a visit for "${params.propertyTitle}" is confirmed on ${params.visitDate} at ${params.visitTime}.`;
+  const mapText = params.locationUrl ? ` Property Map: ${params.locationUrl}` : "";
+  return `Hello ${params.agentName}, a visit for "${params.propertyTitle}" is confirmed on ${params.visitDate} at ${params.visitTime}.${mapText}`;
 }
 
 export function visitCancelled(params: {

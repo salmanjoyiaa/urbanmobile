@@ -8,7 +8,10 @@ export type PropertyType =
   | "office"
   | "land"
   | "studio"
-  | "duplex";
+  | "duplex"
+  | "commercial_space"
+  | "storage_space"
+  | "other";
 
 export type ListingStatus = "draft" | "active" | "rented" | "archived";
 

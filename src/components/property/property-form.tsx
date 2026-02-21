@@ -14,7 +14,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AMENITIES, LISTING_PURPOSES, PROPERTY_TYPES, SAUDI_CITIES } from "@/lib/constants";
+import {
+  AMENITIES,
+  LISTING_PURPOSES,
+  PROPERTY_TYPES,
+  SAUDI_CITIES,
+  BUILDING_FEATURES,
+  APARTMENT_FEATURES,
+  RENTAL_PERIODS,
+  FEE_OPTIONS,
+  WATER_OPTIONS,
+  SECURITY_DEPOSITS,
+  NEARBY_PLACES,
+} from "@/lib/constants";
 import type { Property } from "@/types/database";
 import { ImageUploader } from "@/components/dashboard/image-uploader";
 import { PropertyMap } from "@/components/property/property-map";
@@ -54,13 +66,29 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [amenities, setAmenities] = useState<string[]>(initialData?.amenities || []);
   const [images, setImages] = useState<string[]>(initialData?.images || []);
 
-  const toggleAmenity = (value: string) => {
-    setAmenities((current) =>
+  const [propertyRef, setPropertyRef] = useState(initialData?.property_ref || "");
+  const [layout, setLayout] = useState(initialData?.layout || "");
+  const [buildingFeatures, setBuildingFeatures] = useState<string[]>(initialData?.building_features || []);
+  const [apartmentFeatures, setApartmentFeatures] = useState<string[]>(initialData?.apartment_features || []);
+  const [locationUrl, setLocationUrl] = useState(initialData?.location_url || "");
+  const [rentalPeriod, setRentalPeriod] = useState(initialData?.rental_period || "");
+  const [officeFee, setOfficeFee] = useState(initialData?.office_fee || "");
+  const [waterBillIncluded, setWaterBillIncluded] = useState(initialData?.water_bill_included || "");
+  const [securityDeposit, setSecurityDeposit] = useState(initialData?.security_deposit || "");
+  const [nearbyPlaces, setNearbyPlaces] = useState<string[]>(initialData?.nearby_places || []);
+  const [driveLink, setDriveLink] = useState(initialData?.drive_link || "");
+
+  const toggleArrayItem = (
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
+    value: string
+  ) => {
+    setter((current) =>
       current.includes(value)
         ? current.filter((item) => item !== value)
         : [...current, value]
     );
   };
+  const toggleAmenity = (value: string) => toggleArrayItem(setAmenities, value);
 
   const submit = async () => {
     setSubmitting(true);
@@ -82,6 +110,17 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         year_built: yearBuilt ? Number(yearBuilt) : undefined,
         amenities,
         images,
+        property_ref: propertyRef || undefined,
+        layout: layout || undefined,
+        building_features: buildingFeatures,
+        apartment_features: apartmentFeatures,
+        location_url: locationUrl || undefined,
+        rental_period: rentalPeriod || undefined,
+        office_fee: officeFee || undefined,
+        water_bill_included: waterBillIncluded || undefined,
+        security_deposit: securityDeposit || undefined,
+        nearby_places: nearbyPlaces,
+        drive_link: driveLink || undefined,
       };
 
       const defaultEndpoint = mode === "create" ? "/api/agent/properties" : `/api/agent/properties/${initialData?.id}`;
@@ -180,6 +219,68 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
               </Select>
             </div>
             <div className="space-y-2">
+              <Label>Rental Period</Label>
+              <Select value={rentalPeriod} onValueChange={setRentalPeriod} disabled={isSubmitting}>
+                <SelectTrigger><SelectValue placeholder="Select period" /></SelectTrigger>
+                <SelectContent>
+                  {RENTAL_PERIODS.map((item) => (
+                    <SelectItem key={item} value={item}>{item}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Property ID / Ref</Label>
+              <Input
+                value={propertyRef}
+                onChange={(event) => setPropertyRef(event.target.value)}
+                disabled={isSubmitting}
+                placeholder="PROJ-001"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Layout (e.g. 2BR/2BH/1LV/1DR)</Label>
+              <Input
+                value={layout}
+                onChange={(event) => setLayout(event.target.value)}
+                disabled={isSubmitting}
+                placeholder="2BR/2BH/1LV/1DR"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Office Fee</Label>
+              <Select value={officeFee} onValueChange={setOfficeFee} disabled={isSubmitting}>
+                <SelectTrigger><SelectValue placeholder="Select fee" /></SelectTrigger>
+                <SelectContent>
+                  {FEE_OPTIONS.map((item) => (
+                    <SelectItem key={item} value={item}>{item}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Water Bill Included</Label>
+              <Select value={waterBillIncluded} onValueChange={setWaterBillIncluded} disabled={isSubmitting}>
+                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent>
+                  {WATER_OPTIONS.map((item) => (
+                    <SelectItem key={item} value={item}>{item}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Security Deposit</Label>
+              <Select value={securityDeposit} onValueChange={setSecurityDeposit} disabled={isSubmitting}>
+                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent>
+                  {SECURITY_DEPOSITS.map((item) => (
+                    <SelectItem key={item} value={item}>{item}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label>Price (SAR)</Label>
               <Input
                 type="number"
@@ -223,6 +324,17 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                   disabled={isSubmitting}
                   placeholder="Street name and house number"
                 />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Location (Google Map Link)</Label>
+                <Input
+                  value={locationUrl}
+                  onChange={(event) => setLocationUrl(event.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="https://maps.google.com/?q=..."
+                  type="url"
+                />
+                <p className="text-xs text-muted-foreground mt-1">This link is masked from the public and only sent upon confirmed visits.</p>
               </div>
             </div>
 
@@ -301,11 +413,83 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                 ))}
               </div>
             </div>
+
+            <div>
+              <Label>Building Features</Label>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {BUILDING_FEATURES.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => toggleArrayItem(setBuildingFeatures, item)}
+                    disabled={isSubmitting}
+                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors ${buildingFeatures.includes(item)
+                      ? "border-primary bg-primary/10"
+                      : "hover:bg-muted"
+                      } disabled:opacity-50`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label>Apartment Features</Label>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {APARTMENT_FEATURES.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => toggleArrayItem(setApartmentFeatures, item)}
+                    disabled={isSubmitting}
+                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors ${apartmentFeatures.includes(item)
+                      ? "border-primary bg-primary/10"
+                      : "hover:bg-muted"
+                      } disabled:opacity-50`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label>Nearby Places</Label>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {NEARBY_PLACES.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => toggleArrayItem(setNearbyPlaces, item)}
+                    disabled={isSubmitting}
+                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors ${nearbyPlaces.includes(item)
+                      ? "border-primary bg-primary/10"
+                      : "hover:bg-muted"
+                      } disabled:opacity-50`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
         {step === 4 && (
-          <ImageUploader bucket="property-images" values={images} onChange={setImages} />
+          <div className="space-y-6">
+            <ImageUploader bucket="property-images" values={images} onChange={setImages} />
+            <div className="space-y-2">
+              <Label>Drive Link (Additional Photos)</Label>
+              <Input
+                value={driveLink}
+                onChange={(event) => setDriveLink(event.target.value)}
+                disabled={isSubmitting}
+                placeholder="https://drive.google.com/..."
+                type="url"
+              />
+            </div>
+          </div>
         )}
 
         <div className="flex gap-2">

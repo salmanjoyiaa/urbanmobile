@@ -45,7 +45,12 @@ export function visitConfirmedCustomerEmail(params: {
   propertyTitle: string;
   visitDate: string;
   visitTime: string;
+  locationUrl?: string | null;
 }) {
+  const mapHtml = params.locationUrl
+    ? detail("Property Map", `<a href="${params.locationUrl}" style="color:${BRAND_COLOR}">${params.locationUrl}</a>`)
+    : "";
+
   return {
     subject: `Visit Confirmed — ${params.propertyTitle}`,
     html: layout(`
@@ -56,6 +61,7 @@ export function visitConfirmedCustomerEmail(params: {
       ${detail("Property", params.propertyTitle)}
       ${detail("Date", params.visitDate)}
       ${detail("Time", params.visitTime)}
+      ${mapHtml}
       ${divider()}
       ${paragraph("Please arrive on time. If you need to reschedule, contact us.")}
     `),
@@ -68,7 +74,12 @@ export function visitConfirmedAgentEmail(params: {
   visitorName: string;
   visitDate: string;
   visitTime: string;
+  locationUrl?: string | null;
 }) {
+  const mapHtml = params.locationUrl
+    ? detail("Property Map", `<a href="${params.locationUrl}" style="color:${BRAND_COLOR}">${params.locationUrl}</a>`)
+    : "";
+
   return {
     subject: `Visit Confirmed — ${params.propertyTitle}`,
     html: layout(`
@@ -80,6 +91,7 @@ export function visitConfirmedAgentEmail(params: {
       ${detail("Visitor", params.visitorName)}
       ${detail("Date", params.visitDate)}
       ${detail("Time", params.visitTime)}
+      ${mapHtml}
       ${divider()}
       ${paragraph("Please ensure the property is ready for the scheduled visit.")}
     `),

@@ -57,7 +57,7 @@ export const propertySchema = z.object({
     .string()
     .min(10, "Description must be at least 10 characters")
     .max(5000, "Description must not exceed 5000 characters"),
-  type: z.enum(["apartment", "villa", "office", "land", "studio", "duplex"]),
+  type: z.enum(["apartment", "villa", "office", "land", "studio", "duplex", "commercial_space", "storage_space", "other"]),
   purpose: z.enum(["short_term", "long_term", "contract"]),
   price: z
     .coerce
@@ -94,6 +94,17 @@ export const propertySchema = z.object({
   year_built: z.coerce.number().int().min(1900).max(2100).optional(),
   amenities: z.array(z.string().max(100)).max(50).default([]),
   images: z.array(z.string().url()).max(20).default([]),
+  property_ref: z.string().max(100).optional().or(z.literal("")),
+  layout: z.string().max(100).optional().or(z.literal("")),
+  building_features: z.array(z.string()).default([]),
+  apartment_features: z.array(z.string()).default([]),
+  location_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  rental_period: z.string().max(50).optional().or(z.literal("")),
+  office_fee: z.string().max(50).optional().or(z.literal("")),
+  water_bill_included: z.string().max(50).optional().or(z.literal("")),
+  security_deposit: z.string().max(50).optional().or(z.literal("")),
+  nearby_places: z.array(z.string()).default([]),
+  drive_link: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });
 
 export const productSchema = z.object({
