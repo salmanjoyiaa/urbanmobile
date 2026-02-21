@@ -15,6 +15,9 @@ type VisitRow = {
     visit_date: string;
     visit_time: string;
     status: string;
+    visiting_agent: {
+        full_name: string;
+    } | null;
     properties: {
         title: string;
     } | null;
@@ -73,12 +76,17 @@ export function AgentVisitsClient({ rows }: { rows: VisitRow[] }) {
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <CardTitle className="text-lg text-primary">{visit.properties?.title || "Unknown Property"}</CardTitle>
-                                            <CardDescription className="mt-1">
-                                                {formatTime(visit.visit_time)}
+                                            <CardDescription className="mt-1 flex flex-col gap-1">
+                                                <span>{formatTime(visit.visit_time)}</span>
+                                                {visit.visiting_agent && (
+                                                    <span className="text-secondary-foreground flex items-center gap-1 font-medium bg-secondary w-max px-2 py-0.5 rounded text-xs">
+                                                        Assigned: {visit.visiting_agent.full_name}
+                                                    </span>
+                                                )}
                                             </CardDescription>
                                         </div>
                                         <Badge variant={visit.status === "confirmed" ? "default" : visit.status === "cancelled" ? "destructive" : "secondary"} className="capitalize">
-                                            {visit.status}
+                                            {visit.status === "assigned" ? "Dispatched" : visit.status}
                                         </Badge>
                                     </div>
                                 </CardHeader>

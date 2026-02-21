@@ -98,6 +98,65 @@ export function visitConfirmedAgentEmail(params: {
   };
 }
 
+export function visitAssignedVisitingAgentEmail(params: {
+  visitingAgentName: string;
+  propertyTitle: string;
+  visitDate: string;
+  visitTime: string;
+  visitorName: string;
+  visitorPhone: string;
+  ownerName: string;
+  ownerPhone: string;
+  locationUrl?: string | null;
+}) {
+  const mapHtml = params.locationUrl
+    ? detail("Property Map", `<a href="${params.locationUrl}" style="color:${BRAND_COLOR}">${params.locationUrl}</a>`)
+    : "";
+
+  return {
+    subject: `New Visit Assigned — ${params.propertyTitle}`,
+    html: layout(`
+      ${heading("You have a new visit assignment")}
+      ${paragraph(`Hello ${params.visitingAgentName},`)}
+      ${paragraph("The Admin has assigned you to a new property tour.")}
+      ${divider()}
+      ${detail("Property", params.propertyTitle)}
+      ${detail("Customer", `${params.visitorName} (${params.visitorPhone})`)}
+      ${detail("Property Agent", `${params.ownerName} (${params.ownerPhone})`)}
+      ${detail("Date", params.visitDate)}
+      ${detail("Time", params.visitTime)}
+      ${mapHtml}
+      ${divider()}
+      ${paragraph("Please contact the customer to confirm their arrival.")}
+    `),
+  };
+}
+
+export function visitAssignedPropertyAgentEmail(params: {
+  ownerName: string;
+  propertyTitle: string;
+  visitDate: string;
+  visitTime: string;
+  visitorName: string;
+  visitingAgentName: string;
+}) {
+  return {
+    subject: `Visit Confirmed & Assigned — ${params.propertyTitle}`,
+    html: layout(`
+      ${heading("Your property has a confirmed visit")}
+      ${paragraph(`Hello ${params.ownerName},`)}
+      ${paragraph("A visit request for your property has been confirmed and a visiting agent is dispatched.")}
+      ${divider()}
+      ${detail("Property", params.propertyTitle)}
+      ${detail("Customer", params.visitorName)}
+      ${detail("Assigned Visiting Team", params.visitingAgentName)}
+      ${detail("Date", params.visitDate)}
+      ${detail("Time", params.visitTime)}
+      ${divider()}
+    `),
+  };
+}
+
 export function visitCancelledCustomerEmail(params: {
   visitorName: string;
   propertyTitle: string;

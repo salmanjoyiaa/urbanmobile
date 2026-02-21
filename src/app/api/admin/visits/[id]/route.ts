@@ -7,16 +7,21 @@ import {
   visitCancelled,
   visitConfirmedAgent,
   visitConfirmedVisitor,
+  visitAssignedVisitingAgent,
+  visitAssignedPropertyAgent,
 } from "@/lib/whatsapp-templates";
 import {
   visitConfirmedCustomerEmail,
   visitConfirmedAgentEmail,
   visitCancelledCustomerEmail,
+  visitAssignedVisitingAgentEmail,
+  visitAssignedPropertyAgentEmail,
 } from "@/lib/email-templates";
 
 const payloadSchema = z.object({
-  status: z.enum(["confirmed", "cancelled", "completed"]),
+  status: z.enum(["confirmed", "cancelled", "completed", "assigned"]),
   admin_notes: z.string().optional(),
+  visiting_agent_id: z.string().uuid().optional().nullable(),
 });
 
 export async function PATCH(request: Request, context: { params: { id: string } }) {
@@ -36,25 +41,33 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
   }
 
+  const payload: any = {
+    status: parsed.data.status,
+    admin_notes: parsed.data.admin_notes || null,
+    confirmed_by: admin.profile.id,
+    confirmed_at: new Date().toISOString(),
+  };
+
+  if (parsed.data.status === "assigned" && parsed.data.visiting_agent_id) {
+    payload.visiting_agent_id = parsed.data.visiting_agent_id;
+    payload.visiting_status = "view";
+  }
+
   const { error } = await admin.supabase
     .from("visit_requests")
-    .update({
-      status: parsed.data.status,
-      admin_notes: parsed.data.admin_notes || null,
-      confirmed_by: admin.profile.id,
-      confirmed_at: new Date().toISOString(),
-    } as never)
+    .update(payload as never)
     .eq("id", context.params.id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const { data: visitDetails } = (await admin.supabase
+  const { data: rawData } = await admin.supabase
     .from("visit_requests")
     .select(
       `
-      id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time,
+      id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, visiting_agent_id,
+      visiting_agent:visiting_agent_id (full_name, phone, email),
       properties:property_id (
         id, title, location_url,
         agents:agent_id (
@@ -65,27 +78,9 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     `
     )
     .eq("id", context.params.id)
-    .single()) as {
-      data: {
-        visitor_name: string;
-        visitor_email: string;
-        visitor_phone: string;
-        visit_date: string;
-        visit_time: string;
-        properties: {
-          title: string;
-          location_url: string | null;
-          agents: {
-            profile_id: string;
-            profiles: {
-              full_name: string;
-              phone: string | null;
-              email: string | null;
-            } | null;
-          } | null;
-        } | null;
-      } | null;
-    };
+    .single();
+
+  const visitDetails = rawData as any;
 
   const notifyJobs: Array<Promise<unknown>> = [];
   if (visitDetails?.properties) {
@@ -98,7 +93,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     };
 
     if (parsed.data.status === "confirmed") {
-      // WhatsApp + Email to visitor
+      // Standard confirmed logic
       notifyJobs.push(
         sendWhatsApp(visitDetails.visitor_phone, visitConfirmedVisitor(templateParams))
       );
@@ -107,7 +102,6 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
       }
 
-      // WhatsApp + Email to agent
       const agent = visitDetails.properties.agents;
       if (agent?.profiles?.phone) {
         notifyJobs.push(
@@ -129,6 +123,60 @@ export async function PATCH(request: Request, context: { params: { id: string } 
           visitTime: visitDetails.visit_time,
         });
         notifyJobs.push(sendEmail({ to: agent.profiles.email, ...agentEmailTpl }));
+      }
+    }
+
+    if (parsed.data.status === "assigned" && visitDetails.visiting_agent) {
+      const visitingAgentProfile = visitDetails.visiting_agent;
+      const ownerAgentProfile = visitDetails.properties.agents?.profiles;
+
+      const ownerName = ownerAgentProfile?.full_name || "Agent";
+      const ownerPhone = ownerAgentProfile?.phone || "N/A";
+
+      // 1. WhatsApp + Email to Customer
+      notifyJobs.push(
+        sendWhatsApp(visitDetails.visitor_phone, visitConfirmedVisitor(templateParams))
+      );
+      if (visitDetails.visitor_email) {
+        const emailTpl = visitConfirmedCustomerEmail(templateParams);
+        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
+      }
+
+      // 2. WhatsApp + Email to Visiting Agent
+      const visitingAgentParams = {
+        visitingAgentName: visitingAgentProfile.full_name,
+        propertyTitle: visitDetails.properties.title,
+        visitDate: visitDetails.visit_date,
+        visitTime: visitDetails.visit_time,
+        visitorName: visitDetails.visitor_name,
+        visitorPhone: visitDetails.visitor_phone,
+        ownerName: ownerName,
+        ownerPhone: ownerPhone,
+        locationUrl: visitDetails.properties.location_url,
+      };
+
+      if (visitingAgentProfile.phone) {
+        notifyJobs.push(sendWhatsApp(visitingAgentProfile.phone, visitAssignedVisitingAgent(visitingAgentParams)));
+      }
+      if (visitingAgentProfile.email) {
+        notifyJobs.push(sendEmail({ to: visitingAgentProfile.email, ...visitAssignedVisitingAgentEmail(visitingAgentParams) }));
+      }
+
+      // 3. WhatsApp + Email to Property Agent Owner
+      const propertyAgentParams = {
+        ownerName: ownerName,
+        propertyTitle: visitDetails.properties.title,
+        visitDate: visitDetails.visit_date,
+        visitTime: visitDetails.visit_time,
+        visitorName: visitDetails.visitor_name,
+        visitingAgentName: visitingAgentProfile.full_name,
+      };
+
+      if (ownerAgentProfile?.phone) {
+        notifyJobs.push(sendWhatsApp(ownerAgentProfile.phone, visitAssignedPropertyAgent(propertyAgentParams)));
+      }
+      if (ownerAgentProfile?.email) {
+        notifyJobs.push(sendEmail({ to: ownerAgentProfile.email, ...visitAssignedPropertyAgentEmail(propertyAgentParams) }));
       }
     }
 
@@ -166,6 +214,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     metadata: {
       status: parsed.data.status,
       admin_notes: parsed.data.admin_notes || null,
+      visiting_agent_id: parsed.data.visiting_agent_id || null,
     },
   });
 

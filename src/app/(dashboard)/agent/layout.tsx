@@ -13,5 +13,13 @@ export default async function AgentLayout({ children }: { children: React.ReactN
     redirect("/login");
   }
 
-  return <AgentShell>{children}</AgentShell>;
+  const { data } = await supabase
+    .from("agents")
+    .select("agent_type")
+    .eq("profile_id", user.id)
+    .single();
+
+  const agent = data as any;
+
+  return <AgentShell agentType={agent?.agent_type}>{children}</AgentShell>;
 }

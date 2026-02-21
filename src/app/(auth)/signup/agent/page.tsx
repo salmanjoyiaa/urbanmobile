@@ -39,6 +39,7 @@ export default function AgentSignupPage() {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<AgentSignupInput>({
     resolver: zodResolver(agentSignupSchema),
@@ -49,8 +50,11 @@ export default function AgentSignupPage() {
       phone: "",
       company_name: "",
       license_number: "",
+      agent_type: "property",
     },
   });
+
+  const agentTypeWatch = watch("agent_type");
 
   const handlePhoneChange = (value: string) => {
     // Only allow digits, limit length
@@ -120,6 +124,7 @@ export default function AgentSignupPage() {
     }
 
     const payloadForApi = {
+      agent_type: values.agent_type,
       company_name: values.company_name,
       license_number: values.license_number || null,
       document_url: documentPath || null,
@@ -153,6 +158,25 @@ export default function AgentSignupPage() {
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-2">
+            <Label htmlFor="agent_type">Agent Program</Label>
+            <Select
+              value={agentTypeWatch}
+              onValueChange={(val: any) => setValue("agent_type", val)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Agent Program" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="property">Property Agent (Listings & Rentals)</SelectItem>
+                <SelectItem value="visiting">Visiting Team (Tours & Deals)</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.agent_type && (
+              <p className="text-sm text-destructive">{errors.agent_type.message}</p>
+            )}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="full_name">Full name</Label>
             <Input id="full_name" {...register("full_name")} />

@@ -1,12 +1,14 @@
 import type {
   UserRole,
   AgentStatus,
+  AgentType,
   PropertyType,
   ListingStatus,
   ListingPurpose,
   ProductCondition,
   ProductCategory,
   VisitStatus,
+  VisitingStatus,
   LeadStatus,
   MaintenanceStatus,
 } from "./enums";
@@ -25,6 +27,7 @@ export interface Profile {
 export interface Agent {
   id: string;
   profile_id: string;
+  agent_type: AgentType;
   license_number: string | null;
   company_name: string | null;
   document_url: string | null;
@@ -99,6 +102,9 @@ export interface VisitRequest {
   visit_date: string;
   visit_time: string;
   status: VisitStatus;
+  visiting_agent_id: string | null;
+  customer_remarks: string | null;
+  visiting_status: VisitingStatus | null;
   admin_notes: string | null;
   confirmed_by: string | null;
   confirmed_at: string | null;
@@ -186,7 +192,7 @@ export interface Database {
       };
       agents: {
         Row: Agent;
-        Insert: Omit<Agent, "id" | "created_at" | "updated_at" | "reviewed_by" | "reviewed_at" | "rejection_reason"> & { id?: string };
+        Insert: Omit<Agent, "id" | "created_at" | "updated_at" | "reviewed_by" | "reviewed_at" | "rejection_reason" | "agent_type"> & { id?: string; agent_type?: AgentType };
         Update: Partial<Omit<Agent, "id" | "created_at">>;
       };
       properties: {
@@ -201,7 +207,7 @@ export interface Database {
       };
       visit_requests: {
         Row: VisitRequest;
-        Insert: Omit<VisitRequest, "id" | "created_at" | "updated_at" | "status" | "admin_notes" | "confirmed_by" | "confirmed_at"> & { id?: string; status?: VisitStatus };
+        Insert: Omit<VisitRequest, "id" | "created_at" | "updated_at" | "status" | "admin_notes" | "confirmed_by" | "confirmed_at" | "visiting_status"> & { id?: string; status?: VisitStatus; visiting_status?: VisitingStatus };
         Update: Partial<Omit<VisitRequest, "id" | "created_at">>;
       };
       buy_requests: {

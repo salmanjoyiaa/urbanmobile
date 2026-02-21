@@ -10,6 +10,9 @@ export type VisitRow = {
   visit_date: string;
   visit_time: string;
   status: string;
+  visiting_agent: {
+    full_name: string;
+  } | null;
   properties: {
     title: string;
   } | null;
@@ -43,6 +46,7 @@ export default async function AgentVisitsPage() {
       .select(
         `
       id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status,
+      visiting_agent:visiting_agent_id (full_name),
       properties:property_id (title)
     `
       )

@@ -12,6 +12,7 @@ const bodySchema = z.object({
   license_number: z.string().max(50).optional().nullable(),
   document_url: z.string().max(1000).optional().nullable(),
   bio: z.string().max(5000).optional().nullable(),
+  agent_type: z.enum(["property", "visiting"]).default("property"),
 });
 
 const redisEnabled =
@@ -106,6 +107,7 @@ export async function POST(request: NextRequest) {
       .from("agents")
       .upsert({
         profile_id: user.id,
+        agent_type: parsed.data.agent_type,
         company_name: parsed.data.company_name,
         license_number: parsed.data.license_number ?? null,
         document_url: parsed.data.document_url ?? null,

@@ -8,6 +8,7 @@ import {
   ScrollText,
   Wrench,
   MessageSquare,
+  MapPin,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,9 +27,15 @@ export const agentNav: NavItem[] = [
   { title: "Buy Requests", href: "/agent/leads", icon: ShoppingBag },
 ];
 
+export const visitingAgentNav: NavItem[] = [
+  { title: "Overview", href: "/agent", icon: LayoutDashboard },
+  { title: "My Assignments", href: "/agent/assignments", icon: MapPin },
+];
+
 export const adminNav: NavItem[] = [
   { title: "Overview", href: "/admin", icon: LayoutDashboard },
   { title: "Agents", href: "/admin/agents", icon: Users },
+  { title: "Visiting Team", href: "/admin/visiting-team", icon: MapPin },
   { title: "Properties", href: "/admin/properties", icon: Building2 },
   { title: "Products", href: "/admin/products", icon: Package },
   { title: "Visit Requests", href: "/admin/visits", icon: Calendar },

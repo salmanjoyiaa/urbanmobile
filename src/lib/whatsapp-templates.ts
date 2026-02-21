@@ -20,6 +20,36 @@ export function visitConfirmedAgent(params: {
   return `Hello ${params.agentName}, a visit for "${params.propertyTitle}" is confirmed on ${params.visitDate} at ${params.visitTime}.${mapText}`;
 }
 
+export function visitAssignedVisitingAgent(params: {
+  visitingAgentName: string;
+  propertyTitle: string;
+  visitDate: string;
+  visitTime: string;
+  visitorName: string;
+  visitorPhone: string;
+  ownerName: string;
+  ownerPhone: string;
+  locationUrl?: string | null;
+}) {
+  const mapText = params.locationUrl ? `\nMap: ${params.locationUrl}` : "";
+  return `Hello ${params.visitingAgentName}, you have been ASSIGNED a new visit for "${params.propertyTitle}" on ${params.visitDate} at ${params.visitTime}.
+Customer: ${params.visitorName} (${params.visitorPhone})
+Property Agent: ${params.ownerName} (${params.ownerPhone})${mapText}`;
+}
+
+export function visitAssignedPropertyAgent(params: {
+  ownerName: string;
+  propertyTitle: string;
+  visitDate: string;
+  visitTime: string;
+  visitorName: string;
+  visitingAgentName: string;
+}) {
+  return `Hello ${params.ownerName}, your property "${params.propertyTitle}" has a confirmed visit on ${params.visitDate} at ${params.visitTime}.
+Customer: ${params.visitorName}
+Assigned Visiting Agent: ${params.visitingAgentName}`;
+}
+
 export function visitCancelled(params: {
   visitorName: string;
   propertyTitle: string;
