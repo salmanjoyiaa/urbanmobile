@@ -21,11 +21,11 @@ export function SlotGrid({ slots, selectedSlot, onSelect }: SlotGridProps) {
             onClick={() => onSelect(slot.time)}
             className={
               !slot.available
-                ? "border-red-200 bg-red-50 text-red-500 hover:bg-red-50 hover:text-red-500 disabled:opacity-100 disabled:bg-red-50 disabled:text-red-500 disabled:border-red-200"
+                ? "border-red-200 bg-red-50 text-red-400 hover:bg-red-50 hover:text-red-400 disabled:opacity-100 disabled:bg-red-50 disabled:text-red-400 disabled:border-red-200 line-through"
                 : ""
             }
           >
-            {formatSlotLabel(slot.time)}
+            {slot.available ? formatSlotLabel(slot.time) : `${formatSlotLabel(slot.time)} · Booked`}
           </Button>
         );
       })}

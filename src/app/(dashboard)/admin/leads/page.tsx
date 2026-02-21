@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { ModerationActionButton } from "@/components/admin/moderation-action-button";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 type LeadRow = {
   id: string;
@@ -16,7 +16,7 @@ type LeadRow = {
 };
 
 export default async function AdminLeadsPage() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data } = (await supabase
     .from("buy_requests")
     .select(

@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formatSAR } from "@/lib/format";
 import { PropertyActions } from "@/components/admin/property-actions";
 
@@ -18,7 +18,7 @@ type Row = {
 };
 
 export default async function AdminPropertiesPage() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data } = (await supabase
     .from("properties")
     .select("id, title, city, status, price, agents(profiles(full_name))")

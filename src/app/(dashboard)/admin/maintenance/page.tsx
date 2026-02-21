@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { MaintenanceActions } from "@/components/admin/maintenance-actions";
 import { Wrench } from "lucide-react";
 import type { MaintenanceRequest } from "@/types/database";
@@ -11,19 +11,7 @@ export const metadata: Metadata = {
 export const revalidate = 0;
 
 export default async function AdminMaintenancePage() {
-    const supabase = await createClient();
-
-    // Ensure user is admin
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-
-    const { data: profile } = (await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single()) as { data: { role: string } | null };
-
-    if (profile?.role !== "admin") return null;
+    const supabase = createAdminClient();
 
     const { data: requests, error } = (await supabase
         .from("maintenance_requests")

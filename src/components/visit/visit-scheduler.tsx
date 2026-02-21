@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +19,15 @@ import { isFutureDate, isWeekday } from "@/lib/slots";
 import { SuccessState } from "@/components/ui/success-state";
 import { toast } from "sonner";
 
+const contactSchema = z.object({
+  visitor_name: z.string().min(2, "Name must be at least 2 characters").max(100),
+  visitor_email: z.string().min(1, "Email is required").email("Valid email is required"),
+  visitor_phone: z.string().regex(/^(05|\+9665)[0-9]{8}$/, "Must be a valid Saudi WhatsApp number (05XXXXXXXX or +9665XXXXXXXX)"),
+  visitor_message: z.string().max(5000).optional(),
+});
+
+type ContactInput = z.infer<typeof contactSchema>;
+
 type VisitSchedulerProps = {
   propertyId: string;
   propertyTitle: string;
@@ -26,14 +38,25 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [slot, setSlot] = useState<string | null>(null);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("+966");
-  const [message, setMessage] = useState("");
-
   const dateKey = useMemo(() => (date ? format(date, "yyyy-MM-dd") : ""), [date]);
   const { data: slots = [], isLoading: loadingSlots } = useVisitSlots(propertyId, dateKey, !!dateKey);
   const createVisit = useCreateVisitRequest();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset: resetForm,
+  } = useForm<ContactInput>({
+    resolver: zodResolver(contactSchema),
+    mode: "onTouched",
+    defaultValues: {
+      visitor_name: "",
+      visitor_email: "",
+      visitor_phone: "",
+      visitor_message: "",
+    },
+  });
 
   useRealtimeSlots({
     propertyId,
@@ -47,29 +70,24 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
 
   const isDateDisabled = (day: Date) => !isFutureDate(day) || !isWeekday(day);
 
-  const submit = async () => {
+  const onContactSubmit = async (values: ContactInput) => {
     if (!date || !slot) {
       toast.error("Select a date and time slot first.");
-      return;
-    }
-
-    if (!name || !email || !phone) {
-      toast.error("Please fill name, email, and phone.");
       return;
     }
 
     try {
       await createVisit.mutateAsync({
         property_id: propertyId,
-        visitor_name: name,
-        visitor_email: email,
-        visitor_phone: phone,
+        visitor_name: values.visitor_name,
+        visitor_email: values.visitor_email,
+        visitor_phone: values.visitor_phone,
         visit_date: dateKey,
         visit_time: slot,
       });
 
       toast.success("Visit request submitted.");
-      setStep(4); // Success step
+      setStep(4);
     } catch (error) {
       const messageText = error instanceof Error ? error.message : "Could not submit request";
       toast.error(messageText);
@@ -80,10 +98,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
     setStep(1);
     setDate(undefined);
     setSlot(null);
-    setName("");
-    setEmail("");
-    setPhone("");
-    setMessage("");
+    resetForm();
   };
 
   if (step === 4) {
@@ -159,33 +174,42 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
         )}
 
         {step === 3 && (
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit(onContactSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="visitor-name">Full name</Label>
-              <Input id="visitor-name" value={name} onChange={(event) => setName(event.target.value)} disabled={createVisit.isPending} />
+              <Input id="visitor-name" {...register("visitor_name")} disabled={createVisit.isPending} />
+              {errors.visitor_name && (
+                <p className="text-sm text-destructive">{errors.visitor_name.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="visitor-email">Email</Label>
-              <Input id="visitor-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} disabled={createVisit.isPending} />
+              <Input id="visitor-email" type="email" {...register("visitor_email")} disabled={createVisit.isPending} />
+              {errors.visitor_email && (
+                <p className="text-sm text-destructive">{errors.visitor_email.message}</p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="visitor-phone">Phone (+966...)</Label>
-              <Input id="visitor-phone" placeholder="+966XXXXXXXXX" value={phone} onChange={(event) => setPhone(event.target.value)} disabled={createVisit.isPending} />
+              <Label htmlFor="visitor-phone">WhatsApp Number</Label>
+              <Input id="visitor-phone" placeholder="05XXXXXXXX or +9665XXXXXXXX" {...register("visitor_phone")} disabled={createVisit.isPending} />
+              {errors.visitor_phone && (
+                <p className="text-sm text-destructive">{errors.visitor_phone.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="visitor-message">Message (optional)</Label>
-              <Textarea id="visitor-message" value={message} onChange={(event) => setMessage(event.target.value)} disabled={createVisit.isPending} />
+              <Textarea id="visitor-message" {...register("visitor_message")} disabled={createVisit.isPending} />
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(2)}>
+              <Button type="button" variant="outline" onClick={() => setStep(2)}>
                 Back
               </Button>
-              <Button onClick={submit} disabled={createVisit.isPending}>
+              <Button type="submit" disabled={createVisit.isPending}>
                 {createVisit.isPending ? "Submitting..." : "Submit visit request"}
               </Button>
             </div>
-          </div>
+          </form>
         )}
       </CardContent>
     </Card>

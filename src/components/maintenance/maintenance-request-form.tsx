@@ -21,6 +21,7 @@ export function MaintenanceRequestForm() {
         reset,
     } = useForm<MaintenanceRequestInput>({
         resolver: zodResolver(maintenanceRequestSchema),
+        mode: "onTouched",
         defaultValues: {
             service_type: "",
             customer_name: "",

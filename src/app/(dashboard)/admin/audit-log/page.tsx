@@ -1,6 +1,6 @@
 import { DataTable } from "@/components/dashboard/data-table";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate, formatTime } from "@/lib/format";
 
 type SearchParams = {
@@ -19,7 +19,7 @@ type Row = {
 };
 
 export default async function AdminAuditLogPage({ searchParams }: { searchParams: SearchParams }) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const action = searchParams.action || "";
   const page = Math.max(Number(searchParams.page || 1), 1);
   const pageSize = 20;

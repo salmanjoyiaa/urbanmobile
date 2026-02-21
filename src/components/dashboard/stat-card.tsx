@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 type StatCardProps = {
   title: string;
@@ -8,13 +8,11 @@ type StatCardProps = {
 
 export function StatCard({ title, value, description }: StatCardProps) {
   return (
-    <Card className="border-l-4 border-l-gold">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-bold text-navy">{value}</p>
-        {description ? <p className="mt-1 text-xs text-muted-foreground">{description}</p> : null}
+    <Card className="border hover:shadow-md transition-shadow">
+      <CardContent className="pt-5 pb-4">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{title}</p>
+        <p className="text-3xl font-bold text-foreground tabular-nums">{value}</p>
+        {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
       </CardContent>
     </Card>
   );

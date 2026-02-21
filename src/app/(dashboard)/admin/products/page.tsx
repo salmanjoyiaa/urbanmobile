@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formatSAR } from "@/lib/format";
 import { ProductActions } from "@/components/admin/product-actions";
 
@@ -19,7 +19,7 @@ type Row = {
 };
 
 export default async function AdminProductsPage() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data } = (await supabase
     .from("products")
     .select("id, title, city, condition, price, is_available, agents:agent_id(profiles:profile_id(full_name))")

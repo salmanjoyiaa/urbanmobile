@@ -26,8 +26,8 @@ export function MobileNav() {
                 <SheetContent side="left" className="w-[85vw] max-w-sm bg-[#FCF9F2] p-6 border-r border-[#D9C5B2]/30">
                     <SheetHeader>
                         <SheetTitle className="text-left py-4 border-b border-[#D9C5B2]/30">
-                            <span className="text-2xl font-black tracking-tight text-[#2A201A] flex items-center">
-                                <span className="text-4xl leading-none -mt-1">T</span>heUrbanRealEstate<span className="font-medium">Saudi</span>
+                            <span className="text-[22px] font-black tracking-tight text-[#2A201A] leading-none">
+                                TheUrbanRealEstate<span className="text-[26px] font-black">Saudi</span>
                             </span>
                         </SheetTitle>
                     </SheetHeader>

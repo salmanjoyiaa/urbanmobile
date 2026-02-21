@@ -1,3 +1,4 @@
+import { Inbox } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -25,35 +26,45 @@ export function DataTable<T extends { id?: string }>({
   emptyText = "No records found.",
 }: DataTableProps<T>) {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {columns.map((column) => (
-            <TableHead key={String(column.key)}>{column.title}</TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={columns.length} className="py-8 text-center text-muted-foreground">
-              {emptyText}
-            </TableCell>
+    <div className="rounded-lg border bg-card overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
+            {columns.map((column) => (
+              <TableHead key={String(column.key)} className="font-semibold text-foreground/70">
+                {column.title}
+              </TableHead>
+            ))}
           </TableRow>
-        ) : (
-          rows.map((row, index) => (
-            <TableRow key={row.id ? String(row.id) : String(index)}>
-              {columns.map((column) => (
-                <TableCell key={String(column.key)}>
-                  {column.render
-                    ? column.render(row)
-                    : String((row as Record<string, unknown>)[String(column.key)] ?? "—")}
-                </TableCell>
-              ))}
+        </TableHeader>
+        <TableBody>
+          {rows.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="py-12 text-center">
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  <Inbox className="h-10 w-10 text-muted-foreground/40" />
+                  <p className="text-sm font-medium">{emptyText}</p>
+                </div>
+              </TableCell>
             </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
+          ) : (
+            rows.map((row, index) => (
+              <TableRow
+                key={row.id ? String(row.id) : String(index)}
+                className="hover:bg-muted/30 transition-colors"
+              >
+                {columns.map((column) => (
+                  <TableCell key={String(column.key)}>
+                    {column.render
+                      ? column.render(row)
+                      : String((row as Record<string, unknown>)[String(column.key)] ?? "—")}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

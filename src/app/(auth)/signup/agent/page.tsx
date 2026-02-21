@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { Suspense, useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -26,8 +26,17 @@ function sanitizeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
-export default function AgentSignupPage() {
+export default function AgentSignupPageWrapper() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center p-12"><div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" /></div>}>
+      <AgentSignupPage />
+    </Suspense>
+  );
+}
+
+function AgentSignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const [selectedCountry, setSelectedCountry] = useState("SA");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -43,6 +52,7 @@ export default function AgentSignupPage() {
     formState: { errors, isSubmitting },
   } = useForm<AgentSignupInput>({
     resolver: zodResolver(agentSignupSchema),
+    mode: "onTouched",
     defaultValues: {
       full_name: "",
       email: "",
@@ -55,6 +65,14 @@ export default function AgentSignupPage() {
   });
 
   const agentTypeWatch = watch("agent_type");
+
+  // Pre-select agent type from URL params (e.g., /signup/agent?type=visiting)
+  useEffect(() => {
+    const typeParam = searchParams.get("type");
+    if (typeParam === "property" || typeParam === "visiting") {
+      setValue("agent_type", typeParam);
+    }
+  }, [searchParams, setValue]);
 
   const handlePhoneChange = (value: string) => {
     // Only allow digits, limit length

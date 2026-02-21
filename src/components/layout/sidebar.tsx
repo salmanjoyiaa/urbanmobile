@@ -65,7 +65,7 @@ export function Sidebar({ items, title, userName }: SidebarProps) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    router.replace("/login");
+    router.replace("/");
   };
 
   return (

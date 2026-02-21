@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/popover";
 import { ModerationActionButton } from "@/components/admin/moderation-action-button";
 import { AssignVisitingAgentDropdown } from "@/components/admin/assign-visiting-agent-dropdown";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate, formatTime } from "@/lib/format";
 import { Info } from "lucide-react";
 
@@ -35,7 +35,7 @@ type VisitRow = {
 };
 
 export default async function AdminVisitsPage() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data } = (await supabase
     .from("visit_requests")
     .select(

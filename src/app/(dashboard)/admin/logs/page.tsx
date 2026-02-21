@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { format } from "date-fns";
 import { Phone, Mail, CheckCircle2, XCircle } from "lucide-react";
 import {
@@ -24,7 +24,7 @@ type NotificationLog = {
 };
 
 export default async function MessageLogsPage() {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data } = await supabase
         .from("notification_logs")
         .select("*")

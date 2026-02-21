@@ -23,6 +23,7 @@ export default function SignupPage() {
     formState: { errors, isSubmitting },
   } = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
+    mode: "onTouched",
     defaultValues: {
       full_name: "",
       email: "",

@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateVisitingAgentDialog } from "@/components/admin/create-visiting-agent-dialog";
 import { ModerationActionButton } from "@/components/admin/moderation-action-button";
 
@@ -16,7 +16,7 @@ type AgentRow = {
 };
 
 export default async function AdminVisitingTeamPage() {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Fetch only agents marked as 'visiting' program type
     const { data } = await supabase

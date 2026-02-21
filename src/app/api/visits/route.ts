@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
   try {
     const slots = await cacheAside({
       key: cacheKey,
-      ttlSeconds: 30,
+      ttlSeconds: 10,
       label: "slots:availability",
       fetcher: async () => {
         const { data, error } = (await supabase

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/dashboard/data-table";
 import { ModerationActionButton } from "@/components/admin/moderation-action-button";
 import { CreatePropertyAgentDialog } from "@/components/admin/create-property-agent-dialog";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 type SearchParams = {
   status?: string;
@@ -22,12 +22,13 @@ type AgentRow = {
 };
 
 export default async function AdminAgentsPage({ searchParams }: { searchParams: SearchParams }) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const statusFilter = searchParams.status && searchParams.status !== "all" ? searchParams.status : undefined;
 
   let query = supabase
     .from("agents")
     .select("id, status, company_name, license_number, profiles:profile_id(full_name, email)")
+    .neq("agent_type", "visiting")
     .order("created_at", { ascending: false });
 
   if (statusFilter) {
@@ -41,8 +42,8 @@ export default async function AdminAgentsPage({ searchParams }: { searchParams: 
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-navy">Agents</h1>
-          <p className="text-sm text-muted-foreground">Approve, reject, or suspend agent accounts.</p>
+          <h1 className="text-2xl font-bold text-navy">Property Team</h1>
+          <p className="text-sm text-muted-foreground">Approve, reject, or suspend property agent accounts.</p>
         </div>
         <div className="flex items-center gap-3">
           <CreatePropertyAgentDialog />

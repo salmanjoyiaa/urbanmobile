@@ -9,9 +9,9 @@ export default function AuthLayout({
     <div className="min-h-screen bg-[#FCF9F2] text-[#2A201A] font-sans">
       <header className="sticky top-0 z-50 border-b border-[#D9C5B2]/30 bg-[#FCF9F2]/90 backdrop-blur-md">
         <div className="container mx-auto flex h-14 items-center px-4">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-xl font-black tracking-tight flex items-center">
-              <span className="text-3xl leading-none -mt-1">T</span>heUrbanRealEstate<span className="font-medium">Saudi</span>
+          <Link href="/" className="flex items-center group">
+            <span className="text-xl font-black tracking-tight leading-none">
+              TheUrbanRealEstate<span className="text-[22px] font-black">Saudi</span>
             </span>
           </Link>
         </div>
