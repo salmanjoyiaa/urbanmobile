@@ -70,7 +70,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, visiting_agent_id,
       visiting_agent:visiting_agent_id (full_name, phone, email),
       properties:property_id (
-        id, title, location_url,
+        id, title, location_url, visiting_agent_instructions, visiting_agent_image,
         agents:agent_id (
           profile_id,
           profiles:profile_id (full_name, phone, email)
@@ -155,6 +155,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         ownerName: ownerName,
         ownerPhone: ownerPhone,
         locationUrl: visitDetails.properties.location_url,
+        instructions: visitDetails.properties.visiting_agent_instructions,
+        image: visitDetails.properties.visiting_agent_image,
       };
 
       if (visitingAgentProfile.phone) {

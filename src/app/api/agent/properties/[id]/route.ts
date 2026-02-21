@@ -59,7 +59,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   const updatePayload = { ...parsed.data } as Record<string, unknown>;
   const stringFields = [
     "district", "address", "property_ref", "layout", "location_url",
-    "rental_period", "office_fee", "water_bill_included", "security_deposit", "drive_link"
+    "rental_period", "office_fee", "water_bill_included", "security_deposit", "drive_link",
+    "visiting_agent_image"
   ];
   for (const field of stringFields) {
     if (updatePayload[field] === "") {

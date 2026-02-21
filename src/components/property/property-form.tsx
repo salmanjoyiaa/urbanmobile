@@ -40,7 +40,7 @@ type PropertyFormProps = {
   redirectPath?: string;
 };
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3 | 4 | 5;
 
 export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }: PropertyFormProps) {
   const router = useRouter();
@@ -56,6 +56,8 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [city, setCity] = useState(initialData?.city || SAUDI_CITIES[0]);
   const [district, setDistrict] = useState(initialData?.district || "");
   const [address, setAddress] = useState(initialData?.address || "");
+  const [visitingAgentInstructions, setVisitingAgentInstructions] = useState(initialData?.visiting_agent_instructions || "");
+  const [visitingAgentImage, setVisitingAgentImage] = useState<string[]>(initialData?.visiting_agent_image ? [initialData.visiting_agent_image] : []);
   const [latitude, setLatitude] = useState<number | null>(initialData?.latitude || null);
   const [longitude, setLongitude] = useState<number | null>(initialData?.longitude || null);
 
@@ -121,6 +123,8 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         security_deposit: securityDeposit || undefined,
         nearby_places: nearbyPlaces,
         drive_link: driveLink || undefined,
+        visiting_agent_instructions: visitingAgentInstructions || undefined,
+        visiting_agent_image: visitingAgentImage[0] || undefined,
       };
 
       const defaultEndpoint = mode === "create" ? "/api/agent/properties" : `/api/agent/properties/${initialData?.id}`;
@@ -162,7 +166,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex flex-wrap gap-2 text-sm">
-          {[1, 2, 3, 4].map((item) => (
+          {[1, 2, 3, 4, 5].map((item) => (
             <button
               key={item}
               type="button"
@@ -492,6 +496,27 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
           </div>
         )}
 
+        {step === 5 && (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-destructive font-semibold">INTERNAL USE ONLY: Visiting Agent Instructions</Label>
+              <p className="text-xs text-muted-foreground">This information is shielded from customers. It is routed natively to the internal Visiting Agent tasked with showing this real-estate.</p>
+              <Textarea
+                value={visitingAgentInstructions}
+                onChange={(event) => setVisitingAgentInstructions(event.target.value)}
+                disabled={isSubmitting}
+                placeholder="Access codes, keys location, specific warnings..."
+                rows={5}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Internal Map / Layout Schema (Optional)</Label>
+              <ImageUploader bucket="property-images" values={visitingAgentImage} onChange={setVisitingAgentImage} />
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-2">
           <Button
             type="button"
@@ -502,10 +527,14 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
             <ChevronLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
-          {step < 4 ? (
+          {step < 5 ? (
             <Button
               type="button"
-              onClick={() => setStep((current) => (Math.min(4, current + 1) as Step))}
+              onClick={() => {
+                if (step === 1 && !title) return toast.error("Title is required");
+                if (step === 2 && !address) return toast.error("Address is required");
+                setStep((current) => (Math.min(5, current + 1) as Step))
+              }}
               disabled={isSubmitting}
             >
               Next
@@ -514,7 +543,13 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
           ) : (
             <Button
               type="button"
-              onClick={submit}
+              onClick={() => {
+                if (!visitingAgentInstructions) {
+                  toast.error("Visiting Agent Instructions are compulsory.");
+                  return;
+                }
+                submit();
+              }}
               disabled={isSubmitting}
               size="lg"
             >

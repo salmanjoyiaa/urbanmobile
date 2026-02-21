@@ -44,29 +44,29 @@ export default async function AgentOverviewPage() {
   const visitIdList = (propertyIds || []).map((item) => item.id);
   const leadIdList = (productIds || []).map((item) => item.id);
 
-  const visitsPromise = agent.agent_type === "visiting"
-    ? supabase
-      .from("visit_requests")
-      .select("id", { count: "exact", head: true })
-      .eq("visiting_agent_id", user.id)
-      .in("visiting_status", ["view", "visit_done", "customer_remarks", "deal_pending", "commission_got"]) // Exclude failed/closed
-    : visitIdList.length > 0
-      ? supabase
-        .from("visit_requests")
-        .select("id", { count: "exact", head: true })
-        .in("property_id", visitIdList)
-        .eq("status", "confirmed")
-      : Promise.resolve({ count: 0 });
+  const [{ count: confirmedVisits }, { count: confirmedLeads }, { count: propertyAgentVisits }, { count: propertyAgentLeads }] = await Promise.all([
+    // Visiting Agents Metric 1
+    agent.agent_type === "visiting" ? supabase.from("visit_requests").select("id", { count: "exact", head: true })
+      .eq("visiting_agent_id", user.id).eq("status", "confirmed") : Promise.resolve({ count: 0 }),
+    // Visiting Agents Metric 2
+    agent.agent_type === "visiting" ? supabase.from("visit_requests").select("id", { count: "exact", head: true })
+      .eq("visiting_agent_id", user.id).in("visiting_status", ["commission_got", "deal_close"]) : Promise.resolve({ count: 0 }),
+    // Property Agents Metric 1
+    visitIdList.length > 0 ? supabase.from("visit_requests").select("id", { count: "exact", head: true })
+      .in("property_id", visitIdList).eq("status", "confirmed") : Promise.resolve({ count: 0 }),
+    // Property Agents Metric 2
+    leadIdList.length > 0 ? supabase.from("buy_requests").select("id", { count: "exact", head: true })
+      .in("product_id", leadIdList).eq("status", "confirmed") : Promise.resolve({ count: 0 }),
+  ]);
 
-  const leadsPromise = leadIdList.length > 0
-    ? supabase
-      .from("buy_requests")
-      .select("id", { count: "exact", head: true })
-      .in("product_id", leadIdList)
-      .eq("status", "confirmed")
-    : Promise.resolve({ count: 0 });
+  const [{ count: failedDeals }] = await Promise.all([
+    // Visiting Agents Metric 3
+    agent.agent_type === "visiting" ? supabase.from("visit_requests").select("id", { count: "exact", head: true })
+      .eq("visiting_agent_id", user.id).eq("visiting_status", "deal_fail") : Promise.resolve({ count: 0 }),
+  ]);
 
-  const [{ count: confirmedVisits }, { count: confirmedLeads }] = await Promise.all([visitsPromise, leadsPromise]);
+  const outputVisits = agent.agent_type === "visiting" ? confirmedVisits : propertyAgentVisits;
+  const outputLeads = agent.agent_type === "visiting" ? confirmedLeads : propertyAgentLeads;
 
   return (
     <div className="space-y-6">
@@ -76,10 +76,20 @@ export default async function AgentOverviewPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Properties" value={propertiesCount || 0} />
-        <StatCard title="Products" value={productsCount || 0} />
-        <StatCard title="Confirmed Visits" value={confirmedVisits || 0} />
-        <StatCard title="Confirmed Leads" value={confirmedLeads || 0} />
+        {agent.agent_type === 'visiting' ? (
+          <>
+            <StatCard title="Confirmed Visits" value={outputVisits || 0} />
+            <StatCard title="Confirmed Deals" value={outputLeads || 0} />
+            <StatCard title="Failed Deals" value={failedDeals || 0} />
+          </>
+        ) : (
+          <>
+            <StatCard title="Properties" value={propertiesCount || 0} />
+            <StatCard title="Products" value={productsCount || 0} />
+            <StatCard title="Confirmed Visits" value={outputVisits || 0} />
+            <StatCard title="Confirmed Leads" value={outputLeads || 0} />
+          </>
+        )}
       </div>
 
       <Card>

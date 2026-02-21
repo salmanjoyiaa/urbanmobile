@@ -1,9 +1,15 @@
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ModerationActionButton } from "@/components/admin/moderation-action-button";
 import { AssignVisitingAgentDropdown } from "@/components/admin/assign-visiting-agent-dropdown";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatTime } from "@/lib/format";
+import { Info } from "lucide-react";
 
 type VisitRow = {
   id: string;
@@ -79,8 +85,33 @@ export default async function AdminVisitsPage() {
             render: (row) => row.visiting_agent?.full_name ? (
               <div className="flex flex-col gap-1 items-start">
                 <Badge variant="secondary">{row.visiting_agent.full_name}</Badge>
-                {row.visiting_status && <span className="text-xs text-muted-foreground capitalize">{row.visiting_status.replace("_", " ")}</span>}
-                {row.customer_remarks && <span className="text-xs text-muted-foreground italic line-clamp-2 max-w-[150px]">&quot;{row.customer_remarks}&quot;</span>}
+                {(row.visiting_status || row.customer_remarks) && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="text-xs flex items-center gap-1 text-primary hover:underline font-medium mt-1">
+                        <Info className="h-3 w-3" /> View Status
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-4 text-sm" align="start">
+                      <div className="space-y-3">
+                        {row.visiting_status && (
+                          <div>
+                            <span className="font-semibold text-foreground">Deal Phase:</span>
+                            <div className="mt-1 capitalize text-muted-foreground">{row.visiting_status.replace("_", " ")}</div>
+                          </div>
+                        )}
+                        {row.customer_remarks && (
+                          <div>
+                            <span className="font-semibold text-foreground">Agent Remarks:</span>
+                            <div className="mt-1 text-muted-foreground italic border-l-2 pl-2 border-primary/30">
+                              &quot;{row.customer_remarks}&quot;
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
               </div>
             ) : "—"
           },

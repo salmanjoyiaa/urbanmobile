@@ -10,13 +10,18 @@ type Row = {
   city: string;
   status: string;
   price: number;
+  agents: {
+    profiles: {
+      full_name: string;
+    } | null;
+  } | null;
 };
 
 export default async function AdminPropertiesPage() {
   const supabase = await createClient();
   const { data } = (await supabase
     .from("properties")
-    .select("id, title, city, status, price")
+    .select("id, title, city, status, price, agents(profiles(full_name))")
     .order("created_at", { ascending: false })) as { data: Row[] | null };
 
   const rows = data || [];
@@ -32,6 +37,7 @@ export default async function AdminPropertiesPage() {
         rows={rows}
         columns={[
           { key: "title", title: "Title" },
+          { key: "agent", title: "Listed By", render: (row) => row.agents?.profiles?.full_name || "—" },
           { key: "city", title: "City" },
           { key: "price", title: "Price", render: (row) => formatSAR(row.price) },
           {

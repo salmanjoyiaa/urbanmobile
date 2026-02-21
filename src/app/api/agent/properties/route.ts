@@ -86,6 +86,8 @@ export async function POST(request: Request) {
     security_deposit: parsed.data.security_deposit || null,
     nearby_places: parsed.data.nearby_places || [],
     drive_link: parsed.data.drive_link || null,
+    visiting_agent_instructions: parsed.data.visiting_agent_instructions || null,
+    visiting_agent_image: parsed.data.visiting_agent_image || null,
     agent_id: agentId,
     status: "active",
     featured: false,

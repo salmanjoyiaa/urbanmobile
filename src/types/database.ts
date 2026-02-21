@@ -73,6 +73,8 @@ export interface Property {
   security_deposit: string | null;
   nearby_places: string[];
   drive_link: string | null;
+  visiting_agent_instructions: string | null;
+  visiting_agent_image: string | null;
   created_at: string;
   updated_at: string;
 }

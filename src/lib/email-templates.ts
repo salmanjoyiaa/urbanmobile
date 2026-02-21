@@ -108,9 +108,17 @@ export function visitAssignedVisitingAgentEmail(params: {
   ownerName: string;
   ownerPhone: string;
   locationUrl?: string | null;
+  instructions?: string | null;
+  image?: string | null;
 }) {
   const mapHtml = params.locationUrl
     ? detail("Property Map", `<a href="${params.locationUrl}" style="color:${BRAND_COLOR}">${params.locationUrl}</a>`)
+    : "";
+  const instHtml = params.instructions
+    ? detail("Confidential Instructions", `<div style="white-space: pre-wrap; margin-top: 4px; border-left: 2px solid ${BRAND_COLOR}; padding-left: 8px;">${params.instructions}</div>`)
+    : "";
+  const imgHtml = params.image
+    ? detail("Image/Layout", `<a href="${params.image}" style="color:${BRAND_COLOR}">View Schema</a>`)
     : "";
 
   return {
@@ -126,6 +134,8 @@ export function visitAssignedVisitingAgentEmail(params: {
       ${detail("Date", params.visitDate)}
       ${detail("Time", params.visitTime)}
       ${mapHtml}
+      ${instHtml}
+      ${imgHtml}
       ${divider()}
       ${paragraph("Please contact the customer to confirm their arrival.")}
     `),

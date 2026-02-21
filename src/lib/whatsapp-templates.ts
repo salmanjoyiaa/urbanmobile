@@ -30,11 +30,15 @@ export function visitAssignedVisitingAgent(params: {
   ownerName: string;
   ownerPhone: string;
   locationUrl?: string | null;
+  instructions?: string | null;
+  image?: string | null;
 }) {
   const mapText = params.locationUrl ? `\nMap: ${params.locationUrl}` : "";
+  const instText = params.instructions ? `\n\n[Confidential Instructions]\n${params.instructions}` : "";
+  const imgText = params.image ? `\nImage/Layout: ${params.image}` : "";
   return `Hello ${params.visitingAgentName}, you have been ASSIGNED a new visit for "${params.propertyTitle}" on ${params.visitDate} at ${params.visitTime}.
 Customer: ${params.visitorName} (${params.visitorPhone})
-Property Agent: ${params.ownerName} (${params.ownerPhone})${mapText}`;
+Property Agent: ${params.ownerName} (${params.ownerPhone})${mapText}${instText}${imgText}`;
 }
 
 export function visitAssignedPropertyAgent(params: {

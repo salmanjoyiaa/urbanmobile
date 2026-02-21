@@ -106,6 +106,8 @@ export const propertySchema = z.object({
   security_deposit: z.string().max(50).optional().or(z.literal("")),
   nearby_places: z.array(z.string()).default([]),
   drive_link: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  visiting_agent_instructions: z.string().max(5000, "Instructions must not exceed 5000 characters").optional(),
+  visiting_agent_image: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });
 
 export const productSchema = z.object({
