@@ -19,6 +19,7 @@ import {
 type SidebarProps = {
   items: NavItem[];
   title: string;
+  userName?: string;
 };
 
 function SidebarNav({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
@@ -57,7 +58,7 @@ function SidebarNav({ items, onNavigate }: { items: NavItem[]; onNavigate?: () =
   );
 }
 
-export function Sidebar({ items, title }: SidebarProps) {
+export function Sidebar({ items, title, userName }: SidebarProps) {
   const router = useRouter();
   const supabase = createClient();
   const [open, setOpen] = useState(false);
@@ -73,8 +74,13 @@ export function Sidebar({ items, title }: SidebarProps) {
         <div className="flex h-full flex-col p-4">
           <div className="mb-6 px-2 text-lg font-bold text-navy">{title}</div>
           <SidebarNav items={items} />
-          <div className="mt-auto pt-4">
-            <Button variant="outline" className="w-full" onClick={signOut}>
+          <div className="mt-auto pt-4 flex flex-col gap-2 border-t">
+            {userName && (
+              <div className="px-2 pb-1 text-sm font-medium text-navy/80 truncate">
+                {userName}
+              </div>
+            )}
+            <Button variant="outline" className="w-full justify-start" onClick={signOut}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
             </Button>
@@ -96,10 +102,17 @@ export function Sidebar({ items, title }: SidebarProps) {
               </SheetHeader>
               <div className="mt-6">
                 <SidebarNav items={items} onNavigate={() => setOpen(false)} />
-                <Button variant="outline" className="mt-6 w-full" onClick={signOut}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign out
-                </Button>
+                <div className="mt-6 flex flex-col gap-2 border-t pt-4">
+                  {userName && (
+                    <div className="px-2 text-sm font-medium text-navy/80 truncate">
+                      {userName}
+                    </div>
+                  )}
+                  <Button variant="outline" className="w-full justify-start" onClick={signOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
+                  </Button>
+                </div>
               </div>
             </SheetContent>
           </Sheet>

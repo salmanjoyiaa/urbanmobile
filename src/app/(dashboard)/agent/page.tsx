@@ -16,10 +16,10 @@ export default async function AgentOverviewPage() {
 
   const { data: agent } = (await supabase
     .from("agents")
-    .select("id, status")
+    .select("id, status, agent_type")
     .eq("profile_id", user.id)
     .single()) as {
-      data: { id: string; status: string } | null;
+      data: { id: string; status: string; agent_type: string } | null;
     };
 
   if (!agent) {
@@ -31,6 +31,7 @@ export default async function AgentOverviewPage() {
     supabase.from("products").select("id", { count: "exact", head: true }).eq("agent_id", agent.id),
   ]);
 
+  // Property IDs computation (Property Agents only)
   const { data: propertyIds } = (await supabase
     .from("properties")
     .select("id")
@@ -43,22 +44,29 @@ export default async function AgentOverviewPage() {
   const visitIdList = (propertyIds || []).map((item) => item.id);
   const leadIdList = (productIds || []).map((item) => item.id);
 
-  const [{ count: confirmedVisits }, { count: confirmedLeads }] = await Promise.all([
-    visitIdList.length > 0
+  const visitsPromise = agent.agent_type === "visiting"
+    ? supabase
+      .from("visit_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("visiting_agent_id", user.id)
+      .in("visiting_status", ["view", "visit_done", "customer_remarks", "deal_pending", "commission_got"]) // Exclude failed/closed
+    : visitIdList.length > 0
       ? supabase
         .from("visit_requests")
         .select("id", { count: "exact", head: true })
         .in("property_id", visitIdList)
         .eq("status", "confirmed")
-      : Promise.resolve({ count: 0 }),
-    leadIdList.length > 0
-      ? supabase
-        .from("buy_requests")
-        .select("id", { count: "exact", head: true })
-        .in("product_id", leadIdList)
-        .eq("status", "confirmed")
-      : Promise.resolve({ count: 0 }),
-  ]);
+      : Promise.resolve({ count: 0 });
+
+  const leadsPromise = leadIdList.length > 0
+    ? supabase
+      .from("buy_requests")
+      .select("id", { count: "exact", head: true })
+      .in("product_id", leadIdList)
+      .eq("status", "confirmed")
+    : Promise.resolve({ count: 0 });
+
+  const [{ count: confirmedVisits }, { count: confirmedLeads }] = await Promise.all([visitsPromise, leadsPromise]);
 
   return (
     <div className="space-y-6">
