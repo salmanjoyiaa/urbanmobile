@@ -48,8 +48,12 @@ export function AssignVisitingAgentDropdown({ visitId, visitingAgents }: AssignV
 
             toast.success("Agent assigned successfully");
             router.refresh();
-        } catch (error: any) {
-            toast.error(error.message);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                toast.error(error.message);
+            } else {
+                toast.error("Failed to assign agent");
+            }
         } finally {
             setLoading(false);
         }

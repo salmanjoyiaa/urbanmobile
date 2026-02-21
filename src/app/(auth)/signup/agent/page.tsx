@@ -162,7 +162,7 @@ export default function AgentSignupPage() {
             <Label htmlFor="agent_type">Agent Program</Label>
             <Select
               value={agentTypeWatch}
-              onValueChange={(val: any) => setValue("agent_type", val)}
+              onValueChange={(val: "property" | "visiting") => setValue("agent_type", val)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select Agent Program" />

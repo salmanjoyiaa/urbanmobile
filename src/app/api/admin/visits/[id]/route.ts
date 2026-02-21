@@ -41,6 +41,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const payload: any = {
     status: parsed.data.status,
     admin_notes: parsed.data.admin_notes || null,
@@ -80,6 +81,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     .eq("id", context.params.id)
     .single();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const visitDetails = rawData as any;
 
   const notifyJobs: Array<Promise<unknown>> = [];

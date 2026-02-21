@@ -14,6 +14,7 @@ export default async function AgentAssignmentsPage() {
         .eq("profile_id", user.id)
         .single();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const agent = agentData as any;
 
     if (!agent || agent.agent_type !== "visiting") {

@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { formatTime } from "@/lib/format";
-import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export type AssignmentRow = {
@@ -65,8 +64,12 @@ export function VisitingAgentClient({ rows }: { rows: AssignmentRow[] }) {
             }
             toast.success("Pipeline updated successfully");
             router.refresh();
-        } catch (err: any) {
-            toast.error(err.message);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                toast.error(err.message);
+            } else {
+                toast.error("An unknown error occurred");
+            }
         } finally {
             setLoadingId(null);
         }
@@ -193,7 +196,7 @@ export function VisitingAgentClient({ rows }: { rows: AssignmentRow[] }) {
                                         <div className="sm:col-span-2">
                                             <p className="font-semibold text-foreground mt-2">Remarks</p>
                                             <p className="bg-muted p-2 rounded text-muted-foreground italic text-xs mt-1">
-                                                "{visit.customer_remarks}"
+                                                &quot;{visit.customer_remarks}&quot;
                                             </p>
                                         </div>
                                     )}

@@ -19,6 +19,7 @@ export default async function AgentLayout({ children }: { children: React.ReactN
     .eq("profile_id", user.id)
     .single();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const agent = data as any;
 
   return <AgentShell agentType={agent?.agent_type}>{children}</AgentShell>;

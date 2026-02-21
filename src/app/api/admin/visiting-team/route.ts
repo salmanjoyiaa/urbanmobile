@@ -31,6 +31,7 @@ export async function POST(req: Request) {
             .eq("id", user.id)
             .single();
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const profile = data as any;
 
         if (profile?.role !== "admin") {
@@ -71,7 +72,7 @@ export async function POST(req: Request) {
             company_name: "Internal Visiting Team",
         };
 
-        const { error: agentError } = await admin.from("agents").upsert(payload as any, { onConflict: "profile_id" });
+        const { error: agentError } = await admin.from("agents").upsert(payload as never, { onConflict: "profile_id" });
 
         if (agentError) {
             // Cleanup auth user on failure

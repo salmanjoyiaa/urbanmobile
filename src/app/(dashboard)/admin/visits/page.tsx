@@ -53,6 +53,7 @@ export default async function AdminVisitsPage() {
     .eq("agent_type", "visiting")
     .eq("status", "approved");
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const visitingAgents = (agentsData || []).map((agent: any) => ({
     id: agent.profile_id,
     name: agent.profiles?.full_name || "Unknown",
