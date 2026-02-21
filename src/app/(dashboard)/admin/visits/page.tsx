@@ -14,6 +14,11 @@ type VisitRow = {
   status: string;
   properties: {
     title: string;
+    agents: {
+      profiles: {
+        full_name: string;
+      } | null;
+    } | null;
   } | null;
 };
 
@@ -24,7 +29,12 @@ export default async function AdminVisitsPage() {
     .select(
       `
       id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status,
-      properties:property_id (title)
+      properties:property_id (
+        title,
+        agents:agent_id (
+          profiles:profile_id (full_name)
+        )
+      )
     `
     )
     .order("created_at", { ascending: false })) as { data: VisitRow[] | null };
@@ -42,6 +52,7 @@ export default async function AdminVisitsPage() {
         rows={rows}
         columns={[
           { key: "property", title: "Property", render: (row) => row.properties?.title || "—" },
+          { key: "agent", title: "Assigned Agent", render: (row) => row.properties?.agents?.profiles?.full_name || "—" },
           { key: "visitor_name", title: "Visitor" },
           { key: "visitor_email", title: "Email" },
           { key: "visitor_phone", title: "Phone" },
