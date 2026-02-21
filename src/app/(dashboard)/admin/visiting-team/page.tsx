@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { createClient } from "@/lib/supabase/server";
 import { CreateVisitingAgentDialog } from "@/components/admin/create-visiting-agent-dialog";
+import { ModerationActionButton } from "@/components/admin/moderation-action-button";
 
 type AgentRow = {
     id: string;
@@ -51,6 +52,26 @@ export default async function AdminVisitingTeamPage() {
                         key: "joined",
                         title: "Joined",
                         render: (row) => new Date(row.created_at).toLocaleDateString(),
+                    },
+                    {
+                        key: "actions",
+                        title: "Actions",
+                        render: (row) => (
+                            <div className="flex flex-wrap gap-2">
+                                {row.status === "pending" && (
+                                    <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "approved" }} label="Approve" />
+                                )}
+                                {row.status === "approved" && (
+                                    <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "suspended" }} label="Suspend" variant="outline" />
+                                )}
+                                {row.status === "suspended" && (
+                                    <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "approved" }} label="Un-suspend" variant="secondary" />
+                                )}
+                                {row.status !== "rejected" && (
+                                    <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "rejected" }} label="Delete" variant="destructive" />
+                                )}
+                            </div>
+                        ),
                     },
                 ]}
             />

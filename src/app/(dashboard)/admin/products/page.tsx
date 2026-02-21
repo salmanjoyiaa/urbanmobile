@@ -11,13 +11,18 @@ type Row = {
   condition: string;
   price: number;
   is_available: boolean;
+  agents: {
+    profiles: {
+      full_name: string;
+    } | null;
+  } | null;
 };
 
 export default async function AdminProductsPage() {
   const supabase = await createClient();
   const { data } = (await supabase
     .from("products")
-    .select("id, title, city, condition, price, is_available")
+    .select("id, title, city, condition, price, is_available, agents:agent_id(profiles:profile_id(full_name))")
     .order("created_at", { ascending: false })) as { data: Row[] | null };
 
   const rows = data || [];
@@ -34,6 +39,7 @@ export default async function AdminProductsPage() {
         columns={[
           { key: "title", title: "Title" },
           { key: "city", title: "City" },
+          { key: "agent", title: "Listed By", render: (row) => row.agents?.profiles?.full_name || "—" },
           { key: "condition", title: "Condition", render: (row) => row.condition.replaceAll("_", " ") },
           { key: "price", title: "Price", render: (row) => formatSAR(row.price) },
           {

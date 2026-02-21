@@ -37,6 +37,73 @@ const PIPELINE_STEPS = {
     "deal_close": "Deal Closed"
 } as Record<string, string>;
 
+const PipelineActions = ({
+    visit,
+    updateStatus,
+    loadingId,
+    remarks,
+    setRemarks
+}: {
+    visit: AssignmentRow,
+    updateStatus: (id: string, status: string, payloadRemarks?: string) => void,
+    loadingId: string | null,
+    remarks: Record<string, string>,
+    setRemarks: (r: Record<string, string>) => void
+}) => {
+    switch (visit.visiting_status) {
+        case "view":
+            return (
+                <Button size="sm" onClick={() => updateStatus(visit.id, "visit_done")} disabled={loadingId === visit.id}>
+                    Mark Visit Done
+                </Button>
+            );
+        case "visit_done":
+            return (
+                <div className="flex flex-col gap-2 w-full">
+                    <Textarea
+                        placeholder="Enter customer feedback/remarks..."
+                        value={remarks[visit.id] || ""}
+                        onChange={(e) => setRemarks({ ...remarks, [visit.id]: e.target.value })}
+                        className="text-sm"
+                        rows={2}
+                    />
+                    <Button
+                        size="sm"
+                        onClick={() => updateStatus(visit.id, "customer_remarks", remarks[visit.id])}
+                        disabled={loadingId === visit.id || !remarks[visit.id]}
+                    >
+                        Submit Remarks
+                    </Button>
+                </div>
+            );
+        case "customer_remarks":
+            return (
+                <div className="flex gap-2">
+                    <Button size="sm" onClick={() => updateStatus(visit.id, "deal_pending")} disabled={loadingId === visit.id}>
+                        Deal Pending
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => updateStatus(visit.id, "deal_fail")} disabled={loadingId === visit.id}>
+                        Deal Failed
+                    </Button>
+                </div>
+            );
+        case "deal_pending":
+            return (
+                <Button size="sm" variant="outline" className="text-green-600" onClick={() => updateStatus(visit.id, "commission_got")} disabled={loadingId === visit.id}>
+                    Commission Received
+                </Button>
+            );
+        case "commission_got":
+            return (
+                <Button size="sm" className="bg-navy hover:bg-navy/90" onClick={() => updateStatus(visit.id, "deal_close")} disabled={loadingId === visit.id}>
+                    Close Deal
+                </Button>
+            );
+        default:
+            return null;
+    }
+};
+
 export function VisitingAgentClient({ rows }: { rows: AssignmentRow[] }) {
     const router = useRouter();
     const [date, setDate] = useState<Date | undefined>(new Date());
@@ -72,61 +139,6 @@ export function VisitingAgentClient({ rows }: { rows: AssignmentRow[] }) {
             }
         } finally {
             setLoadingId(null);
-        }
-    };
-
-    const PipelineActions = ({ visit }: { visit: AssignmentRow }) => {
-        switch (visit.visiting_status) {
-            case "view":
-                return (
-                    <Button size="sm" onClick={() => updateStatus(visit.id, "visit_done")} disabled={loadingId === visit.id}>
-                        Mark Visit Done
-                    </Button>
-                );
-            case "visit_done":
-                return (
-                    <div className="flex flex-col gap-2 w-full">
-                        <Textarea
-                            placeholder="Enter customer feedback/remarks..."
-                            value={remarks[visit.id] || ""}
-                            onChange={(e) => setRemarks({ ...remarks, [visit.id]: e.target.value })}
-                            className="text-sm"
-                            rows={2}
-                        />
-                        <Button
-                            size="sm"
-                            onClick={() => updateStatus(visit.id, "customer_remarks", remarks[visit.id])}
-                            disabled={loadingId === visit.id || !remarks[visit.id]}
-                        >
-                            Submit Remarks
-                        </Button>
-                    </div>
-                );
-            case "customer_remarks":
-                return (
-                    <div className="flex gap-2">
-                        <Button size="sm" onClick={() => updateStatus(visit.id, "deal_pending")} disabled={loadingId === visit.id}>
-                            Deal Pending
-                        </Button>
-                        <Button size="sm" variant="destructive" onClick={() => updateStatus(visit.id, "deal_fail")} disabled={loadingId === visit.id}>
-                            Deal Failed
-                        </Button>
-                    </div>
-                );
-            case "deal_pending":
-                return (
-                    <Button size="sm" variant="outline" className="text-green-600" onClick={() => updateStatus(visit.id, "commission_got")} disabled={loadingId === visit.id}>
-                        Commission Received
-                    </Button>
-                );
-            case "commission_got":
-                return (
-                    <Button size="sm" className="bg-navy hover:bg-navy/90" onClick={() => updateStatus(visit.id, "deal_close")} disabled={loadingId === visit.id}>
-                        Close Deal
-                    </Button>
-                );
-            default:
-                return null;
         }
     };
 
@@ -203,7 +215,7 @@ export function VisitingAgentClient({ rows }: { rows: AssignmentRow[] }) {
                                 </CardContent>
                                 {visit.visiting_status !== "deal_close" && visit.visiting_status !== "deal_fail" && (
                                     <CardFooter className="bg-muted/30 pt-4 flex flex-col items-end border-t">
-                                        <PipelineActions visit={visit} />
+                                        <PipelineActions visit={visit} updateStatus={updateStatus} loadingId={loadingId} remarks={remarks} setRemarks={setRemarks} />
                                     </CardFooter>
                                 )}
                             </Card>

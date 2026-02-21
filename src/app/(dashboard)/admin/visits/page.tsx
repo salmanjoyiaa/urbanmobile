@@ -13,6 +13,8 @@ type VisitRow = {
   visit_date: string;
   visit_time: string;
   status: string;
+  visiting_status?: string | null;
+  customer_remarks?: string | null;
   properties: {
     title: string;
     agents: {
@@ -32,7 +34,7 @@ export default async function AdminVisitsPage() {
     .from("visit_requests")
     .select(
       `
-      id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status,
+      id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status, visiting_status, customer_remarks,
       visiting_agent:visiting_agent_id(full_name),
       properties:property_id (
         title,
@@ -74,7 +76,13 @@ export default async function AdminVisitsPage() {
           {
             key: "visiting_agent",
             title: "Visiting Agent",
-            render: (row) => row.visiting_agent?.full_name ? <Badge variant="secondary">{row.visiting_agent.full_name}</Badge> : "—"
+            render: (row) => row.visiting_agent?.full_name ? (
+              <div className="flex flex-col gap-1 items-start">
+                <Badge variant="secondary">{row.visiting_agent.full_name}</Badge>
+                {row.visiting_status && <span className="text-xs text-muted-foreground capitalize">{row.visiting_status.replace("_", " ")}</span>}
+                {row.customer_remarks && <span className="text-xs text-muted-foreground italic line-clamp-2 max-w-[150px]">&quot;{row.customer_remarks}&quot;</span>}
+              </div>
+            ) : "—"
           },
           { key: "visitor_name", title: "Visitor" },
           { key: "visitor_phone", title: "Phone" },

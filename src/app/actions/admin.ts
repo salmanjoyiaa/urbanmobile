@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { writeAuditLog } from "@/lib/admin";
 
 async function checkAdmin() {
     const supabase = await createClient();
@@ -23,18 +24,25 @@ async function checkAdmin() {
         throw new Error("Unauthorized: Admin access required");
     }
 
-    return supabase;
+    return { supabase, userId: user.id };
 }
 
 export async function deleteProperty(id: string) {
     try {
-        const supabase = await checkAdmin();
+        const { supabase, userId } = await checkAdmin();
 
         const { error } = await supabase.from("properties").delete().eq("id", id);
 
         if (error) {
             throw new Error(error.message);
         }
+
+        await writeAuditLog({
+            actorId: userId,
+            action: "deleted",
+            entityType: "properties",
+            entityId: id,
+        });
 
         revalidatePath("/admin/properties");
         revalidatePath("/properties");
@@ -46,13 +54,20 @@ export async function deleteProperty(id: string) {
 
 export async function deleteProduct(id: string) {
     try {
-        const supabase = await checkAdmin();
+        const { supabase, userId } = await checkAdmin();
 
         const { error } = await supabase.from("products").delete().eq("id", id);
 
         if (error) {
             throw new Error(error.message);
         }
+
+        await writeAuditLog({
+            actorId: userId,
+            action: "deleted",
+            entityType: "products",
+            entityId: id,
+        });
 
         revalidatePath("/admin/products");
         revalidatePath("/products");

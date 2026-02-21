@@ -50,7 +50,7 @@ export async function writeAuditLog(params: {
   entityId?: string;
   metadata?: Record<string, unknown>;
 }) {
-  const supabase = await createRouteClient();
+  const supabase = createAdminClient();
 
   await supabase.from("audit_log").insert({
     actor_id: params.actorId,

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/dashboard/data-table";
 import { ModerationActionButton } from "@/components/admin/moderation-action-button";
+import { CreatePropertyAgentDialog } from "@/components/admin/create-property-agent-dialog";
 import { createClient } from "@/lib/supabase/server";
 
 type SearchParams = {
@@ -43,20 +44,23 @@ export default async function AdminAgentsPage({ searchParams }: { searchParams: 
           <h1 className="text-2xl font-bold text-navy">Agents</h1>
           <p className="text-sm text-muted-foreground">Approve, reject, or suspend agent accounts.</p>
         </div>
-        <form method="get" className="flex items-center gap-2">
-          <select
-            name="status"
-            defaultValue={statusFilter || "all"}
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-          >
-            <option value="all">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="suspended">Suspended</option>
-          </select>
-          <Button type="submit" variant="outline">Filter</Button>
-        </form>
+        <div className="flex items-center gap-3">
+          <CreatePropertyAgentDialog />
+          <form method="get" className="flex items-center gap-2">
+            <select
+              name="status"
+              defaultValue={statusFilter || "all"}
+              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+            >
+              <option value="all">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="suspended">Suspended</option>
+            </select>
+            <Button type="submit" variant="outline">Filter</Button>
+          </form>
+        </div>
       </div>
 
       <DataTable

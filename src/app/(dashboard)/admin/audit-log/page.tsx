@@ -1,7 +1,7 @@
 import { DataTable } from "@/components/dashboard/data-table";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatTime } from "@/lib/format";
 
 type SearchParams = {
   action?: string;
@@ -73,7 +73,7 @@ export default async function AdminAuditLogPage({ searchParams }: { searchParams
           { key: "action", title: "Action", render: (row) => row.action.replaceAll("_", " ") },
           { key: "entity_type", title: "Entity" },
           { key: "actor", title: "Actor", render: (row) => row.profiles?.full_name || "System" },
-          { key: "created_at", title: "Date", render: (row) => formatDate(row.created_at) },
+          { key: "created_at", title: "Date & Time", render: (row) => `${formatDate(row.created_at)} · ${formatTime(row.created_at)}` },
         ]}
       />
 
