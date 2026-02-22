@@ -137,7 +137,11 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
       // 1. WhatsApp + Email to Customer
       notifyJobs.push(
-        sendWhatsApp(visitDetails.visitor_phone, visitConfirmedVisitor(templateParams))
+        sendWhatsApp(visitDetails.visitor_phone, visitConfirmedVisitor({
+          ...templateParams,
+          visitingAgentName: visitingAgentProfile.full_name,
+          visitingAgentPhone: visitingAgentProfile.phone,
+        }))
       );
       if (visitDetails.visitor_email) {
         const emailTpl = visitConfirmedCustomerEmail(templateParams);
@@ -174,6 +178,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         visitTime: visitDetails.visit_time,
         visitorName: visitDetails.visitor_name,
         visitingAgentName: visitingAgentProfile.full_name,
+        visitingAgentPhone: visitingAgentProfile.phone || "N/A",
       };
 
       if (ownerAgentProfile?.phone) {

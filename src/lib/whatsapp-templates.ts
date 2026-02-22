@@ -4,9 +4,14 @@ export function visitConfirmedVisitor(params: {
   visitDate: string;
   visitTime: string;
   locationUrl?: string | null;
+  visitingAgentName?: string | null;
+  visitingAgentPhone?: string | null;
 }) {
   const mapText = params.locationUrl ? ` Property Map: ${params.locationUrl}` : "";
-  return `Hello ${params.visitorName}, your visit for "${params.propertyTitle}" is confirmed on ${params.visitDate} at ${params.visitTime}.${mapText}`;
+  const agentText = params.visitingAgentName && params.visitingAgentPhone
+    ? `\nYour Visiting Agent: ${params.visitingAgentName} (${params.visitingAgentPhone})`
+    : "";
+  return `Hello ${params.visitorName}, your visit for "${params.propertyTitle}" is confirmed on ${params.visitDate} at ${params.visitTime}.${mapText}${agentText}`;
 }
 
 export function visitConfirmedAgent(params: {
@@ -43,15 +48,13 @@ Property Agent: ${params.ownerName} (${params.ownerPhone})${mapText}${instText}$
 
 export function visitAssignedPropertyAgent(params: {
   ownerName: string;
-  propertyTitle: string;
-  visitDate: string;
-  visitTime: string;
   visitorName: string;
   visitingAgentName: string;
+  visitingAgentPhone: string;
 }) {
-  return `Hello ${params.ownerName}, your property "${params.propertyTitle}" has a confirmed visit on ${params.visitDate} at ${params.visitTime}.
-Customer: ${params.visitorName}
-Assigned Visiting Agent: ${params.visitingAgentName}`;
+  return `Hello ${params.ownerName}, you have a confirmed visit booking.
+Customer Name: ${params.visitorName}
+Assigned Visiting Agent: ${params.visitingAgentName} (${params.visitingAgentPhone})`;
 }
 
 export function visitCancelled(params: {
