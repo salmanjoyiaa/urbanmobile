@@ -7,11 +7,10 @@ export function visitConfirmedVisitor(params: {
   visitingAgentName?: string | null;
   visitingAgentPhone?: string | null;
 }) {
-  const mapText = params.locationUrl ? ` Property Map: ${params.locationUrl}` : "";
   const agentText = params.visitingAgentName && params.visitingAgentPhone
     ? `\nYour Visiting Agent: ${params.visitingAgentName} (${params.visitingAgentPhone})`
     : "";
-  return `Hello ${params.visitorName}, your visit for "${params.propertyTitle}" is confirmed on ${params.visitDate} at ${params.visitTime}.${mapText}${agentText}`;
+  return `Hello ${params.visitorName}, your visit for "${params.propertyTitle}" is confirmed on ${params.visitDate} at ${params.visitTime}.${agentText}`;
 }
 
 export function visitConfirmedAgent(params: {
