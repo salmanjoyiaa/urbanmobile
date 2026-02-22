@@ -122,7 +122,6 @@ export default function HomePage() {
               <ul className="space-y-2.5">
                 <li><Link href="/signup/agent?type=property" className="text-white/60 hover:text-white text-sm transition-colors">Apply as Property Agent</Link></li>
                 <li><Link href="/signup/agent?type=visiting" className="text-white/60 hover:text-white text-sm transition-colors">Apply as Visiting Team</Link></li>
-                <li><Link href="/signup" className="text-white/60 hover:text-white text-sm transition-colors">Create Account</Link></li>
               </ul>
             </div>
           </div>

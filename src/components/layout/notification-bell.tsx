@@ -55,10 +55,17 @@ export function NotificationBell() {
               onClick={() => {
                 let path = "/admin";
                 if (item.type) {
-                  if (item.type.includes("maintenance")) {
+                  if (item.type === "agent_signup") {
+                    const agentType = item.metadata?.agent_type as string | undefined;
+                    path = agentType === "visiting" ? "/admin/visiting-team" : "/admin/agents";
+                  } else if (item.type.includes("maintenance")) {
                     path = "/admin/maintenance";
-                  } else if (item.type.includes("lead") || item.type.includes("visit")) {
+                  } else if (item.type.includes("visit")) {
+                    path = "/admin/visits";
+                  } else if (item.type.includes("lead")) {
                     path = "/admin/leads";
+                  } else if (item.type.includes("agent")) {
+                    path = "/admin/agents";
                   } else if (item.type.includes("product")) {
                     path = "/admin/products";
                   }

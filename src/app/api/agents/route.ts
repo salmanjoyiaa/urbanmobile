@@ -126,11 +126,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Notify admins of new agent registration
+    const agentLabel = parsed.data.agent_type === "visiting" ? "Visiting Team" : "Property";
     await notifyAdmins({
-      title: "New Agent Application",
-      body: `Company ${parsed.data.company_name} has applied to become an agent.`,
+      title: `New ${agentLabel} Agent Application`,
+      body: `${parsed.data.company_name} has applied to join the ${agentLabel.toLowerCase()} team.`,
       type: "agent_signup",
-      metadata: { profile_id: user.id },
+      metadata: { profile_id: user.id, agent_type: parsed.data.agent_type },
     });
 
     return NextResponse.json({ success: true, agent: data }, { status: 201 });
