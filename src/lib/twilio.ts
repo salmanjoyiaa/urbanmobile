@@ -11,7 +11,10 @@ type SendResult = {
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-const from = process.env.TWILIO_WHATSAPP_FROM;
+const rawFrom = process.env.TWILIO_WHATSAPP_FROM || "";
+const from = rawFrom.replace(/\s+/g, "").startsWith("whatsapp:")
+  ? rawFrom.replace(/\s+/g, "")
+  : (rawFrom ? `whatsapp:${rawFrom.replace(/\s+/g, "")}` : undefined);
 
 const client = accountSid && authToken ? twilio(accountSid, authToken) : null;
 

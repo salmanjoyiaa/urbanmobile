@@ -154,7 +154,7 @@ export const visitRequestSchema = z.object({
     .regex(emailRegex, "Valid email is required"),
   visitor_phone: z
     .string()
-    .regex(/^(05|\+9665)[0-9]{8}$/, "Must be a valid 10-digit Saudi WhatsApp number starting with 05 or +9665"),
+    .regex(/^((05|\+9665)[0-9]{8}|(03|\+923)[0-9]{9})$/, "Must be a valid Saudi (05/9665) or Pakistan (03/923) WhatsApp number"),
   visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
   visit_time: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format"),
 });
@@ -172,7 +172,7 @@ export const buyRequestSchema = z.object({
     .regex(emailRegex, "Valid email is required"),
   buyer_phone: z
     .string()
-    .regex(/^(05|\+9665)[0-9]{8}$/, "Must be a valid 10-digit Saudi WhatsApp number starting with 05 or +9665"),
+    .regex(/^((05|\+9665)[0-9]{8}|(03|\+923)[0-9]{9})$/, "Must be a valid Saudi (05/9665) or Pakistan (03/923) WhatsApp number"),
   message: z
     .string()
     .max(5000, "Message must not exceed 5000 characters")
@@ -195,7 +195,7 @@ export const maintenanceRequestSchema = z.object({
     .regex(emailRegex, "Valid email is required"),
   customer_phone: z
     .string()
-    .regex(/^(05|\+9665)[0-9]{8}$/, "Must be a valid 10-digit Saudi WhatsApp number starting with 05 or +9665"),
+    .regex(/^((05|\+9665)[0-9]{8}|(03|\+923)[0-9]{9})$/, "Must be a valid Saudi (05/9665) or Pakistan (03/923) WhatsApp number"),
   details: z
     .string()
     .max(5000, "Details must not exceed 5000 characters")

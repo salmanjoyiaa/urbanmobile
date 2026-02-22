@@ -113,7 +113,7 @@ export function MaintenanceRequestForm() {
                         <Label htmlFor="customer_phone" className="text-[#2A201A] font-bold">WhatsApp Number</Label>
                         <Input
                             id="customer_phone"
-                            placeholder="05XXXXXXXX or +9665XXXXXXXX"
+                            placeholder="05XXX or +923XXX"
                             className="h-12 border-[#D9C5B2]/50 bg-white rounded-xl focus:ring-[#2A201A]"
                             {...register("customer_phone")}
                         />

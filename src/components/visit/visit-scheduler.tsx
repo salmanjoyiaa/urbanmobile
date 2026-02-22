@@ -22,7 +22,7 @@ import { toast } from "sonner";
 const contactSchema = z.object({
   visitor_name: z.string().min(2, "Name must be at least 2 characters").max(100),
   visitor_email: z.string().min(1, "Email is required").email("Valid email is required"),
-  visitor_phone: z.string().regex(/^(05|\+9665)[0-9]{8}$/, "Must be a valid Saudi WhatsApp number (05XXXXXXXX or +9665XXXXXXXX)"),
+  visitor_phone: z.string().regex(/^((05|\+9665)[0-9]{8}|(03|\+923)[0-9]{9})$/, "Must be a valid Saudi (05/9665) or Pakistan (03/923) WhatsApp number"),
   visitor_message: z.string().max(5000).optional(),
 });
 
@@ -191,7 +191,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
             </div>
             <div className="space-y-2">
               <Label htmlFor="visitor-phone">WhatsApp Number</Label>
-              <Input id="visitor-phone" placeholder="05XXXXXXXX or +9665XXXXXXXX" {...register("visitor_phone")} disabled={createVisit.isPending} />
+              <Input id="visitor-phone" placeholder="05XXX or +923XXX" {...register("visitor_phone")} disabled={createVisit.isPending} />
               {errors.visitor_phone && (
                 <p className="text-sm text-destructive">{errors.visitor_phone.message}</p>
               )}

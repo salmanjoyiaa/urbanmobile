@@ -116,7 +116,7 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
               id="buyer-phone"
               {...register("buyer_phone")}
               disabled={isLoading}
-              placeholder="05XXXXXXXX or +9665XXXXXXXX"
+              placeholder="05XXX or +923XXX"
             />
             {errors.buyer_phone && (
               <p className="text-sm text-destructive">{errors.buyer_phone.message}</p>
