@@ -1,10 +1,13 @@
-import Link from "next/link";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/dashboard/data-table";
-import { ModerationActionButton } from "@/components/admin/moderation-action-button";
+import { AgentRowActions } from "@/components/admin/agent-row-actions";
 import { CreatePropertyAgentDialog } from "@/components/admin/create-property-agent-dialog";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type SearchParams = {
   status?: string;
@@ -79,17 +82,7 @@ export default async function AdminAgentsPage({ searchParams }: { searchParams: 
             key: "actions",
             title: "Actions",
             render: (row) => (
-              <div className="flex flex-wrap gap-2">
-                <Link href={`/admin/agents/${row.id}`}>
-                  <Button size="sm" variant="secondary">View</Button>
-                </Link>
-                {row.status !== "approved" && (
-                  <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "approved" }} label="Approve" />
-                )}
-                <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "rejected" }} label="Reject" variant="destructive" />
-                <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "suspended" }} label="Suspend" variant="outline" />
-                <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} method="DELETE" label="Delete Row" variant="destructive" />
-              </div>
+              <AgentRowActions id={row.id} status={row.status} agentType="property" />
             ),
           },
         ]}

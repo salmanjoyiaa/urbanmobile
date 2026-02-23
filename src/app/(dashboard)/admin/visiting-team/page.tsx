@@ -2,7 +2,10 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateVisitingAgentDialog } from "@/components/admin/create-visiting-agent-dialog";
-import { ModerationActionButton } from "@/components/admin/moderation-action-button";
+import { AgentRowActions } from "@/components/admin/agent-row-actions";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type AgentRow = {
     id: string;
@@ -57,18 +60,7 @@ export default async function AdminVisitingTeamPage() {
                         key: "actions",
                         title: "Actions",
                         render: (row) => (
-                            <div className="flex flex-wrap gap-2">
-                                {row.status === "pending" && (
-                                    <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "approved" }} label="Approve" />
-                                )}
-                                {row.status === "approved" && (
-                                    <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "suspended" }} label="Suspend" variant="outline" />
-                                )}
-                                {row.status === "suspended" && (
-                                    <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "approved" }} label="Un-suspend" variant="secondary" />
-                                )}
-                                <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} method="DELETE" label="Delete" variant="destructive" />
-                            </div>
+                            <AgentRowActions id={row.id} status={row.status} agentType="visiting" />
                         ),
                     },
                 ]}
