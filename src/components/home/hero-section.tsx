@@ -70,14 +70,17 @@ export function HeroSection() {
           <div className="relative w-full max-w-[500px] sm:max-w-[580px] lg:max-w-[680px]">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[65%] h-[65%] bg-[#D9C5B2]/25 dark:bg-[#B69780]/10 rounded-full blur-[70px]" />
             <div className="relative animate-float">
-              <Image
-                src="/3d-house.png"
-                alt="3D House"
-                width={680}
-                height={550}
-                className="w-full h-auto object-contain drop-shadow-2xl"
-                priority
-              />
+              {/* Dark mode: white rounded card frames the house intentionally */}
+              <div className="dark:bg-white dark:rounded-3xl dark:overflow-hidden dark:shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
+                <Image
+                  src="/3d-house.png"
+                  alt="3D House"
+                  width={680}
+                  height={550}
+                  className="w-full h-auto object-contain drop-shadow-2xl mix-blend-multiply dark:mix-blend-normal"
+                  priority
+                />
+              </div>
             </div>
           </div>
         </motion.div>
