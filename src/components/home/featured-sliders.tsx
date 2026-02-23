@@ -90,11 +90,11 @@ export async function FeaturedSliders() {
       {propertySlides.length > 0 && (
         <div>
           <div className="mb-8 flex items-end justify-between">
-            <div>
-              <p className="text-[12px] font-semibold uppercase tracking-widest text-[#B69780] mb-2">
+            <div className="text-center sm:text-left mx-auto sm:mx-0">
+              <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#B69780] mb-2">
                 Affordable Rentals
               </p>
-              <h2 className="text-[28px] font-extrabold tracking-tight text-[#2A201A] sm:text-[40px] leading-[1.1]">
+              <h2 className="text-[32px] font-extrabold tracking-tight text-[#2A201A] sm:text-[40px] leading-[1.1]">
                 Featured Rentals
               </h2>
             </div>
@@ -121,11 +121,11 @@ export async function FeaturedSliders() {
       {productSlides.length > 0 && (
         <div className={propertySlides.length > 0 ? "mt-24" : ""}>
           <div className="mb-8 flex items-end justify-between">
-            <div>
-              <p className="text-[12px] font-semibold uppercase tracking-widest text-[#B69780] mb-2">
+            <div className="text-center sm:text-left mx-auto sm:mx-0">
+              <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#B69780] mb-2">
                 Affordable Essentials
               </p>
-              <h2 className="text-[28px] font-extrabold tracking-tight text-[#2A201A] sm:text-[40px] leading-[1.1]">
+              <h2 className="text-[32px] font-extrabold tracking-tight text-[#2A201A] sm:text-[40px] leading-[1.1]">
                 Featured Products
               </h2>
             </div>

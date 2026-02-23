@@ -17,55 +17,55 @@ export default function HomePage() {
         <section className="max-w-[1400px] mx-auto px-5 sm:px-6 lg:px-12 pt-8 pb-20 lg:pt-12 lg:pb-28">
           <div className="flex flex-col lg:flex-row items-center relative">
             {/* Left Text */}
-            <div className="w-full lg:w-1/2 z-10 pt-4 pb-4 lg:pb-8">
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#2A201A]/8 px-4 py-2 mb-6">
-                <span className="text-[12px] font-bold text-[#2A201A] tracking-wide uppercase">
-                  Trusted by 500+ tenants across Saudi Arabia
+            <div className="w-full lg:w-1/2 z-10 pt-2 pb-8 lg:pb-8 flex flex-col items-center lg:items-start text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#2A201A]/5 px-4 py-2 border border-[#2A201A]/10 mb-8 lg:mb-6 shadow-sm">
+                <span className="text-[11px] lg:text-[12px] font-bold text-[#2A201A] tracking-[0.1em] uppercase">
+                  Trusted by 500+ tenants across KSA
                 </span>
               </div>
 
-              <h1 className="text-[42px] sm:text-[56px] md:text-[64px] lg:text-[76px] font-extrabold tracking-[-0.03em] leading-[1.05] mb-6">
-                Your Next Home,{" "}
+              <h1 className="text-[46px] sm:text-[56px] md:text-[64px] lg:text-[76px] font-extrabold tracking-[-0.04em] leading-[1.05] mb-6">
+                Your Next Home,<br className="hidden sm:block" />{" "}
                 <span className="text-[#B69780]">Made Simple</span>
               </h1>
 
-              <p className="text-[#6B5A4E] max-w-lg text-[17px] leading-relaxed mb-8 font-medium">
+              <p className="text-[#6B5A4E] max-w-[320px] sm:max-w-lg text-[16px] sm:text-[17px] leading-relaxed mb-10 font-medium">
                 Short-term, long-term, or contract rentals — find verified properties, quality products, and 24/7 maintenance services across Saudi Arabia.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 mb-8">
-                <Link href="/properties">
-                  <button className="w-full sm:w-auto h-14 bg-[#2A201A] text-white px-10 rounded-xl text-[16px] font-bold transition-all hover:bg-black hover:scale-[1.02] active:scale-[0.98]">
+              <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-4 mb-10">
+                <Link href="/properties" className="w-full sm:w-auto">
+                  <button className="w-full sm:w-auto h-14 bg-[#2A201A] text-white px-10 rounded-2xl text-[16px] font-bold transition-all hover:bg-black hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#2A201A]/20">
                     Browse Rentals
                   </button>
                 </Link>
-                <Link href="/maintenance">
-                  <button className="w-full sm:w-auto h-14 bg-transparent text-[#2A201A] px-10 rounded-xl text-[16px] font-bold border-2 border-[#2A201A]/20 transition-all hover:border-[#2A201A]/40 hover:bg-[#2A201A]/5 active:scale-[0.98]">
+                <Link href="/maintenance" className="w-full sm:w-auto">
+                  <button className="w-full sm:w-auto h-14 bg-white text-[#2A201A] px-10 rounded-2xl text-[16px] font-bold border-2 border-[#D9C5B2]/40 transition-all hover:border-[#2A201A] hover:bg-[#FCF9F2] active:scale-[0.98] shadow-sm">
                     Request Maintenance
                   </button>
                 </Link>
               </div>
 
-              <div className="flex items-center gap-6 text-sm text-[#6B5A4E]">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  <span className="font-semibold">1-Hour Emergency Response</span>
+              <div className="hidden md:flex items-center gap-6 text-sm text-[#6B5A4E]">
+                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-[#D9C5B2]/30 shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="font-semibold text-[13px]">1-Hour Emergency Response</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  <span className="font-semibold">24-Hour Standard Service</span>
+                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-[#D9C5B2]/30 shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="font-semibold text-[13px]">24-Hour Standard Service</span>
                 </div>
               </div>
             </div>
 
             {/* Right 3D Image */}
             <div
-              className="w-full lg:w-1/2 relative lg:absolute lg:right-[-100px] lg:top-[-80px] flex justify-center lg:block mix-blend-darken pointer-events-none"
+              className="w-full lg:w-1/2 relative lg:absolute lg:right-[-100px] lg:top-[-80px] flex justify-center lg:block mix-blend-darken pointer-events-none mt-4 lg:mt-0"
               style={{ filter: "brightness(1.05) contrast(1.05)" }}
             >
-              <div className="relative w-full max-w-[600px] lg:max-w-[900px] aspect-[4/3]">
+              <div className="relative w-full max-w-[90%] sm:max-w-[600px] lg:max-w-[900px] aspect-[4/3] transform hover:scale-[1.02] transition-transform duration-700">
                 <div
-                  className="absolute inset-0 bg-contain bg-right-bottom bg-no-repeat"
+                  className="absolute inset-0 bg-contain bg-center lg:bg-right-bottom bg-no-repeat drop-shadow-2xl"
                   style={{ backgroundImage: "url('/3d-house.png')" }}
                 />
               </div>
