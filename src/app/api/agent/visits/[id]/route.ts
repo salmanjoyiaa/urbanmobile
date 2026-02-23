@@ -11,6 +11,7 @@ const payloadSchema = z.object({
         "deal_fail",
         "commission_got",
         "deal_close",
+        "reschedule",
     ]),
     customer_remarks: z.string().optional().nullable(),
 });
