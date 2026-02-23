@@ -2,6 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Star } from "lucide-react";
+import { TestimonialDialog } from "@/components/admin/testimonial-dialog";
+import { ModerationActionButton } from "@/components/admin/moderation-action-button";
 
 type TestimonialRow = {
   id: string;
@@ -26,9 +28,12 @@ export default async function AdminTestimonialsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-navy">Testimonials</h1>
-        <p className="text-sm text-muted-foreground">Manage homepage testimonials and reviews.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-navy">Testimonials</h1>
+          <p className="text-sm text-muted-foreground">Manage homepage testimonials and reviews.</p>
+        </div>
+        <TestimonialDialog />
       </div>
 
       <DataTable
@@ -72,6 +77,21 @@ export default async function AdminTestimonialsPage() {
             key: "created_at",
             title: "Added",
             render: (row) => new Date(row.created_at).toLocaleDateString(),
+          },
+          {
+            key: "actions",
+            title: "Actions",
+            render: (row) => (
+              <div className="flex gap-2">
+                <TestimonialDialog testimonial={row as TestimonialRow} />
+                <ModerationActionButton
+                  label="Delete"
+                  endpoint={`/api/admin/testimonials/${row.id}`}
+                  method="DELETE"
+                  variant="destructive"
+                />
+              </div>
+            ),
           },
         ]}
       />

@@ -21,7 +21,7 @@ export default async function AdminPropertiesPage() {
   const supabase = createAdminClient();
   const { data } = (await supabase
     .from("properties")
-    .select("id, title, city, status, price, agents(profiles(full_name))")
+    .select("id, title, city, status, price, agents:agent_id(profiles:profile_id(full_name))")
     .order("created_at", { ascending: false })) as { data: Row[] | null };
 
   const rows = data || [];

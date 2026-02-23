@@ -112,3 +112,48 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
   return NextResponse.json({ success: true });
 }
+
+export async function DELETE(request: Request, context: { params: { id: string } }) {
+  const admin = await getAdminRouteContext();
+  if (admin.error || !admin.profile) {
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
+  }
+
+  // Fetch agent to conditionally delete their auth user or just the agent profile
+  // In a real app we might want to delete the user entirely or just the agent role.
+  // For now, we will delete the agent record. The profile remains as 'customer'.
+  // We can update the user profile role if needed, or simply let CASCADE handle it.
+
+  const { data: agent } = (await admin.supabase
+    .from("agents")
+    .select("profile_id")
+    .eq("id", context.params.id)
+    .single()) as { data: { profile_id: string } | null };
+
+  if (agent?.profile_id) {
+    // Optionally revert the user's role to customer
+    await admin.supabase
+      .from("profiles")
+      .update({ role: "customer" } as never)
+      .eq("id", agent.profile_id);
+  }
+
+  const { error } = await admin.supabase
+    .from("agents")
+    .delete()
+    .eq("id", context.params.id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  await writeAuditLog({
+    actorId: admin.profile.id,
+    action: "agent_deleted",
+    entityType: "agents",
+    entityId: context.params.id,
+    metadata: {},
+  });
+
+  return NextResponse.json({ success: true });
+}

@@ -1,0 +1,231 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Building2, Calendar, Clock, Phone, User, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+type VisitRow = {
+    id: string;
+    visitor_name: string;
+    visitor_email: string;
+    visitor_phone: string;
+    visit_date: string;
+    visit_time: string;
+    status: string;
+    visiting_status?: string | null;
+    customer_remarks?: string | null;
+    visiting_agent: {
+        full_name: string;
+    } | null;
+    properties: {
+        title: string;
+        agents: {
+            profiles: {
+                full_name: string;
+            } | null;
+        } | null;
+    } | null;
+};
+
+type VisitingAgent = {
+    id: string;
+    name: string;
+};
+
+interface VisitRequestDialogProps {
+    visit: VisitRow;
+    visitingAgents: VisitingAgent[];
+}
+
+export function VisitRequestDialog({ visit, visitingAgents }: VisitRequestDialogProps) {
+    const router = useRouter();
+    const [open, setOpen] = useState(false);
+    const [isLgLoading, setIsLgLoading] = useState(false);
+    const [selectedAgentId, setSelectedAgentId] = useState<string>("");
+
+    const handleAssign = async () => {
+        if (!selectedAgentId) return;
+        setIsLgLoading(true);
+        try {
+            const res = await fetch(`/api/admin/visits/${visit.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    status: "assigned",
+                    visiting_agent_id: selectedAgentId,
+                }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Failed to assign agent");
+            }
+
+            toast.success("Visiting team agent assigned successfully.");
+            router.refresh();
+            setOpen(false);
+        } catch (e) {
+            toast.error(e instanceof Error ? e.message : "An error occurred");
+        } finally {
+            setIsLgLoading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!confirm("Are you sure you want to delete this visit request? This cannot be undone.")) return;
+
+        setIsLgLoading(true);
+        try {
+            const res = await fetch(`/api/admin/visits/${visit.id}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Failed to delete visit");
+            }
+
+            toast.success("Visit request deleted.");
+            router.refresh();
+            setOpen(false);
+        } catch (e) {
+            toast.error(e instanceof Error ? e.message : "An error occurred");
+        } finally {
+            setIsLgLoading(false);
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button variant="secondary" size="sm">Manage</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-xl">
+                <DialogHeader>
+                    <div className="flex justify-between items-start pr-4">
+                        <div>
+                            <DialogTitle className="text-xl flex items-center gap-2">
+                                Visit details
+                                <Badge variant={visit.status === "confirmed" ? "default" : "secondary"} className="capitalize">
+                                    {visit.status}
+                                </Badge>
+                            </DialogTitle>
+                            <DialogDescription className="mt-1">
+                                Manage the schedule, visiting team assignment, and view lead status.
+                            </DialogDescription>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={handleDelete} className="text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0">
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </DialogHeader>
+
+                <div className="grid grid-cols-2 gap-6 py-4">
+                    <div className="space-y-4">
+                        <div>
+                            <Label className="text-muted-foreground text-xs uppercase tracking-wider">Property</Label>
+                            <div className="flex items-start gap-2 mt-1">
+                                <Building2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                                <span className="font-medium">{visit.properties?.title || "Unknown Property"}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <Label className="text-muted-foreground text-xs uppercase tracking-wider">Property Agent</Label>
+                            <div className="flex items-center gap-2 mt-1">
+                                <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <span>{visit.properties?.agents?.profiles?.full_name || "—"}</span>
+                            </div>
+                        </div>
+                        <Separator />
+                        <div>
+                            <Label className="text-muted-foreground text-xs uppercase tracking-wider">Schedule</Label>
+                            <div className="flex items-center gap-2 mt-1">
+                                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <span>{format(new Date(visit.visit_date), "MMMM d, yyyy")}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                                <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <span>{visit.visit_time}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div>
+                            <Label className="text-muted-foreground text-xs uppercase tracking-wider">Visitor</Label>
+                            <div className="flex items-center gap-2 mt-1">
+                                <User className="h-4 w-4 text-amber-600 shrink-0" />
+                                <span className="font-medium">{visit.visitor_name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                                <Phone className="h-4 w-4 shrink-0" />
+                                <span>{visit.visitor_phone}</span>
+                            </div>
+                        </div>
+                        <Separator />
+                        <div>
+                            <Label className="text-muted-foreground text-xs uppercase tracking-wider mb-2 block">
+                                Lead / Field Status
+                            </Label>
+                            {!visit.visiting_status && !visit.customer_remarks ? (
+                                <span className="text-sm text-muted-foreground italic">No field data yet.</span>
+                            ) : (
+                                <div className="space-y-2 bg-muted/50 p-3 rounded-md text-sm border">
+                                    {visit.visiting_status && (
+                                        <div className="flex justify-between border-b pb-2">
+                                            <span className="text-muted-foreground">Deal Phase:</span>
+                                            <span className="font-medium capitalize">{visit.visiting_status.replace("_", " ")}</span>
+                                        </div>
+                                    )}
+                                    {visit.customer_remarks && (
+                                        <div>
+                                            <span className="text-muted-foreground block mb-1">Remarks:</span>
+                                            <span className="italic block pl-2 border-l-2 border-primary/40">&quot;{visit.customer_remarks}&quot;</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-muted/30 p-4 -mx-6 -mb-6 mt-2 border-t flex flex-col gap-3 rounded-b-lg">
+                    <Label className="text-sm font-semibold">Assign Visiting Team Agent</Label>
+                    <div className="flex gap-2">
+                        <Select value={selectedAgentId} onValueChange={setSelectedAgentId}>
+                            <SelectTrigger className="flex-1 bg-background">
+                                <SelectValue placeholder={visit.visiting_agent?.full_name || "Select an agent to dispatch"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {visitingAgents.map((agent) => (
+                                    <SelectItem key={agent.id} value={agent.id}>
+                                        {agent.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Button onClick={handleAssign} disabled={!selectedAgentId || isLgLoading}>
+                            {isLgLoading ? "Updating..." : "Dispatch"}
+                        </Button>
+                    </div>
+                </div>
+
+            </DialogContent>
+        </Dialog>
+    );
+}

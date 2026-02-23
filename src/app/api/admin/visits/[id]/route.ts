@@ -229,3 +229,29 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
   return NextResponse.json({ success: true });
 }
+
+export async function DELETE(request: Request, context: { params: { id: string } }) {
+  const admin = await getAdminRouteContext();
+  if (admin.error || !admin.profile) {
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
+  }
+
+  const { error } = await admin.supabase
+    .from("visit_requests")
+    .delete()
+    .eq("id", context.params.id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  await writeAuditLog({
+    actorId: admin.profile.id,
+    action: "visit_deleted",
+    entityType: "visit_requests",
+    entityId: context.params.id,
+    metadata: {},
+  });
+
+  return NextResponse.json({ success: true });
+}

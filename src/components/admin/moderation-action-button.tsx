@@ -7,7 +7,8 @@ import { toast } from "sonner";
 
 type ModerationActionButtonProps = {
   endpoint: string;
-  payload: Record<string, unknown>;
+  payload?: Record<string, unknown>;
+  method?: "PATCH" | "DELETE" | "POST";
   label: string;
   variant?: "default" | "outline" | "destructive" | "secondary";
 };
@@ -15,6 +16,7 @@ type ModerationActionButtonProps = {
 export function ModerationActionButton({
   endpoint,
   payload,
+  method = "PATCH",
   label,
   variant = "outline",
 }: ModerationActionButtonProps) {
@@ -22,12 +24,16 @@ export function ModerationActionButton({
   const [isLoading, setLoading] = useState(false);
 
   const run = async () => {
+    if (method === "DELETE" && !confirm("Are you sure you want to delete this record? This cannot be undone.")) {
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch(endpoint, {
-        method: "PATCH",
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: payload ? JSON.stringify(payload) : undefined,
       });
 
       const result = (await response.json()) as { error?: string };

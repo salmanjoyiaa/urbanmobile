@@ -83,9 +83,12 @@ export default async function AdminAgentsPage({ searchParams }: { searchParams: 
                 <Link href={`/admin/agents/${row.id}`}>
                   <Button size="sm" variant="secondary">View</Button>
                 </Link>
-                <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "approved" }} label="Approve" />
+                {row.status !== "approved" && (
+                  <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "approved" }} label="Approve" />
+                )}
                 <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "rejected" }} label="Reject" variant="destructive" />
                 <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "suspended" }} label="Suspend" variant="outline" />
+                <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} method="DELETE" label="Delete Row" variant="destructive" />
               </div>
             ),
           },

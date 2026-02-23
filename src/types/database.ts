@@ -183,6 +183,17 @@ export interface AuditLog {
   created_at: string;
 }
 
+export interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  content: string;
+  rating: number;
+  avatar_url: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
 // Supabase Database type for client typing
 export interface Database {
   public: {
@@ -229,13 +240,41 @@ export interface Database {
       };
       notification_logs: {
         Row: NotificationLog;
-        Insert: Omit<NotificationLog, "id" | "created_at"> & { id?: string };
+        Insert: {
+          id?: string;
+          channel: string;
+          recipient: string;
+          subject?: string | null;
+          content?: string | null;
+          status: string;
+          error_message?: string | null;
+          metadata?: Json | null;
+          created_at?: string;
+        };
         Update: never;
       };
       audit_log: {
         Row: AuditLog;
         Insert: Omit<AuditLog, "id" | "created_at"> & { id?: string };
         Update: never;
+      };
+      testimonials: {
+        Row: Testimonial;
+        Insert: Omit<Testimonial, "id" | "created_at" | "role" | "rating" | "is_active" | "avatar_url"> & {
+          id?: string;
+          role?: string;
+          rating?: number;
+          is_active?: boolean;
+          avatar_url?: string | null;
+        };
+        Update: {
+          name?: string;
+          role?: string;
+          content?: string;
+          rating?: number;
+          avatar_url?: string | null;
+          is_active?: boolean;
+        };
       };
     };
   };

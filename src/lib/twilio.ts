@@ -46,15 +46,16 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
       },
     });
 
-    // @ts-expect-error -- notification_logs insert type mismatch
-    await supabase.from("notification_logs").insert({
+    const { error: logError } = await supabase.from("notification_logs").insert({
       channel: "whatsapp",
       recipient: to,
       content: body,
       subject: null,
       status: "failed",
       error_message: msg,
-    });
+      metadata: null,
+    } as any);
+    if (logError) console.error("[twilio:log:error]", logError);
 
     return { success: false, error: msg };
   }
@@ -73,15 +74,16 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
       },
     });
 
-    // @ts-expect-error -- notification_logs insert type mismatch
-    await supabase.from("notification_logs").insert({
+    const { error: logError } = await supabase.from("notification_logs").insert({
       channel: "whatsapp",
       recipient: normalizedTo,
       content: body,
       subject: null,
       status: "failed",
       error_message: msg,
-    });
+      metadata: null,
+    } as any);
+    if (logError) console.error("[twilio:log:error]", logError);
 
     return { success: false, error: msg };
   }
@@ -96,15 +98,16 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
         body,
       });
 
-      // @ts-expect-error -- notification_logs insert type mismatch
-      await supabase.from("notification_logs").insert({
+      const { error: logError } = await supabase.from("notification_logs").insert({
         channel: "whatsapp",
         recipient: normalizedTo,
         content: body,
         subject: null,
         status: "sent",
+        error_message: null,
         metadata: { sid: message.sid },
-      });
+      } as any);
+      if (logError) console.error("[twilio:log:error]", logError);
 
       return { success: true, sid: message.sid };
     } catch (error) {
@@ -128,15 +131,16 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
     level: "error",
   });
 
-  // @ts-expect-error -- notification_logs insert type mismatch
-  await supabase.from("notification_logs").insert({
+  const { error: logError } = await supabase.from("notification_logs").insert({
     channel: "whatsapp",
     recipient: normalizedTo,
     content: body,
     subject: null,
     status: "failed",
-    error_message: lastError,
-  });
+    error_message: lastError || "Unknown error",
+    metadata: null,
+  } as any);
+  if (logError) console.error("[twilio:log:error]", logError);
 
   return { success: false, error: lastError || "Failed to send WhatsApp message" };
 }

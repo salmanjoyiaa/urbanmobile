@@ -67,9 +67,7 @@ export default async function AdminVisitingTeamPage() {
                                 {row.status === "suspended" && (
                                     <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "approved" }} label="Un-suspend" variant="secondary" />
                                 )}
-                                {row.status !== "rejected" && (
-                                    <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} payload={{ status: "rejected" }} label="Delete" variant="destructive" />
-                                )}
+                                <ModerationActionButton endpoint={`/api/admin/agents/${row.id}`} method="DELETE" label="Delete" variant="destructive" />
                             </div>
                         ),
                     },

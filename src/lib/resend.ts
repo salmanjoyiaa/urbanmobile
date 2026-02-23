@@ -34,15 +34,16 @@ export async function sendEmail(params: {
       },
     });
 
-    // @ts-expect-error -- notification_logs insert type mismatch
-    await supabase.from("notification_logs").insert({
+    const { error: logError } = await supabase.from("notification_logs").insert({
       channel: "email",
       recipient: params.to,
       subject: params.subject,
       content: params.html,
       status: "failed",
       error_message: "Resend is not configured",
-    });
+      metadata: null,
+    } as any);
+    if (logError) console.error("[email:log:error]", logError);
 
     return { success: false, error: "Resend is not configured" };
   }
@@ -69,28 +70,30 @@ export async function sendEmail(params: {
         level: "error",
       });
 
-      // @ts-expect-error -- notification_logs insert type mismatch
-      await supabase.from("notification_logs").insert({
+      const { error: logError } = await supabase.from("notification_logs").insert({
         channel: "email",
         recipient: params.to,
         subject: params.subject,
         content: params.html,
         status: "failed",
         error_message: error.message,
-      });
+        metadata: null,
+      } as any);
+      if (logError) console.error("[email:log:error]", logError);
 
       return { success: false, error: error.message };
     }
 
-    // @ts-expect-error -- notification_logs insert type mismatch
-    await supabase.from("notification_logs").insert({
+    const { error: logError } = await supabase.from("notification_logs").insert({
       channel: "email",
       recipient: params.to,
       subject: params.subject,
       content: params.html,
       status: "sent",
+      error_message: null,
       metadata: { resend_id: data?.id },
-    });
+    } as any);
+    if (logError) console.error("[email:log:error]", logError);
 
     return { success: true, id: data?.id };
   } catch (err) {
@@ -108,15 +111,16 @@ export async function sendEmail(params: {
       level: "error",
     });
 
-    // @ts-expect-error -- notification_logs insert type mismatch
-    await supabase.from("notification_logs").insert({
+    const { error: logError } = await supabase.from("notification_logs").insert({
       channel: "email",
       recipient: params.to,
       subject: params.subject,
       content: params.html,
       status: "failed",
       error_message: message,
-    });
+      metadata: null,
+    } as any);
+    if (logError) console.error("[email:log:error]", logError);
 
     return { success: false, error: message };
   }
