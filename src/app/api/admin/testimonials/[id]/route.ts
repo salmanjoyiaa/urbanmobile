@@ -46,6 +46,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         metadata: parsed.data,
     });
 
+    revalidatePath("/admin/testimonials", "page");
+
     return NextResponse.json({ success: true });
 }
 
@@ -71,6 +73,8 @@ export async function DELETE(request: Request, context: { params: { id: string }
         entityId: context.params.id,
         metadata: {},
     });
+
+    revalidatePath("/admin/testimonials", "page");
 
     return NextResponse.json({ success: true });
 }
