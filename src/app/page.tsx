@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { HomepageNav } from "@/components/home/homepage-nav";
+import { HeroSection } from "@/components/home/hero-section";
 import { FeaturedSliders } from "@/components/home/featured-sliders";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { Testimonials } from "@/components/home/testimonials";
@@ -9,73 +10,12 @@ import { JoinTeam } from "@/components/home/join-team";
 
 export default function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#FCF9F2] text-[#2A201A] font-sans overflow-x-hidden">
+    <div className="flex min-h-screen flex-col bg-[#FCF9F2] dark:bg-[#0F0D0B] text-[#2A201A] dark:text-[#F5F0EA] font-sans overflow-x-hidden">
       <HomepageNav />
 
       <main className="flex-1 w-full">
         {/* Hero Area */}
-        <section className="max-w-[1400px] mx-auto px-5 sm:px-6 lg:px-12 pt-8 pb-20 lg:pt-12 lg:pb-28">
-          <div className="flex flex-col-reverse lg:flex-row items-center relative gap-4 lg:gap-0">
-            <div className="w-full lg:w-1/2 z-10 pb-8 lg:pb-8 flex flex-col items-center lg:items-start text-center lg:text-left pt-6 lg:pt-0">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/60 backdrop-blur-sm px-4 py-1.5 border border-[#2A201A]/10 mb-8 lg:mb-6 shadow-sm">
-                <span className="text-[11px] lg:text-[12px] font-black text-[#2A201A] tracking-[0.15em] uppercase">
-                  Trusted by 500+ tenants across KSA
-                </span>
-              </div>
-
-              <h1 className="text-[50px] sm:text-[56px] md:text-[64px] lg:text-[80px] font-black tracking-[-0.04em] leading-[1] mb-6 text-[#2A201A] drop-shadow-sm">
-                Your Next Home,<br className="hidden sm:block" />{" "}
-                <span className="text-[#B69780] font-medium italic pr-2 tracking-[-0.02em]">Made&nbsp;Simple.</span>
-              </h1>
-
-              <p className="text-[#6B5A4E] max-w-[340px] sm:max-w-lg text-[16px] sm:text-[18px] leading-[1.6] mb-10 font-medium">
-                Short-term, long-term, or contract rentals. Find verified properties, quality products, and 24/7 maintenance services.
-              </p>
-
-              <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-4 mb-10">
-                <Link href="/properties" className="w-full sm:w-auto">
-                  <button className="w-full sm:w-auto h-14 bg-[#2A201A] text-white px-10 rounded-2xl text-[16px] font-bold transition-all hover:bg-black hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#2A201A]/20">
-                    Browse Rentals
-                  </button>
-                </Link>
-                <Link href="/maintenance" className="w-full sm:w-auto">
-                  <button className="w-full sm:w-auto h-14 bg-white text-[#2A201A] px-10 rounded-2xl text-[16px] font-bold border-2 border-[#D9C5B2]/40 transition-all hover:border-[#2A201A] hover:bg-[#FCF9F2] active:scale-[0.98] shadow-sm">
-                    Request Maintenance
-                  </button>
-                </Link>
-              </div>
-
-              <div className="hidden md:flex items-center gap-6 text-sm text-[#6B5A4E]">
-                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-[#D9C5B2]/30 shadow-sm">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="font-semibold text-[13px]">1-Hour Emergency Response</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-[#D9C5B2]/30 shadow-sm">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="font-semibold text-[13px]">24-Hour Standard Service</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right 3D Image */}
-            <div
-              className="w-full lg:w-1/2 relative lg:absolute lg:right-[-100px] lg:top-[-80px] flex justify-center lg:block pointer-events-none mb-4 lg:mb-0 z-0"
-            >
-              {/* Soft underlying glow */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-[#D9C5B2]/30 rounded-full blur-[60px]" />
-
-              <div className="relative w-full max-w-[95%] sm:max-w-[600px] lg:max-w-[900px] aspect-[4/3] transform hover:scale-[1.02] transition-transform duration-700">
-                <div
-                  className="absolute inset-0 bg-contain bg-center lg:bg-right-bottom bg-no-repeat mix-blend-multiply transition-all"
-                  style={{
-                    backgroundImage: "url('/3d-house.png')",
-                    filter: "brightness(1.05) contrast(1.08)"
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        </section>
+        <HeroSection />
 
         {/* Featured Sliders */}
         <section className="max-w-[1400px] mx-auto px-5 sm:px-6 lg:px-12 pb-16">
@@ -96,7 +36,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#D9C5B2]/30 bg-[#2A201A] text-white py-16">
+      <footer className="border-t border-[#D9C5B2]/30 dark:border-white/5 bg-[#2A201A] dark:bg-[#080605] text-white py-16">
         <div className="container mx-auto px-5 lg:px-12 max-w-[1400px]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
             {/* Brand */}

@@ -1,4 +1,7 @@
+"use client";
+
 import { Search, CalendarCheck, Key } from "lucide-react";
+import { motion } from "framer-motion";
 
 const steps = [
   {
@@ -23,30 +26,41 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-20 lg:py-28">
+    <section className="py-20 lg:py-28 bg-[#FCF9F2] dark:bg-[#0F0D0B]">
       <div className="container mx-auto px-5 lg:px-12 max-w-[1400px]">
-        <div className="text-center mb-14">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center mb-14"
+        >
           <p className="text-[13px] font-bold uppercase tracking-[0.2em] text-[#B69780] mb-3">How It Works</p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#2A201A] tracking-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#2A201A] dark:text-white tracking-tight">
             Find Your Home in 3 Steps
           </h2>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-          {steps.map((item) => (
-            <div
+          {steps.map((item, i) => (
+            <motion.div
               key={item.step}
-              className="relative bg-white rounded-2xl p-8 border border-[#eff3f4] hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+              initial={{ opacity: 0, y: 32 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: i * 0.12 }}
+              whileHover={{ y: -6, transition: { duration: 0.3, ease: "easeOut" } }}
+              className="relative bg-white dark:bg-[#1A1614] rounded-2xl p-8 border border-[#eff3f4] dark:border-white/5 hover:shadow-xl dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-shadow duration-300 cursor-default"
             >
-              <div className="absolute -top-4 -right-2 text-[72px] font-black text-[#2A201A]/5 leading-none select-none">
+              <div className="absolute -top-4 -right-2 text-[72px] font-black text-[#2A201A]/5 dark:text-white/5 leading-none select-none">
                 {item.step}
               </div>
-              <div className="w-14 h-14 rounded-xl bg-[#2A201A] flex items-center justify-center mb-6">
-                <item.icon className="h-6 w-6 text-white" />
+              <div className="w-14 h-14 rounded-xl bg-[#2A201A] dark:bg-[#B69780] flex items-center justify-center mb-6">
+                <item.icon className="h-6 w-6 text-white dark:text-[#0F0D0B]" />
               </div>
-              <h3 className="text-xl font-bold text-[#2A201A] mb-3">{item.title}</h3>
-              <p className="text-[#6B5A4E] leading-relaxed">{item.description}</p>
-            </div>
+              <h3 className="text-xl font-bold text-[#2A201A] dark:text-white mb-3">{item.title}</h3>
+              <p className="text-[#6B5A4E] dark:text-white/55 leading-relaxed">{item.description}</p>
+            </motion.div>
           ))}
         </div>
       </div>

@@ -1,5 +1,8 @@
+"use client";
+
 import { Wrench, ShieldCheck, Zap, Droplets, PaintRoller, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 const services = [
     {
@@ -26,58 +29,81 @@ const services = [
 
 export function MaintenanceServices() {
     return (
-        <section className="py-24 bg-[#FCF9F2] relative overflow-hidden">
+        <section className="py-24 bg-[#FCF9F2] dark:bg-[#0F0D0B] relative overflow-hidden">
             <div className="container mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16 gap-6 sm:gap-8">
-                    <div className="max-w-xl text-center md:text-left mx-auto md:mx-0">
-                        <h2 className="text-[34px] sm:text-[36px] md:text-[48px] font-extrabold text-[#2A201A] leading-[1.1] mb-5">
+                    <motion.div
+                        initial={{ opacity: 0, y: 24 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-60px" }}
+                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                        className="max-w-xl text-center md:text-left mx-auto md:mx-0"
+                    >
+                        <h2 className="text-[34px] sm:text-[36px] md:text-[48px] font-extrabold text-[#2A201A] dark:text-white leading-[1.1] mb-5">
                             Premium Property <br className="hidden md:block" />
                             Maintenance.
                         </h2>
-                        <p className="text-[16px] sm:text-[17px] text-[#6B5A4E] leading-relaxed mx-auto max-w-sm sm:max-w-none">
+                        <p className="text-[16px] sm:text-[17px] text-[#6B5A4E] dark:text-white/55 leading-relaxed mx-auto max-w-sm sm:max-w-none">
                             We provide end-to-end maintenance services managed by certified professionals. Keep your property in pristine condition effortlessly.
                         </p>
                         <div className="mt-6 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3">
-                            <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white shadow-sm border border-[#D9C5B2]/30 px-5 py-2">
+                            <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white dark:bg-white/5 shadow-sm border border-[#D9C5B2]/30 dark:border-white/10 px-5 py-2">
                                 <Clock className="w-4 h-4 text-red-500 animate-pulse" />
-                                <span className="text-[13px] font-bold text-[#2A201A]">Emergency: 1-Hour</span>
+                                <span className="text-[13px] font-bold text-[#2A201A] dark:text-white/80">Emergency: 1-Hour</span>
                             </div>
-                            <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white shadow-sm border border-[#D9C5B2]/30 px-5 py-2">
+                            <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white dark:bg-white/5 shadow-sm border border-[#D9C5B2]/30 dark:border-white/10 px-5 py-2">
                                 <Clock className="w-4 h-4 text-blue-500" />
-                                <span className="text-[13px] font-bold text-[#2A201A]">Standard: 24-Hour</span>
+                                <span className="text-[13px] font-bold text-[#2A201A] dark:text-white/80">Standard: 24-Hour</span>
                             </div>
                         </div>
-                    </div>
-                    <Link href="/maintenance" className="w-full md:w-auto">
-                        <button className="w-full md:w-auto h-14 bg-white border-2 border-[#D9C5B2]/40 text-[#2A201A] px-8 rounded-2xl font-bold flex items-center justify-center gap-2 hover:border-[#2A201A] hover:bg-[#FCF9F2] active:scale-[0.98] transition-all group shadow-sm">
-                            Request Service
-                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </button>
-                    </Link>
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                        <Link href="/maintenance" className="w-full md:w-auto">
+                            <button className="w-full md:w-auto h-14 bg-white dark:bg-white/5 border-2 border-[#D9C5B2]/40 dark:border-white/10 text-[#2A201A] dark:text-white px-8 rounded-2xl font-bold flex items-center justify-center gap-2 hover:border-[#2A201A] dark:hover:border-white/30 hover:bg-[#FCF9F2] dark:hover:bg-white/10 active:scale-[0.98] transition-all group shadow-sm">
+                                Request Service
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </Link>
+                    </motion.div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {services.map((service, i) => (
-                        <div
+                        <motion.div
                             key={i}
-                            className="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-[#D9C5B2]/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all group hover:-translate-y-1 text-center md:text-left"
+                            initial={{ opacity: 0, y: 28 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: "-40px" }}
+                            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: i * 0.1 }}
+                            whileHover={{ y: -5, transition: { duration: 0.25 } }}
+                            className="bg-white/80 dark:bg-[#1A1614]/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-[#D9C5B2]/30 dark:border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:hover:shadow-[0_16px_40px_rgba(0,0,0,0.4)] transition-all text-center md:text-left group cursor-default"
                         >
-                            <div className="w-14 h-14 bg-[#FCF9F2] border border-[#D9C5B2]/40 rounded-2xl mx-auto md:mx-0 flex items-center justify-center mb-5 md:mb-6 group-hover:scale-110 transition-transform duration-300">
-                                <service.icon className="w-6 h-6 text-[#2A201A]" />
+                            <div className="w-14 h-14 bg-[#FCF9F2] dark:bg-white/5 border border-[#D9C5B2]/40 dark:border-white/10 rounded-2xl mx-auto md:mx-0 flex items-center justify-center mb-5 md:mb-6 group-hover:scale-110 transition-transform duration-300">
+                                <service.icon className="w-6 h-6 text-[#2A201A] dark:text-[#B69780]" />
                             </div>
-                            <h3 className="text-[18px] md:text-[20px] font-extrabold text-[#2A201A] mb-2">{service.title}</h3>
-                            <p className="text-[#6B5A4E] leading-relaxed text-[14px] md:text-[15px]">{service.description}</p>
-                        </div>
+                            <h3 className="text-[18px] md:text-[20px] font-extrabold text-[#2A201A] dark:text-white mb-2">{service.title}</h3>
+                            <p className="text-[#6B5A4E] dark:text-white/55 leading-relaxed text-[14px] md:text-[15px]">{service.description}</p>
+                        </motion.div>
                     ))}
                 </div>
 
-                {/* Global Security Badge */}
-                <div className="mt-16 flex items-center justify-center gap-3 text-[#6B5A4E]">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                    className="mt-16 flex items-center justify-center gap-3 text-[#6B5A4E] dark:text-white/40"
+                >
                     <ShieldCheck className="w-5 h-5" />
                     <span className="text-[14px] font-semibold uppercase tracking-widest">
                         All agents physically verified across Saudi Arabia
                     </span>
-                </div>
+                </motion.div>
             </div>
         </section>
     );
