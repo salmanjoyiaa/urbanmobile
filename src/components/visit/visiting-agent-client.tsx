@@ -34,7 +34,8 @@ const PIPELINE_STEPS = {
     "deal_pending": "Deal Pending",
     "deal_fail": "Deal Failed",
     "commission_got": "Commission Got",
-    "deal_close": "Deal Closed"
+    "deal_close": "Deal Closed",
+    "reschedule": "Reschedule Requested"
 } as Record<string, string>;
 
 const PipelineActions = ({
@@ -53,9 +54,14 @@ const PipelineActions = ({
     switch (visit.visiting_status) {
         case "view":
             return (
-                <Button size="sm" onClick={() => updateStatus(visit.id, "visit_done")} disabled={loadingId === visit.id}>
-                    Mark Visit Done
-                </Button>
+                <div className="flex gap-2">
+                    <Button size="sm" onClick={() => updateStatus(visit.id, "visit_done")} disabled={loadingId === visit.id}>
+                        Mark Visit Done
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => updateStatus(visit.id, "reschedule")} disabled={loadingId === visit.id}>
+                        Reschedule
+                    </Button>
+                </div>
             );
         case "visit_done":
             return (

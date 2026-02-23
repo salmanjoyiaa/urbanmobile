@@ -17,7 +17,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/products/${product.id}`}>
       <div className="group overflow-hidden rounded-2xl border border-[#eff3f4] bg-white transition-colors hover:bg-[#f7f9f9]">
-        <div className="relative aspect-[4/3] overflow-hidden bg-[#f7f9f9]">
+        <div className="relative aspect-square sm:aspect-[4/3] overflow-hidden bg-[#f7f9f9]">
           {imgSrc ? (
             <Image
               src={imgSrc}
@@ -35,11 +35,11 @@ export function ProductCard({ product }: { product: Product }) {
             {product.condition.replace("_", " ")}
           </div>
         </div>
-        <div className="p-4">
-          <h3 className="truncate text-[15px] font-bold text-[#0f1419]">
+        <div className="p-3 sm:p-4">
+          <h3 className="truncate text-[13px] sm:text-[15px] font-bold text-[#0f1419]">
             {product.title}
           </h3>
-          <p className="mt-0.5 text-[15px] font-bold text-[#1d9bf0]">
+          <p className="mt-0.5 text-[13px] sm:text-[15px] font-bold text-[#1d9bf0]">
             SAR {product.price.toLocaleString()}
           </p>
           <span className="mt-2 inline-block rounded-full bg-[#eff3f4] px-2.5 py-0.5 text-[12px] font-medium capitalize text-[#536471]">
