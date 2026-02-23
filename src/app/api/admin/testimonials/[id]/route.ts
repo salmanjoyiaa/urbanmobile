@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
 

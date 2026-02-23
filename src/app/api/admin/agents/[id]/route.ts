@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
 import { sendWhatsApp } from "@/lib/twilio";
@@ -110,6 +111,9 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     },
   });
 
+  revalidatePath("/admin/agents", "page");
+  revalidatePath("/admin/visiting-team", "page");
+
   return NextResponse.json({ success: true });
 }
 
@@ -154,6 +158,9 @@ export async function DELETE(request: Request, context: { params: { id: string }
     entityId: context.params.id,
     metadata: {},
   });
+
+  revalidatePath("/admin/agents", "page");
+  revalidatePath("/admin/visiting-team", "page");
 
   return NextResponse.json({ success: true });
 }
