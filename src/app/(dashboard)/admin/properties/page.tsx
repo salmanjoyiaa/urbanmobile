@@ -4,6 +4,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatSAR } from "@/lib/format";
 import { PropertyActions } from "@/components/admin/property-actions";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type Row = {
   id: string;
   title: string;

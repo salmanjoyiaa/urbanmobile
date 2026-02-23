@@ -1,7 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
-import { ModerationActionButton } from "@/components/admin/moderation-action-button";
-import { VisitRequestDialog } from "@/components/admin/visit-request-dialog";
+
+import { VisitRowActions } from "@/components/admin/visit-row-actions";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate, formatTime } from "@/lib/format";
 
@@ -92,15 +95,7 @@ export default async function AdminVisitsPage() {
             key: "actions",
             title: "Actions",
             render: (row) => (
-              <div className="flex flex-wrap gap-2">
-                <VisitRequestDialog visit={row as VisitRow} visitingAgents={visitingAgents} />
-                {(row.status === "pending") && (
-                  <ModerationActionButton endpoint={`/api/admin/visits/${row.id}`} payload={{ status: "confirmed" }} label="Confirm" />
-                )}
-                {row.status !== "completed" && row.status !== "cancelled" && (
-                  <ModerationActionButton endpoint={`/api/admin/visits/${row.id}`} payload={{ status: "cancelled" }} label="Cancel" variant="destructive" />
-                )}
-              </div>
+              <VisitRowActions visit={row as VisitRow} visitingAgents={visitingAgents} />
             ),
           },
         ]}

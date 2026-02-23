@@ -12,6 +12,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type NotificationLog = {
     id: string;
     channel: string;

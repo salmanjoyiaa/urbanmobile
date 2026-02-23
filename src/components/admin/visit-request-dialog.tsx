@@ -50,9 +50,10 @@ type VisitingAgent = {
 interface VisitRequestDialogProps {
     visit: VisitRow;
     visitingAgents: VisitingAgent[];
+    triggerNode?: React.ReactNode;
 }
 
-export function VisitRequestDialog({ visit, visitingAgents }: VisitRequestDialogProps) {
+export function VisitRequestDialog({ visit, visitingAgents, triggerNode }: VisitRequestDialogProps) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [isLgLoading, setIsLgLoading] = useState(false);
@@ -113,7 +114,7 @@ export function VisitRequestDialog({ visit, visitingAgents }: VisitRequestDialog
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="secondary" size="sm">Manage</Button>
+                {triggerNode || <Button variant="secondary" size="sm">Manage</Button>}
             </DialogTrigger>
             <DialogContent className="max-w-xl">
                 <DialogHeader>
