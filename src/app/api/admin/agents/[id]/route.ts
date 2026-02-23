@@ -118,6 +118,81 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   return NextResponse.json({ success: true });
 }
 
+export async function PUT(request: Request, context: { params: { id: string } }) {
+  const admin = await getAdminRouteContext();
+  if (admin.error || !admin.profile) {
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const editSchema = z.object({
+    full_name: z.string().min(1).max(100),
+    phone: z.string().max(20).optional().nullable(),
+    company_name: z.string().max(150).optional().nullable(),
+    license_number: z.string().max(100).optional().nullable(),
+  });
+
+  const parsed = editSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
+  }
+
+  // Fetch the agent's profile_id
+  const { data: agentRecord, error: fetchError } = (await admin.supabase
+    .from("agents")
+    .select("profile_id")
+    .eq("id", context.params.id)
+    .single()) as { data: { profile_id: string } | null; error: unknown };
+
+  if (fetchError || !agentRecord) {
+    return NextResponse.json({ error: "Agent not found" }, { status: 404 });
+  }
+
+  // Update profiles table
+  const { error: profileError } = await admin.supabase
+    .from("profiles")
+    .update({ full_name: parsed.data.full_name, phone: parsed.data.phone || null } as never)
+    .eq("id", agentRecord.profile_id);
+
+  if (profileError) {
+    return NextResponse.json({ error: profileError.message }, { status: 500 });
+  }
+
+  // Update agents table (company/license if provided)
+  const agentUpdate: Record<string, string | null> = {};
+  if ("company_name" in parsed.data) agentUpdate.company_name = parsed.data.company_name || null;
+  if ("license_number" in parsed.data) agentUpdate.license_number = parsed.data.license_number || null;
+
+  if (Object.keys(agentUpdate).length > 0) {
+    const { error: agentError } = await admin.supabase
+      .from("agents")
+      .update(agentUpdate as never)
+      .eq("id", context.params.id);
+
+    if (agentError) {
+      return NextResponse.json({ error: agentError.message }, { status: 500 });
+    }
+  }
+
+  await writeAuditLog({
+    actorId: admin.profile.id,
+    action: "agent_edited",
+    entityType: "agents",
+    entityId: context.params.id,
+    metadata: { ...parsed.data },
+  });
+
+  revalidatePath("/admin/agents", "page");
+  revalidatePath("/admin/visiting-team", "page");
+  return NextResponse.json({ success: true });
+}
+
 export async function DELETE(request: Request, context: { params: { id: string } }) {
   const admin = await getAdminRouteContext();
   if (admin.error || !admin.profile) {

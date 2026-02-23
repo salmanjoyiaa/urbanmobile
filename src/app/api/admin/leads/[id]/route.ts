@@ -15,6 +15,56 @@ const payloadSchema = z.object({
   admin_notes: z.string().optional(),
 });
 
+export async function PUT(request: Request, context: { params: { id: string } }) {
+  const admin = await getAdminRouteContext();
+  if (admin.error || !admin.profile) {
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const editSchema = z.object({
+    buyer_name: z.string().min(1).max(100),
+    buyer_email: z.string().email().max(255),
+    buyer_phone: z.string().min(1).max(20),
+    message: z.string().max(1000).optional().nullable(),
+  });
+
+  const parsed = editSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
+  }
+
+  const { error } = await admin.supabase
+    .from("buy_requests")
+    .update({
+      buyer_name: parsed.data.buyer_name,
+      buyer_email: parsed.data.buyer_email,
+      buyer_phone: parsed.data.buyer_phone,
+      message: parsed.data.message || null,
+    } as never)
+    .eq("id", context.params.id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  await writeAuditLog({
+    actorId: admin.profile.id,
+    action: "lead_edited",
+    entityType: "buy_requests",
+    entityId: context.params.id,
+    metadata: { ...parsed.data },
+  });
+
+  return NextResponse.json({ success: true });
+}
+
 export async function PATCH(request: Request, context: { params: { id: string } }) {
   const admin = await getAdminRouteContext();
   if (admin.error || !admin.profile) {

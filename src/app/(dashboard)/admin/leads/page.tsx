@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { ModerationActionButton } from "@/components/admin/moderation-action-button";
+import { EditLeadDialog } from "@/components/admin/edit-lead-dialog";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MessageCircle } from "lucide-react";
 
@@ -67,7 +68,8 @@ export default async function AdminLeadsPage() {
             key: "actions",
             title: "Actions",
             render: (row) => (
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                <EditLeadDialog lead={row} />
                 <ModerationActionButton endpoint={`/api/admin/leads/${row.id}`} payload={{ status: "confirmed" }} label="Confirm" />
                 <ModerationActionButton endpoint={`/api/admin/leads/${row.id}`} payload={{ status: "rejected" }} label="Reject" variant="destructive" />
               </div>

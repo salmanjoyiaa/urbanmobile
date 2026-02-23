@@ -234,6 +234,61 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   return NextResponse.json({ success: true });
 }
 
+export async function PUT(request: Request, context: { params: { id: string } }) {
+  const admin = await getAdminRouteContext();
+  if (admin.error || !admin.profile) {
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const editSchema = z.object({
+    visitor_name: z.string().min(1).max(100),
+    visitor_email: z.string().email().max(255),
+    visitor_phone: z.string().min(1).max(20),
+    visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    visit_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+    admin_notes: z.string().optional().nullable(),
+  });
+
+  const parsed = editSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
+  }
+
+  const { error } = await admin.supabase
+    .from("visit_requests")
+    .update({
+      visitor_name: parsed.data.visitor_name,
+      visitor_email: parsed.data.visitor_email,
+      visitor_phone: parsed.data.visitor_phone,
+      visit_date: parsed.data.visit_date,
+      visit_time: parsed.data.visit_time,
+      admin_notes: parsed.data.admin_notes || null,
+    } as never)
+    .eq("id", context.params.id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  await writeAuditLog({
+    actorId: admin.profile.id,
+    action: "visit_edited",
+    entityType: "visit_requests",
+    entityId: context.params.id,
+    metadata: { ...parsed.data },
+  });
+
+  revalidatePath("/admin/visits", "page");
+  return NextResponse.json({ success: true });
+}
+
 export async function DELETE(request: Request, context: { params: { id: string } }) {
   const admin = await getAdminRouteContext();
   if (admin.error || !admin.profile) {

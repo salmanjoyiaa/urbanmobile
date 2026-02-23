@@ -78,7 +78,7 @@ export default async function AdminVisitingTeamPage() {
                         key: "actions",
                         title: "Actions",
                         render: (row) => (
-                            <AgentRowActions id={row.id} status={row.status} agentType="visiting" />
+                            <AgentRowActions id={row.id} status={row.status} agentType="visiting" row={row} />
                         ),
                     },
                 ]}

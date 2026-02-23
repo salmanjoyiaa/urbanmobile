@@ -19,6 +19,7 @@ type VisitRow = {
   status: string;
   visiting_status?: string | null;
   customer_remarks?: string | null;
+  admin_notes?: string | null;
   properties: {
     title: string;
     agents: {
@@ -38,7 +39,7 @@ export default async function AdminVisitsPage() {
     .from("visit_requests")
     .select(
       `
-      id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status, visiting_status, customer_remarks,
+      id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status, visiting_status, customer_remarks, admin_notes,
       visiting_agent:visiting_agent_id(full_name),
       properties:property_id (
         title,
@@ -88,20 +89,32 @@ export default async function AdminVisitsPage() {
           {
             key: "visitor_phone",
             title: "Phone",
-            render: (row) => (
-              <div className="flex items-center gap-2">
-                {row.visitor_phone || "—"}
-                {row.visitor_phone && (
-                  <a
-                    href={`https://wa.me/${row.visitor_phone.replace(/\D/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle className="h-4 w-4 text-green-500 hover:text-green-600 transition-colors" />
-                  </a>
-                )}
-              </div>
-            )
+            render: (row) => {
+              const buildVisitMessage = () => {
+                const property = row.properties?.title || "the property";
+                const date = formatDate(row.visit_date);
+                const time = formatTime(row.visit_time);
+                const agentLine = row.visiting_agent?.full_name
+                  ? `\nVisiting Agent: ${row.visiting_agent.full_name}`
+                  : "";
+                return `Hello ${row.visitor_name}!\n\nYour visit has been scheduled.\n\nProperty: ${property}\nDate: ${date}\nTime: ${time}${agentLine}\n\nPlease be on time. Contact us if you need to reschedule.\n\nUrbanSaudi Team`;
+              };
+              return (
+                <div className="flex items-center gap-2">
+                  {row.visitor_phone || "—"}
+                  {row.visitor_phone && (
+                    <a
+                      href={`https://wa.me/${row.visitor_phone.replace(/\D/g, '')}?text=${encodeURIComponent(buildVisitMessage())}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Send WhatsApp message"
+                    >
+                      <MessageCircle className="h-4 w-4 text-green-500 hover:text-green-600 transition-colors" />
+                    </a>
+                  )}
+                </div>
+              );
+            }
           },
           {
             key: "schedule",

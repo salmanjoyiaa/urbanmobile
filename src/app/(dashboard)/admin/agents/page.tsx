@@ -102,7 +102,7 @@ export default async function AdminAgentsPage({ searchParams }: { searchParams: 
             key: "actions",
             title: "Actions",
             render: (row) => (
-              <AgentRowActions id={row.id} status={row.status} agentType="property" />
+              <AgentRowActions id={row.id} status={row.status} agentType="property" row={row} />
             ),
           },
         ]}

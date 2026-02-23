@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Trash2, Eye, Ban, CheckCircle, Clock } from "lucide-react";
+import { MoreHorizontal, Trash2, Eye, Ban, CheckCircle, Clock, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { VisitRequestDialog } from "@/components/admin/visit-request-dialog";
+import { EditVisitDialog } from "@/components/admin/edit-visit-dialog";
 
 type VisitRow = {
     id: string;
@@ -25,6 +26,7 @@ type VisitRow = {
     status: string;
     visiting_status?: string | null;
     customer_remarks?: string | null;
+    admin_notes?: string | null;
     properties: {
         title: string;
         agents: {
@@ -93,6 +95,15 @@ export function VisitRowActions({ visit, visitingAgents }: VisitRowActionsProps)
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                <EditVisitDialog
+                    visit={visit}
+                    triggerNode={
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                            <Pencil className="mr-2 h-4 w-4" /> Edit Details
+                        </DropdownMenuItem>
+                    }
+                />
 
                 <VisitRequestDialog
                     visit={visit}

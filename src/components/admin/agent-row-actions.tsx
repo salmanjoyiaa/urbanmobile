@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, ShieldCheck, ShieldAlert, ShieldBan, Trash2, Eye } from "lucide-react";
+import { MoreHorizontal, ShieldCheck, ShieldAlert, ShieldBan, Trash2, Eye, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -14,14 +14,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import Link from "next/link";
+import { EditAgentDialog } from "@/components/admin/edit-agent-dialog";
 
 interface AgentRowActionsProps {
     id: string;
     status: string;
     agentType: "property" | "visiting";
+    row: {
+        company_name?: string | null;
+        license_number?: string | null;
+        profiles: { full_name: string; phone: string | null } | null;
+    };
 }
 
-export function AgentRowActions({ id, status, agentType }: AgentRowActionsProps) {
+export function AgentRowActions({ id, status, agentType, row }: AgentRowActionsProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -74,6 +80,16 @@ export function AgentRowActions({ id, status, agentType }: AgentRowActionsProps)
                         </Link>
                     </DropdownMenuItem>
                 )}
+
+                <EditAgentDialog
+                    agent={{ id, company_name: row.company_name, license_number: row.license_number, profiles: row.profiles }}
+                    agentType={agentType}
+                    triggerNode={
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                            <Pencil className="mr-2 h-4 w-4" /> Edit Details
+                        </DropdownMenuItem>
+                    }
+                />
 
                 <DropdownMenuSeparator />
 
