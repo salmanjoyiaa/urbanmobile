@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const payloadSchema = z.object({
     name: z.string().min(2).optional(),
@@ -57,7 +58,8 @@ export async function DELETE(request: Request, context: { params: { id: string }
         return NextResponse.json({ error: admin.error }, { status: admin.status });
     }
 
-    const { error } = await admin.supabase
+    const adminDb = createAdminClient();
+    const { error } = await adminDb
         .from("testimonials")
         .delete()
         .eq("id", context.params.id);

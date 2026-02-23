@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWhatsApp } from "@/lib/twilio";
 import { sendEmail } from "@/lib/resend";
 import {
@@ -239,7 +240,8 @@ export async function DELETE(request: Request, context: { params: { id: string }
     return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
-  const { error } = await admin.supabase
+  const adminDb = createAdminClient();
+  const { error } = await adminDb
     .from("visit_requests")
     .delete()
     .eq("id", context.params.id);

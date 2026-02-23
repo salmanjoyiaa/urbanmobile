@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWhatsApp } from "@/lib/twilio";
 import { sendEmail } from "@/lib/resend";
 import { agentApproved, agentRejected } from "@/lib/whatsapp-templates";
@@ -123,12 +124,9 @@ export async function DELETE(request: Request, context: { params: { id: string }
     return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
-  // Fetch agent to conditionally delete their auth user or just the agent profile
-  // In a real app we might want to delete the user entirely or just the agent role.
-  // For now, we will delete the agent record. The profile remains as 'customer'.
-  // We can update the user profile role if needed, or simply let CASCADE handle it.
+  const adminDb = createAdminClient();
 
-  const { data: agent } = (await admin.supabase
+  const { data: agent } = (await adminDb
     .from("agents")
     .select("profile_id")
     .eq("id", context.params.id)
@@ -136,13 +134,13 @@ export async function DELETE(request: Request, context: { params: { id: string }
 
   if (agent?.profile_id) {
     // Optionally revert the user's role to customer
-    await admin.supabase
+    await adminDb
       .from("profiles")
       .update({ role: "customer" } as never)
       .eq("id", agent.profile_id);
   }
 
-  const { error } = await admin.supabase
+  const { error } = await adminDb
     .from("agents")
     .delete()
     .eq("id", context.params.id);
