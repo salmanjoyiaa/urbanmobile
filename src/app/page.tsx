@@ -16,21 +16,20 @@ export default function HomePage() {
         {/* Hero Area */}
         <section className="max-w-[1400px] mx-auto px-5 sm:px-6 lg:px-12 pt-8 pb-20 lg:pt-12 lg:pb-28">
           <div className="flex flex-col-reverse lg:flex-row items-center relative gap-4 lg:gap-0">
-            {/* Left Text */}
-            <div className="w-full lg:w-1/2 z-10 pb-8 lg:pb-8 flex flex-col items-center lg:items-start text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#2A201A]/5 px-4 py-2 border border-[#2A201A]/10 mb-8 lg:mb-6 shadow-sm">
-                <span className="text-[11px] lg:text-[12px] font-bold text-[#2A201A] tracking-[0.1em] uppercase">
+            <div className="w-full lg:w-1/2 z-10 pb-8 lg:pb-8 flex flex-col items-center lg:items-start text-center lg:text-left pt-6 lg:pt-0">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/60 backdrop-blur-sm px-4 py-1.5 border border-[#2A201A]/10 mb-8 lg:mb-6 shadow-sm">
+                <span className="text-[11px] lg:text-[12px] font-black text-[#2A201A] tracking-[0.15em] uppercase">
                   Trusted by 500+ tenants across KSA
                 </span>
               </div>
 
-              <h1 className="text-[46px] sm:text-[56px] md:text-[64px] lg:text-[76px] font-extrabold tracking-[-0.04em] leading-[1.05] mb-6">
+              <h1 className="text-[50px] sm:text-[56px] md:text-[64px] lg:text-[80px] font-black tracking-[-0.04em] leading-[1] mb-6 text-[#2A201A] drop-shadow-sm">
                 Your Next Home,<br className="hidden sm:block" />{" "}
-                <span className="text-[#B69780]">Made Simple</span>
+                <span className="text-[#B69780] font-medium italic pr-2 tracking-[-0.02em]">Made&nbsp;Simple.</span>
               </h1>
 
-              <p className="text-[#6B5A4E] max-w-[320px] sm:max-w-lg text-[16px] sm:text-[17px] leading-relaxed mb-10 font-medium">
-                Short-term, long-term, or contract rentals — find verified properties, quality products, and 24/7 maintenance services across Saudi Arabia.
+              <p className="text-[#6B5A4E] max-w-[340px] sm:max-w-lg text-[16px] sm:text-[18px] leading-[1.6] mb-10 font-medium">
+                Short-term, long-term, or contract rentals. Find verified properties, quality products, and 24/7 maintenance services.
               </p>
 
               <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-4 mb-10">
@@ -60,13 +59,18 @@ export default function HomePage() {
 
             {/* Right 3D Image */}
             <div
-              className="w-full lg:w-1/2 relative lg:absolute lg:right-[-100px] lg:top-[-80px] flex justify-center lg:block mix-blend-darken pointer-events-none mb-6 lg:mb-0"
-              style={{ filter: "brightness(1.05) contrast(1.05)" }}
+              className="w-full lg:w-1/2 relative lg:absolute lg:right-[-100px] lg:top-[-80px] flex justify-center lg:block pointer-events-none mb-4 lg:mb-0 z-0"
             >
-              <div className="relative w-full max-w-[90%] sm:max-w-[600px] lg:max-w-[900px] aspect-[4/3] transform hover:scale-[1.02] transition-transform duration-700">
+              {/* Soft underlying glow */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-[#D9C5B2]/30 rounded-full blur-[60px]" />
+
+              <div className="relative w-full max-w-[95%] sm:max-w-[600px] lg:max-w-[900px] aspect-[4/3] transform hover:scale-[1.02] transition-transform duration-700">
                 <div
-                  className="absolute inset-0 bg-contain bg-center lg:bg-right-bottom bg-no-repeat drop-shadow-2xl"
-                  style={{ backgroundImage: "url('/3d-house.png')" }}
+                  className="absolute inset-0 bg-contain bg-center lg:bg-right-bottom bg-no-repeat mix-blend-multiply transition-all"
+                  style={{
+                    backgroundImage: "url('/3d-house.png')",
+                    filter: "brightness(1.05) contrast(1.08)"
+                  }}
                 />
               </div>
             </div>
