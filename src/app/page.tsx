@@ -15,9 +15,9 @@ export default function HomePage() {
       <main className="flex-1 w-full">
         {/* Hero Area */}
         <section className="max-w-[1400px] mx-auto px-5 sm:px-6 lg:px-12 pt-8 pb-20 lg:pt-12 lg:pb-28">
-          <div className="flex flex-col lg:flex-row items-center relative">
+          <div className="flex flex-col-reverse lg:flex-row items-center relative gap-4 lg:gap-0">
             {/* Left Text */}
-            <div className="w-full lg:w-1/2 z-10 pt-2 pb-8 lg:pb-8 flex flex-col items-center lg:items-start text-center lg:text-left">
+            <div className="w-full lg:w-1/2 z-10 pb-8 lg:pb-8 flex flex-col items-center lg:items-start text-center lg:text-left">
               <div className="inline-flex items-center gap-2 rounded-full bg-[#2A201A]/5 px-4 py-2 border border-[#2A201A]/10 mb-8 lg:mb-6 shadow-sm">
                 <span className="text-[11px] lg:text-[12px] font-bold text-[#2A201A] tracking-[0.1em] uppercase">
                   Trusted by 500+ tenants across KSA
@@ -60,7 +60,7 @@ export default function HomePage() {
 
             {/* Right 3D Image */}
             <div
-              className="w-full lg:w-1/2 relative lg:absolute lg:right-[-100px] lg:top-[-80px] flex justify-center lg:block mix-blend-darken pointer-events-none mt-4 lg:mt-0"
+              className="w-full lg:w-1/2 relative lg:absolute lg:right-[-100px] lg:top-[-80px] flex justify-center lg:block mix-blend-darken pointer-events-none mb-6 lg:mb-0"
               style={{ filter: "brightness(1.05) contrast(1.05)" }}
             >
               <div className="relative w-full max-w-[90%] sm:max-w-[600px] lg:max-w-[900px] aspect-[4/3] transform hover:scale-[1.02] transition-transform duration-700">
