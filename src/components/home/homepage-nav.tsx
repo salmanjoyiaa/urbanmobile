@@ -40,10 +40,16 @@ export function HomepageNav() {
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-4">
           <Link
-            href="/login"
-            className="inline-flex items-center justify-center rounded-xl bg-[#2A201A] px-7 py-2.5 text-[14px] font-bold text-white transition-all hover:bg-black"
+            href="/login?type=property"
+            className="inline-flex items-center justify-center rounded-xl bg-[#2A201A] px-5 py-2.5 text-[14px] font-bold text-white transition-all hover:bg-black"
           >
-            Agent Login
+            Property Team Login
+          </Link>
+          <Link
+            href="/login?type=visiting"
+            className="inline-flex items-center justify-center rounded-xl border-2 border-[#2A201A] px-5 py-2.5 text-[14px] font-bold text-[#2A201A] transition-all hover:bg-[#D9C5B2]/20"
+          >
+            Visiting Team Login
           </Link>
         </div>
 
@@ -71,13 +77,20 @@ export function HomepageNav() {
                 {link.title}
               </Link>
             ))}
-            <div className="pt-3 border-t border-[#D9C5B2]/30 mt-2">
+            <div className="pt-3 border-t border-[#D9C5B2]/30 mt-2 flex flex-col gap-2">
               <Link
-                href="/login"
+                href="/login?type=property"
                 onClick={() => setOpen(false)}
                 className="block w-full text-center rounded-xl bg-[#2A201A] px-7 py-3 text-[14px] font-bold text-white transition-all hover:bg-black"
               >
-                Agent Login
+                Property Team Login
+              </Link>
+              <Link
+                href="/login?type=visiting"
+                onClick={() => setOpen(false)}
+                className="block w-full text-center rounded-xl border-2 border-[#2A201A] px-7 py-3 text-[14px] font-bold text-[#2A201A] transition-all hover:bg-[#D9C5B2]/20"
+              >
+                Visiting Team Login
               </Link>
             </div>
           </nav>

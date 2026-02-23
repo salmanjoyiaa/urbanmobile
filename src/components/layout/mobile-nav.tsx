@@ -61,13 +61,20 @@ export function MobileNav() {
                             Maintenance
                         </Link>
 
-                        <div className="mt-8 pt-6 border-t border-[#D9C5B2]/30">
+                        <div className="mt-8 pt-6 border-t border-[#D9C5B2]/30 flex flex-col gap-3">
                             <Link
-                                href="/login"
+                                href="/login?type=property"
                                 onClick={() => setOpen(false)}
                                 className="flex w-full items-center justify-center rounded-xl bg-[#2A201A] px-4 py-3.5 text-[15px] font-bold text-white transition-all hover:bg-black active:scale-95 shadow-md"
                             >
-                                Agent login
+                                Property Team Login
+                            </Link>
+                            <Link
+                                href="/login?type=visiting"
+                                onClick={() => setOpen(false)}
+                                className="flex w-full items-center justify-center rounded-xl border-2 border-[#2A201A] px-4 py-3.5 text-[15px] font-bold text-[#2A201A] transition-all hover:bg-[#D9C5B2]/20 active:scale-95 shadow-sm"
+                            >
+                                Visiting Team Login
                             </Link>
                         </div>
                     </nav>

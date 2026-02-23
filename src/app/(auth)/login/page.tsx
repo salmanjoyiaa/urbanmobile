@@ -1,5 +1,7 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -12,12 +14,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useState } from "react";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
-  const [loginType, setLoginType] = useState<"property" | "visiting">("property");
+
+  const loginType = searchParams.get("type") as "property" | "visiting" | null;
 
   const {
     register,
@@ -33,10 +36,7 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (values: LoginInput) => {
-    const redirect =
-      typeof window !== "undefined"
-        ? new URLSearchParams(window.location.search).get("redirect")
-        : null;
+    const redirect = searchParams.get("redirect");
 
     const { data, error } = await supabase.auth.signInWithPassword(values);
 
@@ -87,28 +87,13 @@ export default function LoginPage() {
     <Card className="border-[#D9C5B2]/40 bg-[#FCF9F2] shadow-xl shadow-[#2A201A]/5">
       <CardHeader className="space-y-2">
         <CardTitle className="text-2xl font-extrabold text-[#2A201A]">
-          {loginType === "property" ? "Property Team Login" : "Visiting Team Login"}
+          {loginType === "property"
+            ? "Property Team Login"
+            : loginType === "visiting"
+              ? "Visiting Team Login"
+              : "Agent Login"}
         </CardTitle>
-        <CardDescription className="text-[#6B5A4E]">Access your UrbanSaudi agent portal.</CardDescription>
-
-        <div className="grid grid-cols-2 gap-2 mt-4 pt-2">
-          <Button
-            type="button"
-            variant={loginType === "property" ? "default" : "outline"}
-            className={`rounded-lg ${loginType === "property" ? "bg-[#2A201A] text-white hover:bg-black" : "text-[#6B5A4E]"}`}
-            onClick={() => setLoginType("property")}
-          >
-            Property Team
-          </Button>
-          <Button
-            type="button"
-            variant={loginType === "visiting" ? "default" : "outline"}
-            className={`rounded-lg ${loginType === "visiting" ? "bg-[#2A201A] text-white hover:bg-black" : "text-[#6B5A4E]"}`}
-            onClick={() => setLoginType("visiting")}
-          >
-            Visiting Team
-          </Button>
-        </div>
+        <CardDescription className="text-[#6B5A4E]">Access your UrbanSaudi account.</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -144,7 +129,7 @@ export default function LoginPage() {
                 Signing in...
               </>
             ) : (
-              `Sign In as ${loginType === "property" ? "Property Agent" : "Visiting Agent"}`
+              `Sign In${loginType ? ` as ${loginType === "property" ? "Property" : "Visiting"} Agent` : ""}`
             )}
           </Button>
         </form>
@@ -157,5 +142,13 @@ export default function LoginPage() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex h-full min-h-[400px] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#2A201A]" /></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
