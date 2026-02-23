@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 
 import { VisitRowActions } from "@/components/admin/visit-row-actions";
+import { MessageCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -84,7 +85,24 @@ export default async function AdminVisitsPage() {
             ) : "—"
           },
           { key: "visitor_name", title: "Visitor" },
-          { key: "visitor_phone", title: "Phone" },
+          {
+            key: "visitor_phone",
+            title: "Phone",
+            render: (row) => (
+              <div className="flex items-center gap-2">
+                {row.visitor_phone || "—"}
+                {row.visitor_phone && (
+                  <a
+                    href={`https://wa.me/${row.visitor_phone.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle className="h-4 w-4 text-green-500 hover:text-green-600 transition-colors" />
+                  </a>
+                )}
+              </div>
+            )
+          },
           {
             key: "schedule",
             title: "Schedule",

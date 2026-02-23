@@ -3,6 +3,7 @@ import { DataTable } from "@/components/dashboard/data-table";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateVisitingAgentDialog } from "@/components/admin/create-visiting-agent-dialog";
 import { AgentRowActions } from "@/components/admin/agent-row-actions";
+import { MessageCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -45,7 +46,24 @@ export default async function AdminVisitingTeamPage() {
                 columns={[
                     { key: "name", title: "Name", render: (row) => row.profiles?.full_name || "—" },
                     { key: "email", title: "Email", render: (row) => row.profiles?.email || "—" },
-                    { key: "phone", title: "Phone", render: (row) => row.profiles?.phone || "—" },
+                    {
+                        key: "phone",
+                        title: "Phone",
+                        render: (row) => (
+                            <div className="flex items-center gap-2">
+                                {row.profiles?.phone || "—"}
+                                {row.profiles?.phone && (
+                                    <a
+                                        href={`https://wa.me/${row.profiles.phone.replace(/\D/g, '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <MessageCircle className="h-4 w-4 text-green-500 hover:text-green-600 transition-colors" />
+                                    </a>
+                                )}
+                            </div>
+                        )
+                    },
                     {
                         key: "status",
                         title: "Status",

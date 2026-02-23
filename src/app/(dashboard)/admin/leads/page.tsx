@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { ModerationActionButton } from "@/components/admin/moderation-action-button";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { MessageCircle } from "lucide-react";
 
 type LeadRow = {
   id: string;
@@ -42,7 +43,24 @@ export default async function AdminLeadsPage() {
           { key: "product", title: "Product", render: (row) => row.products?.title || "—" },
           { key: "buyer_name", title: "Buyer" },
           { key: "buyer_email", title: "Email" },
-          { key: "buyer_phone", title: "Phone" },
+          {
+            key: "buyer_phone",
+            title: "Phone",
+            render: (row) => (
+              <div className="flex items-center gap-2">
+                {row.buyer_phone || "—"}
+                {row.buyer_phone && (
+                  <a
+                    href={`https://wa.me/${row.buyer_phone.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle className="h-4 w-4 text-green-500 hover:text-green-600 transition-colors" />
+                  </a>
+                )}
+              </div>
+            )
+          },
           { key: "message", title: "Message", render: (row) => row.message || "—" },
           { key: "status", title: "Status", render: (row) => <Badge className="capitalize">{row.status}</Badge> },
           {
