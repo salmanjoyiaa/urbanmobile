@@ -7,7 +7,6 @@ import { sendWhatsApp, sendWhatsAppTemplate } from "@/lib/twilio";
 import { sendEmail } from "@/lib/resend";
 import {
   visitCancelled,
-  visitConfirmedAgent,
   visitConfirmationCustomerContent,
   visitAssignedVisitingAgentContent,
   visitAssignedPropertyAgentContent,
@@ -109,14 +108,14 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
       const agent = visitDetails.properties.agents;
       if (agent?.profiles?.phone) {
+        const paContent = visitAssignedPropertyAgentContent({
+          ownerName: agent.profiles.full_name || "Agent",
+          visitorName: visitDetails.visitor_name,
+          visitingAgentName: "Not yet assigned",
+          visitingAgentPhone: "N/A",
+        });
         notifyJobs.push(
-          sendWhatsApp(
-            agent.profiles.phone,
-            visitConfirmedAgent({
-              agentName: agent.profiles.full_name || "Agent",
-              ...templateParams,
-            })
-          )
+          sendWhatsAppTemplate(agent.profiles.phone, paContent.contentSid, paContent.contentVariables)
         );
       }
       if (agent?.profiles?.email) {

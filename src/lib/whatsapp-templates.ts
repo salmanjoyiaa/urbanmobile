@@ -121,8 +121,8 @@ export function visitConfirmationCustomerContent(params: {
       "2": params.propertyTitle,
       "3": params.visitDate,
       "4": params.visitTime,
-      "5": params.visitingAgentName ?? "",
-      "6": params.visitingAgentPhone ?? "",
+      "5": params.visitingAgentName || "Not yet assigned",
+      "6": params.visitingAgentPhone || "N/A",
     },
   };
 }
@@ -172,7 +172,7 @@ export function visitAssignedVisitingAgentContent(params: {
       "6": params.visitorPhone,
       "7": params.ownerName,
       "8": params.ownerPhone,
-      "9": params.instructions ?? "",
+      "9": params.instructions || "No special instructions",
     },
   };
 }
