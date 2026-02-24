@@ -95,3 +95,84 @@ export function maintenanceApproved(params: { customerName: string; serviceType:
 export function maintenanceRejected(params: { customerName: string; serviceType: string }) {
   return `Hello ${params.customerName}, we regret to inform you that your maintenance request for ${params.serviceType} could not be approved at this time.`;
 }
+
+// ----- WhatsApp Content Template (Twilio approved templates) -----
+// Used to send via contentSid + contentVariables to avoid error 63016.
+
+const DEFAULT_SID_VISIT_CONFIRMATION_CUSTOMER = "HX6e23b200047add8f129ffa4adcfc77cc";
+const DEFAULT_SID_VISIT_ASSIGNED_PROPERTY_AGENT = "HXa441955a0eadba3da289aa7deb88f8af";
+const DEFAULT_SID_VISIT_ASSIGNED_VISITING_AGENT = "HXc7193048915d62e308939c1033019656";
+
+/** visit_confirmation_customer: 1=visitorName, 2=propertyTitle, 3=visitDate, 4=visitTime, 5=visitingAgentName, 6=visitingAgentPhone */
+export function visitConfirmationCustomerContent(params: {
+  visitorName: string;
+  propertyTitle: string;
+  visitDate: string;
+  visitTime: string;
+  visitingAgentName?: string | null;
+  visitingAgentPhone?: string | null;
+}): { contentSid: string; contentVariables: Record<string, string> } {
+  const contentSid =
+    process.env.TWILIO_TEMPLATE_VISIT_CONFIRMATION_CUSTOMER_SID || DEFAULT_SID_VISIT_CONFIRMATION_CUSTOMER;
+  return {
+    contentSid,
+    contentVariables: {
+      "1": params.visitorName,
+      "2": params.propertyTitle,
+      "3": params.visitDate,
+      "4": params.visitTime,
+      "5": params.visitingAgentName ?? "",
+      "6": params.visitingAgentPhone ?? "",
+    },
+  };
+}
+
+/** visit_assigned_property_agent: 1=ownerName, 2=visitorName, 3=visitingAgentName, 4=visitingAgentPhone */
+export function visitAssignedPropertyAgentContent(params: {
+  ownerName: string;
+  visitorName: string;
+  visitingAgentName: string;
+  visitingAgentPhone: string;
+}): { contentSid: string; contentVariables: Record<string, string> } {
+  const contentSid =
+    process.env.TWILIO_TEMPLATE_VISIT_ASSIGNED_PROPERTY_AGENT_SID || DEFAULT_SID_VISIT_ASSIGNED_PROPERTY_AGENT;
+  return {
+    contentSid,
+    contentVariables: {
+      "1": params.ownerName,
+      "2": params.visitorName,
+      "3": params.visitingAgentName,
+      "4": params.visitingAgentPhone,
+    },
+  };
+}
+
+/** visit_assigned_visiting_agent: 1=visitingAgentName, 2=propertyTitle, 3=visitDate, 4=visitTime, 5=visitorName, 6=visitorPhone, 7=ownerName, 8=ownerPhone, 9=instructions (step 5) */
+export function visitAssignedVisitingAgentContent(params: {
+  visitingAgentName: string;
+  propertyTitle: string;
+  visitDate: string;
+  visitTime: string;
+  visitorName: string;
+  visitorPhone: string;
+  ownerName: string;
+  ownerPhone: string;
+  instructions?: string | null;
+}): { contentSid: string; contentVariables: Record<string, string> } {
+  const contentSid =
+    process.env.TWILIO_TEMPLATE_VISIT_ASSIGNED_VISITING_AGENT_SID || DEFAULT_SID_VISIT_ASSIGNED_VISITING_AGENT;
+  return {
+    contentSid,
+    contentVariables: {
+      "1": params.visitingAgentName,
+      "2": params.propertyTitle,
+      "3": params.visitDate,
+      "4": params.visitTime,
+      "5": params.visitorName,
+      "6": params.visitorPhone,
+      "7": params.ownerName,
+      "8": params.ownerPhone,
+      "9": params.instructions ?? "",
+    },
+  };
+}

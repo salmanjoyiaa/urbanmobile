@@ -3,14 +3,14 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendWhatsApp } from "@/lib/twilio";
+import { sendWhatsApp, sendWhatsAppTemplate } from "@/lib/twilio";
 import { sendEmail } from "@/lib/resend";
 import {
   visitCancelled,
   visitConfirmedAgent,
-  visitConfirmedVisitor,
-  visitAssignedVisitingAgent,
-  visitAssignedPropertyAgent,
+  visitConfirmationCustomerContent,
+  visitAssignedVisitingAgentContent,
+  visitAssignedPropertyAgentContent,
 } from "@/lib/whatsapp-templates";
 import {
   visitConfirmedCustomerEmail,
@@ -97,9 +97,10 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     };
 
     if (parsed.data.status === "confirmed") {
-      // Standard confirmed logic
+      // Standard confirmed logic – WhatsApp via approved template (avoids 63016)
+      const custContent = visitConfirmationCustomerContent(templateParams);
       notifyJobs.push(
-        sendWhatsApp(visitDetails.visitor_phone, visitConfirmedVisitor(templateParams))
+        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables)
       );
       if (visitDetails.visitor_email) {
         const emailTpl = visitConfirmedCustomerEmail(templateParams);
@@ -137,20 +138,21 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       const ownerName = ownerAgentProfile?.full_name || "Agent";
       const ownerPhone = ownerAgentProfile?.phone || "N/A";
 
-      // 1. WhatsApp + Email to Customer
+      // 1. WhatsApp + Email to Customer (approved template)
+      const custContent = visitConfirmationCustomerContent({
+        ...templateParams,
+        visitingAgentName: visitingAgentProfile.full_name,
+        visitingAgentPhone: visitingAgentProfile.phone ?? "",
+      });
       notifyJobs.push(
-        sendWhatsApp(visitDetails.visitor_phone, visitConfirmedVisitor({
-          ...templateParams,
-          visitingAgentName: visitingAgentProfile.full_name,
-          visitingAgentPhone: visitingAgentProfile.phone,
-        }))
+        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables)
       );
       if (visitDetails.visitor_email) {
         const emailTpl = visitConfirmedCustomerEmail(templateParams);
         notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
       }
 
-      // 2. WhatsApp + Email to Visiting Agent
+      // 2. WhatsApp + Email to Visiting Agent (approved template; var 9 = property step 5 instructions)
       const visitingAgentParams = {
         visitingAgentName: visitingAgentProfile.full_name,
         propertyTitle: visitDetails.properties.title,
@@ -166,13 +168,14 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       };
 
       if (visitingAgentProfile.phone) {
-        notifyJobs.push(sendWhatsApp(visitingAgentProfile.phone, visitAssignedVisitingAgent(visitingAgentParams)));
+        const vaContent = visitAssignedVisitingAgentContent(visitingAgentParams);
+        notifyJobs.push(sendWhatsAppTemplate(visitingAgentProfile.phone, vaContent.contentSid, vaContent.contentVariables));
       }
       if (visitingAgentProfile.email) {
         notifyJobs.push(sendEmail({ to: visitingAgentProfile.email, ...visitAssignedVisitingAgentEmail(visitingAgentParams) }));
       }
 
-      // 3. WhatsApp + Email to Property Agent Owner
+      // 3. WhatsApp + Email to Property Agent Owner (approved template)
       const propertyAgentParams = {
         ownerName: ownerName,
         propertyTitle: visitDetails.properties.title,
@@ -184,7 +187,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       };
 
       if (ownerAgentProfile?.phone) {
-        notifyJobs.push(sendWhatsApp(ownerAgentProfile.phone, visitAssignedPropertyAgent(propertyAgentParams)));
+        const paContent = visitAssignedPropertyAgentContent(propertyAgentParams);
+        notifyJobs.push(sendWhatsAppTemplate(ownerAgentProfile.phone, paContent.contentSid, paContent.contentVariables));
       }
       if (ownerAgentProfile?.email) {
         notifyJobs.push(sendEmail({ to: ownerAgentProfile.email, ...visitAssignedPropertyAgentEmail(propertyAgentParams) }));
