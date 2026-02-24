@@ -12,6 +12,20 @@ const csp = [
 ].join("; ");
 
 const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/marketplace",
+        destination: "/products",
+        permanent: false,
+      },
+      {
+        source: "/marketplace/:path*",
+        destination: "/products/:path*",
+        permanent: false,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

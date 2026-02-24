@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { ThemeToggle } from "./theme-toggle";
 
 const navLinks = [
   { title: "Home", href: "/" },
@@ -24,8 +23,10 @@ export function HomepageNav() {
 
   return (
     <header
-      className={`w-full py-4 sm:py-5 sticky top-0 z-50 transition-all duration-300 bg-[hsl(var(--footer-bg))] border-b border-white/10 dark:border-0 ${
-        scrolled ? "dark:bg-slate-950/95 dark:backdrop-blur-md dark:border-b dark:border-border dark:shadow-sm" : "dark:bg-transparent"
+      className={`w-full py-4 sm:py-5 sticky top-0 z-50 transition-all duration-300 border-b border-white/10 ${
+        scrolled
+          ? "bg-[#1a1a2e]/95 backdrop-blur-md shadow-sm border-white/5"
+          : "gradient-primary"
       }`}
     >
       <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 sm:px-5 lg:px-12">
@@ -49,9 +50,8 @@ export function HomepageNav() {
           ))}
         </nav>
 
-        {/* Desktop CTA + Toggle */}
+        {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <ThemeToggle />
           <Link
             href="/login?type=property"
             className="inline-flex items-center justify-center min-h-11 rounded-xl bg-white text-primary px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/90 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 shadow-sm"
@@ -66,9 +66,8 @@ export function HomepageNav() {
           </Link>
         </div>
 
-        {/* Mobile: Toggle + Hamburger */}
+        {/* Mobile: Hamburger */}
         <div className="md:hidden flex items-center gap-2">
-          <ThemeToggle />
           <button
             className="p-2 -mr-2 text-white dark:text-foreground"
             onClick={() => setOpen(!open)}
@@ -81,7 +80,7 @@ export function HomepageNav() {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-[hsl(var(--footer-bg))] dark:bg-slate-950 border-b border-white/10 dark:border-border shadow-lg z-50 pb-4">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-[#1a1a2e] border-b border-white/10 shadow-lg z-50 pb-4">
           <nav className="flex flex-col px-4 py-4 gap-0">
             {navLinks.map((link) => (
               <Link

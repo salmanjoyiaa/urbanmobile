@@ -94,9 +94,7 @@ urbansaudi/
 │   └── migrations/
 │       └── 00001_initial_schema.sql
 ├── DEPLOYMENT.md                # Comprehensive deployment guide
-├── SUPABASE_SETUP.md            # Quick SQL setup
-├── PRODUCTION_CHECKLIST.md      # Pre-launch checklist
-└── .env.example                 # Environment variables template
+└── .env.example                 # Environment variables template (copy to .env.local)
 ```
 
 ## 🚀 Quick Start
@@ -128,7 +126,7 @@ Fill in required variables (see `.env.example` for details):
 3. Paste into Supabase SQL Editor → Run
 4. Verify 8 tables created
 
-See [SUPABASE_SETUP.md](SUPABASE_SETUP.md) for detailed steps.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for database and Supabase setup.
 
 ### 5. Start Development Server
 ```bash
@@ -167,23 +165,22 @@ Optional (for full functionality):
 
 2. **Import to Vercel**
    - Go to [vercel.com](https://vercel.com) → New Project
-   - Import from GitHub: `salmanjoyiaa/urbanmobile`
-   - Add environment variables from `.env.local`
+   - Import from GitHub
+   - **Environment variables:** Set all variables from [.env.example](.env.example) in the Vercel project dashboard (**Settings → Environment Variables**). Use placeholder values as a reference; fill with your real Supabase, Upstash, and Twilio values. Required for build: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SITE_NAME`.
+   - Set `NEXT_PUBLIC_SITE_URL` to your Vercel deployment URL (e.g. `https://your-app.vercel.app`) or custom domain for production.
    - Deploy
 
 3. **Post-Deployment**
-   - Update `NEXT_PUBLIC_SITE_URL` to Vercel domain
-   - Configure Twilio webhook URL
-   - Add Vercel domain to Supabase redirect URLs
-   - Create admin user via SQL
+   - Add your Vercel URL to **Supabase** → Authentication → URL Configuration (Redirect URLs and Site URL).
+   - Set **Twilio** webhook URL to `https://your-vercel-domain.vercel.app/api/whatsapp/webhook`.
+   - Create first admin user via SQL (see [DEPLOYMENT.md](DEPLOYMENT.md)).
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for complete step-by-step guide.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the full step-by-step guide.
 
 ## 📚 Documentation
 
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Full deployment guide (Supabase, Upstash, Twilio, Vercel)
-- **[SUPABASE_SETUP.md](SUPABASE_SETUP.md)** - Quick SQL migration setup
-- **[PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md)** - Pre-launch verification checklist
+- **[.env.example](.env.example)** - List of environment variables; copy to `.env.local` locally, or set in Vercel dashboard for deployment
 
 ## 🔐 Security Features
 

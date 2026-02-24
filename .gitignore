@@ -29,10 +29,13 @@ yarn-error.log*
 .env*.local
 .env
 .env.local
-.env.example
 
 # vercel
 .vercel
+homepage/
+newsql/
+test-results/
+playwright-report/
 
 # typescript
 *.tsbuildinfo
