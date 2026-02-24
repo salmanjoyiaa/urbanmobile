@@ -220,4 +220,3 @@ export type ProductInput = z.infer<typeof productSchema>;
 export type VisitRequestInput = z.infer<typeof visitRequestSchema>;
 export type BuyRequestInput = z.infer<typeof buyRequestSchema>;
 export type MaintenanceRequestInput = z.infer<typeof maintenanceRequestSchema>;
-uestSchema>;
