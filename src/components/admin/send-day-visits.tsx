@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarDays, Send, Loader2 } from "lucide-react";
+import { CalendarDays, Send, Loader2, ExternalLink } from "lucide-react";
 
 type Agent = { id: string; name: string };
 
@@ -31,6 +31,55 @@ export function SendDayVisits({ visitingAgents, propertyAgents }: Props) {
   const [visitingAgentId, setVisitingAgentId] = useState("");
   const [propertyAgentId, setPropertyAgentId] = useState("");
   const [sending, setSending] = useState<"visiting" | "property" | null>(null);
+  const [opening, setOpening] = useState<"visiting" | "property" | null>(null);
+
+  async function openOnDevice(
+    recipientType: "visiting_agent" | "property_agent",
+    id: string
+  ) {
+    const key = recipientType === "visiting_agent" ? "visiting" : "property";
+    setOpening(key);
+    try {
+      const payload: Record<string, unknown> = {
+        date,
+        recipientType,
+        preview: true,
+      };
+      if (recipientType === "visiting_agent") payload.profileId = id;
+      else payload.agentId = id;
+
+      const res = await fetch("/api/admin/visits/send-day-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        toast.error(json.error || "Failed to load visits");
+        return;
+      }
+      if (json.totalVisits === 0) {
+        toast.info("No visits found for this agent on the selected date.");
+        return;
+      }
+
+      const phone = (json.agentPhone || "").replace(/\D/g, "");
+      if (!phone) {
+        toast.error("Agent has no phone number on file.");
+        return;
+      }
+
+      window.open(
+        `https://wa.me/${phone}?text=${encodeURIComponent(json.text)}`,
+        "_blank"
+      );
+    } catch {
+      toast.error("Network error. Try again.");
+    } finally {
+      setOpening(null);
+    }
+  }
 
   async function send(
     recipientType: "visiting_agent" | "property_agent",
@@ -112,19 +161,34 @@ export function SendDayVisits({ visitingAgents, propertyAgents }: Props) {
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              size="sm"
-              className="w-full"
-              disabled={!visitingAgentId || !date || sending !== null}
-              onClick={() => send("visiting_agent", visitingAgentId)}
-            >
-              {sending === "visiting" ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="mr-2 h-4 w-4" />
-              )}
-              Send WhatsApp &amp; Email
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                className="flex-1"
+                disabled={!visitingAgentId || !date || sending !== null}
+                onClick={() => send("visiting_agent", visitingAgentId)}
+              >
+                {sending === "visiting" ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="mr-2 h-4 w-4" />
+                )}
+                Send via Twilio
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!visitingAgentId || !date || opening !== null}
+                onClick={() => openOnDevice("visiting_agent", visitingAgentId)}
+                title="Open WhatsApp on your device"
+              >
+                {opening === "visiting" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ExternalLink className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           </div>
 
           {/* Property Agent */}
@@ -142,19 +206,34 @@ export function SendDayVisits({ visitingAgents, propertyAgents }: Props) {
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              size="sm"
-              className="w-full"
-              disabled={!propertyAgentId || !date || sending !== null}
-              onClick={() => send("property_agent", propertyAgentId)}
-            >
-              {sending === "property" ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="mr-2 h-4 w-4" />
-              )}
-              Send WhatsApp &amp; Email
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                className="flex-1"
+                disabled={!propertyAgentId || !date || sending !== null}
+                onClick={() => send("property_agent", propertyAgentId)}
+              >
+                {sending === "property" ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="mr-2 h-4 w-4" />
+                )}
+                Send via Twilio
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!propertyAgentId || !date || opening !== null}
+                onClick={() => openOnDevice("property_agent", propertyAgentId)}
+                title="Open WhatsApp on your device"
+              >
+                {opening === "property" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ExternalLink className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>

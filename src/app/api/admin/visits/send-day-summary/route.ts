@@ -15,6 +15,7 @@ const bodySchema = z
     recipientType: z.enum(["visiting_agent", "property_agent"]),
     profileId: z.string().uuid().optional(),
     agentId: z.string().uuid().optional(),
+    preview: z.boolean().optional(),
   })
   .refine(
     (d) =>
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { date, recipientType, profileId, agentId } = parsed.data;
+  const { date, recipientType, profileId, agentId, preview } = parsed.data;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let visits: any[] = [];
@@ -103,6 +104,46 @@ export async function POST(request: Request) {
       success: true,
       sent: { whatsApp: 0, email: 0 },
       totalVisits: 0,
+    });
+  }
+
+  // Preview mode — return composed text + agent phone for admin's own device
+  if (preview) {
+    let agentPhone: string | null = null;
+    let agentNameP = "Agent";
+    const lines: string[] = [];
+
+    for (const v of visits) {
+      const visitTime = (v.visit_time as string)?.slice(0, 5) || "";
+      const propertyTitle = v.properties?.title || "Property";
+      const ownerAgent = v.properties?.agents?.profiles;
+      const visitingAgent = v.visiting_agent;
+
+      if (recipientType === "visiting_agent") {
+        agentNameP = visitingAgent?.full_name || "Agent";
+        agentPhone = agentPhone || visitingAgent?.phone || null;
+      } else {
+        agentNameP = ownerAgent?.full_name || "Agent";
+        agentPhone = agentPhone || ownerAgent?.phone || null;
+      }
+
+      let line = `• ${propertyTitle} — ${visitTime}\n  Visitor: ${v.visitor_name}`;
+      if (v.visitor_phone) line += ` (${v.visitor_phone})`;
+      if (visitingAgent?.full_name && recipientType === "property_agent") {
+        line += `\n  Visiting Agent: ${visitingAgent.full_name}`;
+      }
+      lines.push(line);
+    }
+
+    const text = `Hello ${agentNameP},\n\nHere are your visits for ${date}:\n\n${lines.join("\n\n")}\n\nPlease be prepared. Contact admin if you need to reschedule.\n\n— UrbanSaudi`;
+
+    return NextResponse.json({
+      success: true,
+      preview: true,
+      agentPhone,
+      agentName: agentNameP,
+      text,
+      totalVisits: visits.length,
     });
   }
 
