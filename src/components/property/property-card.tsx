@@ -33,8 +33,8 @@ export function PropertyCard({ property }: { property: Property }) {
 
   return (
     <Link href={`/properties/${property.id}`}>
-      <div className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
-        <div className="relative aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
+      <div className="group overflow-hidden rounded-2xl border border-border bg-background dark:bg-card transition-colors hover:bg-background/90 dark:hover:bg-card/90">
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted dark:bg-muted/50">
           {imgSrc ? (
             <Image
               src={imgSrc}
@@ -45,21 +45,21 @@ export function PropertyCard({ property }: { property: Property }) {
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <Package className="h-12 w-12 text-slate-400 dark:text-slate-500" />
+              <Package className="h-12 w-12 text-muted-foreground/60" />
             </div>
           )}
-          <div className="absolute left-3 top-3 rounded-full bg-white/90 dark:bg-slate-950/90 px-2.5 py-0.5 text-[12px] font-bold text-slate-900 dark:text-white backdrop-blur-sm">
+          <div className="absolute left-3 top-3 rounded-full bg-background/90 dark:bg-card/90 px-2.5 py-0.5 text-[12px] font-bold text-foreground backdrop-blur-sm">
             {rentalLabel}
           </div>
         </div>
         <div className="p-4">
-          <h3 className="truncate text-[15px] font-bold text-slate-900 dark:text-white">
+          <h3 className="truncate text-[15px] font-bold text-foreground">
             {property.title}
           </h3>
-          <p className="mt-0.5 text-[15px] font-bold text-blue-500 dark:text-blue-400">
-            SAR {property.price.toLocaleString()}<span className="text-[12px] font-medium text-slate-600 dark:text-slate-400">{priceSuffix}</span>
+          <p className="mt-0.5 text-[15px] font-bold text-blue-600 dark:text-blue-400">
+            SAR {property.price.toLocaleString()}<span className="text-[12px] font-medium text-muted-foreground">{priceSuffix}</span>
           </p>
-          <div className="mt-2 flex items-center gap-3 text-[13px] text-slate-600 dark:text-slate-400">
+          <div className="mt-2 flex items-center gap-3 text-[13px] text-muted-foreground">
             <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" /> {property.city}
             </span>

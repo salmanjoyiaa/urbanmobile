@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format } from "date-fns";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { SlotGrid } from "@/components/visit/slot-grid";
 import { useVisitSlots, useCreateVisitRequest } from "@/queries/visits";
 import { useRealtimeSlots } from "@/hooks/use-realtime-slots";
@@ -22,7 +23,7 @@ import { toast } from "sonner";
 const contactSchema = z.object({
   visitor_name: z.string().min(2, "Name must be at least 2 characters").max(100),
   visitor_email: z.string().min(1, "Email is required").email("Valid email is required"),
-  visitor_phone: z.string().regex(/^((05|\+9665)[0-9]{8}|(03|\+923)[0-9]{9})$/, "Must be a valid Saudi (05/9665) or Pakistan (03/923) WhatsApp number"),
+  visitor_phone: z.string().regex(/^\+\d{10,15}$/, "Invalid phone number format"),
   visitor_message: z.string().max(5000).optional(),
 });
 
@@ -45,6 +46,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     reset: resetForm,
   } = useForm<ContactInput>({
@@ -189,13 +191,20 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
                 <p className="text-sm text-destructive">{errors.visitor_email.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="visitor-phone">WhatsApp Number</Label>
-              <Input id="visitor-phone" placeholder="05XXX or +923XXX" {...register("visitor_phone")} disabled={createVisit.isPending} />
-              {errors.visitor_phone && (
-                <p className="text-sm text-destructive">{errors.visitor_phone.message}</p>
+            <Controller
+              name="visitor_phone"
+              control={control}
+              render={({ field }) => (
+                <PhoneInput
+                  label="WhatsApp Number"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.visitor_phone}
+                  disabled={createVisit.isPending}
+                  showHelper={true}
+                />
               )}
-            </div>
+            />
             <div className="space-y-2">
               <Label htmlFor="visitor-message">Message (optional)</Label>
               <Textarea id="visitor-message" {...register("visitor_message")} disabled={createVisit.isPending} />

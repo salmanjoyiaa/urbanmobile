@@ -19,14 +19,14 @@ export function MobileNav() {
         <div className="md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-[#2A201A] hover:bg-[#2A201A]/5">
+                    <Button variant="ghost" size="icon" className="text-foreground hover:bg-foreground/5">
                         <Menu className="h-6 w-6 stroke-[2.5]" />
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[85vw] max-w-sm bg-[#FCF9F2] p-6 border-r border-[#D9C5B2]/30">
+                <SheetContent side="left" className="w-[85vw] max-w-sm bg-background dark:bg-card p-6 border-r border-border">
                     <SheetHeader>
-                        <SheetTitle className="text-left py-4 border-b border-[#D9C5B2]/30">
-                            <span className="text-[22px] font-black tracking-tight text-[#2A201A] leading-none">
+                        <SheetTitle className="text-left py-4 border-b border-border">
+                            <span className="text-[22px] font-black tracking-tight text-foreground leading-none">
                                 TheUrbanRealEstate<span className="text-[26px] font-black">Saudi</span>
                             </span>
                         </SheetTitle>
@@ -35,44 +35,44 @@ export function MobileNav() {
                         <Link
                             href="/"
                             onClick={() => setOpen(false)}
-                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-[#2A201A] transition-all hover:bg-[#2A201A]/5 active:scale-95"
+                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-foreground transition-all hover:bg-foreground/5 active:scale-95"
                         >
                             Home
                         </Link>
                         <Link
                             href="/properties"
                             onClick={() => setOpen(false)}
-                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-[#2A201A] transition-all hover:bg-[#2A201A]/5 active:scale-95"
+                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-foreground transition-all hover:bg-foreground/5 active:scale-95"
                         >
                             Properties
                         </Link>
                         <Link
                             href="/products"
                             onClick={() => setOpen(false)}
-                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-[#2A201A] transition-all hover:bg-[#2A201A]/5 active:scale-95"
+                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-foreground transition-all hover:bg-foreground/5 active:scale-95"
                         >
                             Products
                         </Link>
                         <Link
                             href="/maintenance"
                             onClick={() => setOpen(false)}
-                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-[#2A201A] transition-all hover:bg-[#2A201A]/5 active:scale-95"
+                            className="rounded-xl px-4 py-3.5 text-[16px] font-bold tracking-wide text-foreground transition-all hover:bg-foreground/5 active:scale-95"
                         >
                             Maintenance
                         </Link>
 
-                        <div className="mt-8 pt-6 border-t border-[#D9C5B2]/30 flex flex-col gap-3">
+                        <div className="mt-8 pt-6 border-t border-border flex flex-col gap-3">
                             <Link
                                 href="/login?type=property"
                                 onClick={() => setOpen(false)}
-                                className="flex w-full items-center justify-center rounded-xl bg-[#2A201A] px-4 py-3.5 text-[15px] font-bold text-white transition-all hover:bg-black active:scale-95 shadow-md"
+                                className="flex w-full items-center justify-center rounded-xl bg-primary dark:bg-accent px-4 py-3.5 text-[15px] font-bold text-primary-foreground dark:text-foreground transition-all hover:bg-primary/90 dark:hover:bg-accent/90 active:scale-95 shadow-md"
                             >
                                 Property Team Login
                             </Link>
                             <Link
                                 href="/login?type=visiting"
                                 onClick={() => setOpen(false)}
-                                className="flex w-full items-center justify-center rounded-xl border-2 border-[#2A201A] px-4 py-3.5 text-[15px] font-bold text-[#2A201A] transition-all hover:bg-[#D9C5B2]/20 active:scale-95 shadow-sm"
+                                className="flex w-full items-center justify-center rounded-xl border-2 border-primary dark:border-accent px-4 py-3.5 text-[15px] font-bold text-primary dark:text-accent transition-all hover:bg-primary/5 dark:hover:bg-accent/10 active:scale-95 shadow-sm"
                             >
                                 Visiting Team Login
                             </Link>

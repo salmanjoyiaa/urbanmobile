@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { useCreateLeadRequest } from "@/queries/leads";
 import { buyRequestSchema, type BuyRequestInput } from "@/lib/validators";
 import { toast } from "sonner";
@@ -26,6 +27,7 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<BuyRequestInput>({
@@ -110,18 +112,20 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
               <p className="text-sm text-destructive">{errors.buyer_email.message}</p>
             )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="buyer-phone">WhatsApp Number</Label>
-            <Input
-              id="buyer-phone"
-              {...register("buyer_phone")}
-              disabled={isLoading}
-              placeholder="05XXX or +923XXX"
-            />
-            {errors.buyer_phone && (
-              <p className="text-sm text-destructive">{errors.buyer_phone.message}</p>
+          <Controller
+            name="buyer_phone"
+            control={control}
+            render={({ field }) => (
+              <PhoneInput
+                label="WhatsApp Number"
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.buyer_phone}
+                disabled={isLoading}
+                showHelper={true}
+              />
             )}
-          </div>
+          />
           <div className="space-y-2">
             <Label htmlFor="buyer-message">Message (optional)</Label>
             <Textarea

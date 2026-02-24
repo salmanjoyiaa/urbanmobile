@@ -3,7 +3,7 @@
 import { Suspense, useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { toast } from "sonner";
 import { COUNTRIES, getCountryByCode } from "@/lib/country-data";
 
@@ -39,7 +40,6 @@ function AgentSignupPage() {
   const searchParams = useSearchParams();
   const supabase = createClient();
   const [selectedCountry, setSelectedCountry] = useState("SA");
-  const [phoneNumber, setPhoneNumber] = useState("");
 
   const country = useMemo(() => getCountryByCode(selectedCountry), [selectedCountry]);
   const cities = country?.cities || [];
@@ -47,6 +47,7 @@ function AgentSignupPage() {
   const {
     register,
     handleSubmit,
+    control,
     setValue,
     watch,
     formState: { errors, isSubmitting },
@@ -73,13 +74,6 @@ function AgentSignupPage() {
       setValue("agent_type", typeParam);
     }
   }, [searchParams, setValue]);
-
-  const handlePhoneChange = (value: string) => {
-    // Only allow digits, limit length
-    const digits = value.replace(/\D/g, "").slice(0, country?.phoneDigits || 15);
-    setPhoneNumber(digits);
-    setValue("phone", `${country?.dialCode || ""}${digits}`);
-  };
 
   const onSubmit = async (values: AgentSignupInput) => {
     const fileInput = document.getElementById("document") as HTMLInputElement | null;
@@ -264,38 +258,21 @@ function AgentSignupPage() {
             )}
           </div>
 
-          {/* Phone with country code */}
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <div className="flex gap-2">
-              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                <SelectTrigger className="w-[140px] shrink-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {COUNTRIES.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>
-                      {c.dialCode} {c.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder={`${"0".repeat(country?.phoneDigits || 9)}`}
-                value={phoneNumber}
-                onChange={(e) => handlePhoneChange(e.target.value)}
-                maxLength={country?.phoneDigits || 15}
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field }) => (
+              <PhoneInput
+                label="WhatsApp Number"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                onCountryChange={setSelectedCountry}
+                selectedCountry={selectedCountry}
+                error={errors.phone}
+                showHelper={true}
               />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {country?.dialCode} + {country?.phoneDigits} digits
-            </p>
-            {errors.phone && (
-              <p className="text-sm text-destructive">{errors.phone.message}</p>
             )}
-          </div>
+          />
 
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>

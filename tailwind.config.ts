@@ -43,6 +43,8 @@ const config: Config = {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
         },
+        "section-alt": "hsl(var(--section-alt))",
+        "section-cream": "hsl(var(--section-cream))",
       },
       borderRadius: {
         lg: "var(--radius)",

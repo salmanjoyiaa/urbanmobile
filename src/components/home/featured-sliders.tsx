@@ -91,16 +91,16 @@ export async function FeaturedSliders() {
         <div>
           <div className="mb-8 flex items-end justify-between">
             <div className="text-center sm:text-left mx-auto sm:mx-0">
-              <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#B69780] mb-2">
+              <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-primary mb-2">
                 Affordable Rentals
               </p>
-              <h2 className="text-[32px] font-extrabold tracking-tight text-[#2A201A] sm:text-[40px] leading-[1.1]">
+              <h2 className="text-[32px] font-extrabold tracking-tight text-foreground sm:text-[40px] leading-[1.1]">
                 Featured Rentals
               </h2>
             </div>
             <Link
               href="/properties"
-              className="group hidden items-center gap-1 rounded-2xl border-2 border-[#D9C5B2]/40 bg-transparent px-6 py-2.5 text-[14px] font-bold text-[#6B5A4E] transition-all hover:border-[#2A201A] hover:bg-[#2A201A] hover:text-[#FCF9F2] sm:inline-flex"
+              className="group hidden items-center gap-1 rounded-2xl border-2 border-border bg-transparent px-6 py-2.5 text-[14px] font-bold text-foreground transition-all hover:border-foreground hover:bg-primary hover:text-primary-foreground sm:inline-flex"
             >
               View All
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -109,7 +109,7 @@ export async function FeaturedSliders() {
           <ImageSlider items={propertySlides} />
           <Link
             href="/properties"
-            className="mt-6 flex items-center justify-center gap-1 text-[13px] font-bold text-[#B69780] hover:text-[#2A201A] sm:hidden transition-colors"
+            className="mt-6 flex items-center justify-center gap-1 text-[13px] font-bold text-accent hover:text-primary sm:hidden transition-colors"
           >
             View All Properties
             <ArrowRight className="h-3.5 w-3.5" />
@@ -122,16 +122,16 @@ export async function FeaturedSliders() {
         <div className={propertySlides.length > 0 ? "mt-24" : ""}>
           <div className="mb-8 flex items-end justify-between">
             <div className="text-center sm:text-left mx-auto sm:mx-0">
-              <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#B69780] mb-2">
+              <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-primary mb-2">
                 Affordable Essentials
               </p>
-              <h2 className="text-[32px] font-extrabold tracking-tight text-[#2A201A] sm:text-[40px] leading-[1.1]">
+              <h2 className="text-[32px] font-extrabold tracking-tight text-foreground sm:text-[40px] leading-[1.1]">
                 Featured Products
               </h2>
             </div>
             <Link
               href="/products"
-              className="group hidden items-center gap-1 rounded-2xl border-2 border-[#D9C5B2]/40 bg-transparent px-6 py-2.5 text-[14px] font-bold text-[#6B5A4E] transition-all hover:border-[#2A201A] hover:bg-[#2A201A] hover:text-[#FCF9F2] sm:inline-flex"
+              className="group hidden items-center gap-1 rounded-2xl border-2 border-border bg-transparent px-6 py-2.5 text-[14px] font-bold text-foreground transition-all hover:border-foreground hover:bg-primary hover:text-primary-foreground sm:inline-flex"
             >
               View All
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -140,7 +140,7 @@ export async function FeaturedSliders() {
           <ImageSlider items={productSlides} />
           <Link
             href="/products"
-            className="mt-6 flex items-center justify-center gap-1 text-[13px] font-bold text-[#B69780] hover:text-[#2A201A] sm:hidden transition-colors"
+            className="mt-6 flex items-center justify-center gap-1 text-[13px] font-bold text-accent hover:text-primary sm:hidden transition-colors"
           >
             View All Products
             <ArrowRight className="h-3.5 w-3.5" />

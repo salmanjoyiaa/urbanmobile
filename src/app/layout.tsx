@@ -80,7 +80,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${outfit.variable} font-sans antialiased`}>
         <ThemeProvider>
-          <NextTopLoader color="#1e3a8a" showSpinner={false} />
+          <NextTopLoader color="hsl(224 76% 24%)" showSpinner={false} />
           <QueryProvider>
             <AuthProvider>
               {children}

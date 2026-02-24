@@ -5,25 +5,31 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --foreground: 220 30% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 220 30% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 222 47% 11%;
-    --primary-foreground: 210 40% 98%;
+    --popover-foreground: 220 30% 12%;
+    --primary: 224 76% 24%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 224 76% 24%;
     --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary-foreground: 220 30% 12%;
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
     --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
+    --accent-foreground: 220 30% 12%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 222 47% 11%;
     --radius: 0.75rem;
+    --section-alt: 214 32% 98%;
+    /* Section alt (marketplace, maintenance) — pure white */
+    --section-cream: 0 0% 100%;
+    /* Light theme footer + header band: navy */
+    --footer-bg: 224 72% 18%;
+    --footer-text: 0 0% 100%;
   }
 
   .dark {
@@ -58,6 +64,37 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Hero: reference style — dark blue/purple gradient (light theme) */
+.bg-hero-light {
+  background: linear-gradient(
+    180deg,
+    hsl(224 60% 18%) 0%,
+    hsl(230 50% 22%) 50%,
+    hsl(224 45% 28%) 100%
+  );
+}
+.dark .bg-hero-light {
+  background: linear-gradient(180deg, hsl(224 30% 8%) 0%, hsl(0 0% 10%) 100%);
+}
+
+/* Section cream (marketplace, maintenance — reference style) */
+.bg-section-cream {
+  background-color: hsl(var(--section-cream));
+}
+.dark .bg-section-cream {
+  background-color: hsl(0 0% 10%);
+}
+
+/* Footer: blue in light theme, dark blue in dark theme */
+.bg-footer {
+  background-color: hsl(var(--footer-bg));
+  color: hsl(var(--footer-text));
+}
+.dark .bg-footer {
+  background-color: hsl(224 45% 10%);
+  color: hsl(0 0% 95%);
 }
 
 /* Smooth scrolling */

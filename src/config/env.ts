@@ -15,6 +15,8 @@ const serverEnvSchema = envSchema.extend({
   TWILIO_AUTH_TOKEN: z.string().min(1).optional(),
   TWILIO_WHATSAPP_FROM: z.string().min(1).optional(),
   ADMIN_WHATSAPP_NUMBER: z.string().min(1).optional(),
+  RESEND_API_KEY: z.string().min(1).optional(),
+  RESEND_FROM_EMAIL: z.string().email().optional(),
   NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional().or(z.literal("")),
   SENTRY_DSN: z.string().url().optional().or(z.literal("")),
 });

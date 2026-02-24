@@ -26,7 +26,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-20 lg:py-28 bg-[#FCF9F2] dark:bg-[#0F0D0B]">
+    <section className="py-20 lg:py-28 bg-background dark:bg-[#0F0D0B]">
       <div className="container mx-auto px-5 lg:px-12 max-w-[1400px]">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -35,8 +35,8 @@ export function HowItWorks() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="text-center mb-14"
         >
-          <p className="text-[13px] font-bold uppercase tracking-[0.2em] text-[#B69780] mb-3">How It Works</p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#2A201A] dark:text-white tracking-tight">
+          <p className="text-[13px] font-bold uppercase tracking-[0.2em] text-primary mb-3">How It Works</p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight">
             Find Your Home in 3 Steps
           </h2>
         </motion.div>
@@ -50,16 +50,16 @@ export function HowItWorks() {
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: i * 0.12 }}
               whileHover={{ y: -6, transition: { duration: 0.3, ease: "easeOut" } }}
-              className="relative bg-white dark:bg-[#1A1614] rounded-2xl p-8 border border-[#eff3f4] dark:border-white/5 hover:shadow-xl dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-shadow duration-300 cursor-default"
+              className="relative bg-card dark:bg-[#1A1614] rounded-2xl p-8 border border-border dark:border-white/5 hover:shadow-xl dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-shadow duration-300 cursor-default"
             >
-              <div className="absolute -top-4 -right-2 text-[72px] font-black text-[#2A201A]/5 dark:text-white/5 leading-none select-none">
+              <div className="absolute -top-4 -right-2 text-[72px] font-black text-foreground/5 dark:text-white/5 leading-none select-none">
                 {item.step}
               </div>
-              <div className="w-14 h-14 rounded-xl bg-[#2A201A] dark:bg-[#B69780] flex items-center justify-center mb-6">
-                <item.icon className="h-6 w-6 text-white dark:text-[#0F0D0B]" />
+              <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mb-6">
+                <item.icon className="h-6 w-6 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-bold text-[#2A201A] dark:text-white mb-3">{item.title}</h3>
-              <p className="text-[#6B5A4E] dark:text-white/55 leading-relaxed">{item.description}</p>
+              <h3 className="text-xl font-bold text-foreground mb-3">{item.title}</h3>
+              <p className="text-muted-foreground leading-relaxed">{item.description}</p>
             </motion.div>
           ))}
         </div>

@@ -82,12 +82,12 @@ export function ImageSlider({ items }: ImageSliderProps) {
                     )}
                   />
                   {/* Gradient overlay */}
-                  <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-[#2A201A]/95 via-[#2A201A]/40 to-transparent transition-opacity duration-300 pointer-events-none" />
+                  <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-foreground/95 via-foreground/40 to-transparent transition-opacity duration-300 pointer-events-none" />
 
                   {/* Badge */}
                   {item.badge && (
                     <div className="absolute left-4 top-4">
-                      <span className="inline-flex rounded-full bg-white/90 backdrop-blur-md px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#2A201A] shadow-sm">
+                      <span className="inline-flex rounded-full bg-white/90 backdrop-blur-md px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-foreground shadow-sm">
                         {item.badge}
                       </span>
                     </div>
@@ -99,7 +99,7 @@ export function ImageSlider({ items }: ImageSliderProps) {
                       {item.title}
                     </h3>
                     {item.price && (
-                      <p className="text-[15px] sm:text-[16px] font-bold text-[#E5D2C1]">
+                      <p className="text-[15px] sm:text-[16px] font-bold text-white/90">
                         {item.price}
                       </p>
                     )}
@@ -123,8 +123,8 @@ export function ImageSlider({ items }: ImageSliderProps) {
             className={cn(
               "h-1.5 rounded-full transition-all duration-300",
               selectedIndex === index
-                ? "w-8 bg-[#2A201A]"
-                : "w-1.5 bg-[#D9C5B2] hover:bg-[#B69780]"
+                ? "w-8 bg-primary"
+                : "w-1.5 bg-border hover:bg-primary/70"
             )}
           />
         ))}

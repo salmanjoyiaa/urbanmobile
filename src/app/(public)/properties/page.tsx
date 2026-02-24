@@ -83,19 +83,19 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   return (
     <div className="container mx-auto space-y-6 px-4 py-8">
       <div>
-        <h1 className="text-[24px] font-extrabold text-[#2A201A]">Rental Listings</h1>
-        <p className="mt-1 text-[15px] text-[#6B5A4E]">Find affordable homes and spaces for rent across Saudi Arabia.</p>
+        <h1 className="text-[24px] font-extrabold text-foreground">Rental Listings</h1>
+        <p className="mt-1 text-[15px] text-muted-foreground">Find affordable homes and spaces for rent across Saudi Arabia.</p>
       </div>
 
       <PropertyFilters initialValues={searchParams} />
 
       {properties.length === 0 ? (
-        <div className="rounded-2xl border border-[#D9C5B2]/40 bg-[#FCF9F2] p-12 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#E5D5C5]">
-            <Building2 className="h-7 w-7 text-[#6B5A4E]" />
+        <div className="rounded-2xl border border-border bg-muted/50 p-12 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+            <Building2 className="h-7 w-7 text-muted-foreground" />
           </div>
-          <h3 className="mt-4 text-[17px] font-bold text-[#2A201A]">No properties found</h3>
-          <p className="mt-1 text-[15px] text-[#6B5A4E]">
+          <h3 className="mt-4 text-[17px] font-bold text-foreground">No properties found</h3>
+          <p className="mt-1 text-[15px] text-muted-foreground">
             Try adjusting your filters or check back later.
           </p>
         </div>
