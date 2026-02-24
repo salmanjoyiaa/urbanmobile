@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
           .select("visit_time")
           .eq("property_id", propertyId)
           .eq("visit_date", date)
-          .in("status", ["pending", "confirmed"])) as {
+          .in("status", ["pending", "confirmed", "assigned"])) as {
             data: Array<{ visit_time: string }> | null;
             error: { message: string } | null;
           };
@@ -90,8 +90,25 @@ export async function GET(request: NextRequest) {
           throw new Error(error.message);
         }
 
-        const bookedTimes = (data || []).map((entry) => entry.visit_time);
-        return buildAvailabilitySlots(bookedTimes);
+        const now = new Date();
+        const bookedTimes = (data || [])
+          .map((entry) => {
+            const raw = entry.visit_time ?? "";
+            const normalized = raw.length > 5 ? raw.slice(0, 5) : raw;
+            return { normalized, raw };
+          })
+          .filter(({ normalized }) => {
+            const slotAt = new Date(`${date}T${normalized}`);
+            return slotAt > now;
+          })
+          .map(({ normalized }) => normalized);
+        const slots = buildAvailabilitySlots(bookedTimes);
+        const today = new Date().toISOString().slice(0, 10);
+        if (date === today) {
+          const now = new Date();
+          return slots.filter((s) => new Date(`${date}T${s.time}`) > now);
+        }
+        return slots;
       },
     });
 
@@ -144,7 +161,7 @@ export async function POST(request: NextRequest) {
     .eq("property_id", payload.property_id)
     .eq("visit_date", payload.visit_date)
     .eq("visit_time", payload.visit_time)
-    .in("status", ["pending", "confirmed"])
+    .in("status", ["pending", "confirmed", "assigned"])
     .limit(1)) as {
       data: Array<{ id: string }> | null;
     };

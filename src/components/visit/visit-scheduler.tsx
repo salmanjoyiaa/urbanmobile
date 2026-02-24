@@ -41,6 +41,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
 
   const dateKey = useMemo(() => (date ? format(date, "yyyy-MM-dd") : ""), [date]);
   const { data: slots = [], isLoading: loadingSlots } = useVisitSlots(propertyId, dateKey, !!dateKey);
+  const availableSlots = useMemo(() => slots.filter((s) => s.available), [slots]);
   const createVisit = useCreateVisitRequest();
 
   const {
@@ -139,6 +140,9 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
 
         {step === 1 && (
           <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              We&apos;re open Mon–Fri. Select a day to see available times.
+            </p>
             <Calendar
               mode="single"
               selected={date}
@@ -155,13 +159,26 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
 
         {step === 2 && (
           <div className="space-y-4">
+            {date && (
+              <p className="text-base font-semibold text-foreground">
+                {format(date, "EEEE, MMM d, yyyy")}
+              </p>
+            )}
             {loadingSlots ? (
               <div className="flex items-center text-sm text-muted-foreground">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Loading slots...
               </div>
+            ) : availableSlots.length === 0 && slots.length > 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No slots available on this day. Try another date.
+              </p>
+            ) : availableSlots.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No slots available. Select a weekday to see times.
+              </p>
             ) : (
-              <SlotGrid slots={slots} selectedSlot={slot} onSelect={setSlot} />
+              <SlotGrid slots={availableSlots} selectedSlot={slot} onSelect={setSlot} />
             )}
 
             <div className="flex gap-2">
@@ -177,6 +194,11 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
 
         {step === 3 && (
           <form onSubmit={handleSubmit(onContactSubmit)} className="space-y-4">
+            {date && slot && (
+              <p className="text-sm font-medium text-muted-foreground">
+                You&apos;re booking: {format(date, "EEEE, MMM d")} at {slot.slice(0, 5)}
+              </p>
+            )}
             <div className="space-y-2">
               <Label htmlFor="visitor-name">Full name</Label>
               <Input id="visitor-name" {...register("visitor_name")} disabled={createVisit.isPending} />
