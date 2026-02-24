@@ -12,56 +12,61 @@ export function ThemeToggle() {
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div className="min-h-11 min-w-11 flex items-center justify-center rounded-full bg-muted/80" aria-hidden />;
+    return (
+      <div 
+        className="relative flex items-center justify-center w-11 h-11" 
+        aria-hidden 
+      >
+        <div className="w-[46px] h-[26px] rounded-full bg-slate-200/50 dark:bg-slate-800/50" />
+      </div>
+    );
   }
 
   const isDark = theme === "dark";
 
   return (
-    <motion.button
+    <button
+      role="switch"
+      aria-checked={isDark}
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className={`relative flex items-center justify-center min-h-11 min-w-11 rounded-full px-0.5 transition-colors duration-300 border ${
-        isDark
-          ? "bg-slate-800 border-border"
-          : "bg-slate-100 border-border"
-      } w-14 h-7`}
-      whileTap={{ scale: 0.94 }}
+      className="relative flex items-center justify-center w-11 h-11 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-full transition-transform active:scale-95"
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
-      {/* Sliding knob */}
-      <motion.div
-        className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-          isDark
-            ? "bg-primary shadow-[0_2px_8px_hsl(var(--primary)/0.4)]"
-            : "bg-white shadow-[0_2px_6px_rgba(42,32,26,0.18)]"
-        }`}
-        animate={{ x: isDark ? 27 : 0 }}
-        transition={{ type: "spring", stiffness: 600, damping: 35 }}
-      >
-        <AnimatePresence mode="wait" initial={false}>
-          {isDark ? (
-            <motion.div
-              key="sun"
-              initial={{ rotate: -60, opacity: 0, scale: 0.5 }}
-              animate={{ rotate: 0, opacity: 1, scale: 1 }}
-              exit={{ rotate: 60, opacity: 0, scale: 0.5 }}
-              transition={{ duration: 0.18 }}
-            >
-              <Sun className="h-3.5 w-3.5 text-slate-900" />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="moon"
-              initial={{ rotate: 60, opacity: 0, scale: 0.5 }}
-              animate={{ rotate: 0, opacity: 1, scale: 1 }}
-              exit={{ rotate: -60, opacity: 0, scale: 0.5 }}
-              transition={{ duration: 0.18 }}
-            >
-              <Moon className="h-3.5 w-3.5 text-slate-700" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </motion.button>
+      {/* Pill Background */}
+      <span className="relative flex items-center w-[46px] h-[26px] rounded-full bg-slate-200 dark:bg-slate-700/60 group-hover:bg-slate-300 dark:group-hover:bg-slate-600/80 border border-black/5 dark:border-white/10 transition-colors duration-200 shadow-inner overflow-hidden">
+        
+        {/* Sliding Knob */}
+        <motion.span 
+          initial={false}
+          animate={{ x: isDark ? 20 : 0 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          className="absolute left-[3px] flex items-center justify-center w-5 h-5 rounded-full bg-white dark:bg-[#0F0D0B] shadow-[0_1px_3px_rgba(0,0,0,0.12)] border border-slate-200/50 dark:border-slate-800 z-10"
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            {isDark ? (
+              <motion.div
+                key="moon"
+                initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Moon className="w-[11px] h-[11px] text-indigo-400" strokeWidth={2.5} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="sun"
+                initial={{ opacity: 0, rotate: 90, scale: 0.5 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: -90, scale: 0.5 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Sun className="w-[11px] h-[11px] text-amber-500" strokeWidth={2.5} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.span>
+      </span>
+    </button>
   );
 }

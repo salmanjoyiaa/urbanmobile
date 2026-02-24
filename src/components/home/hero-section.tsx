@@ -10,22 +10,6 @@ const fadeUp = (delay = 0, reduceMotion?: boolean) => ({
   transition: { duration: reduceMotion ? 0 : 0.65, ease: [0.22, 1, 0.36, 1] as [number, number, number, number], delay },
 });
 
-function HeroHouseImage() {
-  return (
-    <div className="relative w-full h-full">
-      <Image
-        src="/images/3d.png"
-        alt="Modern 3D luxury villa"
-        width={680}
-        height={600}
-        priority
-        quality={90}
-        className="w-full h-auto object-contain drop-shadow-2xl"
-      />
-    </div>
-  );
-}
-
 export function HeroSection() {
   const reduceMotion = useReducedMotion();
 
@@ -95,18 +79,25 @@ export function HeroSection() {
             )}
 
             <motion.div
-              className="relative"
+              className="relative w-full aspect-square max-w-[500px] lg:max-w-[600px] flex items-center justify-center text-white dark:text-white drop-shadow-2xl"
               animate={reduceMotion ? undefined : {
                 y: [0, -12, 0],
                 filter: [
-                  "drop-shadow(0 20px 40px rgba(0,0,0,0.1)) drop-shadow(0 0 40px rgba(30,58,138,0.12))",
-                  "drop-shadow(0 30px 60px rgba(0,0,0,0.12)) drop-shadow(0 0 50px rgba(30,58,138,0.18))",
-                  "drop-shadow(0 20px 40px rgba(0,0,0,0.1)) drop-shadow(0 0 40px rgba(30,58,138,0.12))"
+                  "drop-shadow(0 20px 40px rgba(0,0,0,0.2)) drop-shadow(0 0 40px rgba(255,255,255,0.08))",
+                  "drop-shadow(0 28px 56px rgba(0,0,0,0.25)) drop-shadow(0 0 56px rgba(255,255,255,0.12))",
+                  "drop-shadow(0 20px 40px rgba(0,0,0,0.2)) drop-shadow(0 0 40px rgba(255,255,255,0.08))"
                 ]
               }}
               transition={reduceMotion ? undefined : { duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
             >
-              <HeroHouseImage />
+              <Image 
+                src="/images/hero-villa-3d.png" 
+                alt="Luxury 3D Villa Hero" 
+                width={800} 
+                height={800} 
+                className="w-full h-auto object-contain"
+                priority 
+              />
             </motion.div>
           </div>
         </motion.div>
