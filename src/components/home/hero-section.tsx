@@ -170,12 +170,13 @@ export function HeroSection() {
             {...fadeUp(0.1)}
             className="text-[48px] sm:text-[56px] md:text-[64px] lg:text-[76px] font-black tracking-[-0.04em] leading-[1] mb-5 text-[#2A201A] dark:text-white drop-shadow-sm"
           >
-            Your Next Home,<br className="hidden sm:block" />{" "}
-            <span className="text-[#B69780] font-medium italic pr-2 tracking-[-0.02em]">Made&nbsp;Simple.</span>
+            Your Next<br />
+            Home,{" "}
+            <span className="text-[#B69780] dark:text-[#D4A574] font-semibold pr-2 tracking-[-0.02em]">Made Simple</span>
           </motion.h1>
 
           <motion.p {...fadeUp(0.2)} className="text-[#6B5A4E] dark:text-white/55 max-w-[340px] sm:max-w-lg text-[16px] sm:text-[18px] leading-[1.6] mb-8 font-medium">
-            Short-term, long-term, or contract rentals. Find verified properties, quality products, and 24/7 maintenance services.
+            Short-term, long-term, or contract rentals — find verified properties, quality products, and 24/7 maintenance services across Saudi Arabia.
           </motion.p>
 
           <motion.div {...fadeUp(0.3)} className="flex flex-col sm:flex-row w-full sm:w-auto gap-4 mb-8">

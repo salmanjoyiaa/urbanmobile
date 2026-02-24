@@ -84,16 +84,16 @@ function LoginContent() {
   };
 
   return (
-    <Card className="border-[#D9C5B2]/40 bg-[#FCF9F2] shadow-xl shadow-[#2A201A]/5">
+    <Card className="border-border bg-card shadow-xl shadow-foreground/5 dark:shadow-background/5">
       <CardHeader className="space-y-2">
-        <CardTitle className="text-2xl font-extrabold text-[#2A201A]">
+        <CardTitle className="text-2xl font-extrabold text-foreground">
           {loginType === "property"
             ? "Property Team Login"
             : loginType === "visiting"
               ? "Visiting Team Login"
               : "Agent Login"}
         </CardTitle>
-        <CardDescription className="text-[#6B5A4E]">Access your UrbanSaudi account.</CardDescription>
+        <CardDescription className="text-muted-foreground">Access your UrbanSaudi account.</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -122,7 +122,7 @@ function LoginContent() {
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
           </div>
-          <Button type="submit" className="w-full bg-[#2A201A] hover:bg-black text-white rounded-xl h-11" disabled={isSubmitting}>
+          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-11" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -134,9 +134,9 @@ function LoginContent() {
           </Button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-[#6B5A4E]">
+        <div className="mt-6 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/signup/agent" className="font-bold text-[#2A201A] hover:underline">
+          <Link href="/signup/agent" className="font-bold text-primary hover:underline">
             Apply to become an agent
           </Link>
         </div>
@@ -147,7 +147,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="flex h-full min-h-[400px] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#2A201A]" /></div>}>
+    <Suspense fallback={<div className="flex h-full min-h-[400px] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
       <LoginContent />
     </Suspense>
   );

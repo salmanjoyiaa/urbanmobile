@@ -55,17 +55,17 @@ export function MaintenanceRequestForm() {
 
     if (isSuccess) {
         return (
-            <div className="bg-[#FCF9F2] border border-[#D9C5B2]/40 rounded-2xl p-8 text-center shadow-lg shadow-[#2A201A]/5">
-                <div className="mx-auto w-16 h-16 bg-[#E5D5C5] rounded-full flex items-center justify-center mb-6">
-                    <Wrench className="w-8 h-8 text-[#2A201A]" />
+            <div className="bg-card dark:bg-slate-900 border border-border dark:border-slate-700 rounded-2xl p-8 text-center shadow-lg shadow-foreground/5">
+                <div className="mx-auto w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mb-6">
+                    <Wrench className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-2xl font-extrabold text-[#2A201A] mb-2">Request Received</h3>
-                <p className="text-[#6B5A4E] text-lg mb-8">
+                <h3 className="text-2xl font-extrabold text-foreground mb-2">Request Received</h3>
+                <p className="text-muted-foreground text-lg mb-8">
                     Thank you. Our maintenance management team will review your request and get back to you shortly.
                 </p>
                 <Button
                     onClick={() => setIsSuccess(false)}
-                    className="bg-[#2A201A] hover:bg-black text-white px-8 py-2 rounded-xl h-12 font-bold"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-2 rounded-xl h-12 font-bold"
                 >
                     Submit Another Request
                 </Button>
@@ -74,21 +74,21 @@ export function MaintenanceRequestForm() {
     }
 
     return (
-        <div className="bg-[#FCF9F2] border border-[#D9C5B2]/40 rounded-2xl p-8 lg:p-10 shadow-xl shadow-[#2A201A]/5">
+        <div className="bg-card dark:bg-slate-900 border border-border dark:border-slate-700 rounded-2xl p-8 lg:p-10 shadow-xl shadow-foreground/5 dark:shadow-background/5">
             <div className="mb-8">
-                <h2 className="text-3xl font-extrabold text-[#2A201A] mb-2">Request Maintenance</h2>
-                <p className="text-[#6B5A4E]">
+                <h2 className="text-3xl font-extrabold text-foreground mb-2">Request Maintenance</h2>
+                <p className="text-muted-foreground">
                     Fill out the strict verification form below to schedule premium service.
                 </p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="space-y-2">
-                    <Label htmlFor="service_type" className="text-[#2A201A] font-bold">Service Category</Label>
+                    <Label htmlFor="service_type" className="text-foreground font-bold">Service Category</Label>
                     <Input
                         id="service_type"
                         placeholder="e.g., Plumbing, Electrical, HVAC"
-                        className="h-12 border-[#D9C5B2]/50 bg-white rounded-xl focus:ring-[#2A201A]"
+                        className="h-12 border-border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl"
                         {...register("service_type")}
                     />
                     {errors.service_type && (
@@ -98,11 +98,11 @@ export function MaintenanceRequestForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <Label htmlFor="customer_name" className="text-[#2A201A] font-bold">Full Name</Label>
+                        <Label htmlFor="customer_name" className="text-foreground font-bold">Full Name</Label>
                         <Input
                             id="customer_name"
                             placeholder="John Doe"
-                            className="h-12 border-[#D9C5B2]/50 bg-white rounded-xl focus:ring-[#2A201A]"
+                            className="h-12 border-border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl"
                             {...register("customer_name")}
                         />
                         {errors.customer_name && (
@@ -110,11 +110,11 @@ export function MaintenanceRequestForm() {
                         )}
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="customer_phone" className="text-[#2A201A] font-bold">WhatsApp Number</Label>
+                        <Label htmlFor="customer_phone" className="text-foreground font-bold">WhatsApp Number</Label>
                         <Input
                             id="customer_phone"
                             placeholder="05XXX or +923XXX"
-                            className="h-12 border-[#D9C5B2]/50 bg-white rounded-xl focus:ring-[#2A201A]"
+                            className="h-12 border-border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl"
                             {...register("customer_phone")}
                         />
                         {errors.customer_phone && (
@@ -124,12 +124,12 @@ export function MaintenanceRequestForm() {
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="customer_email" className="text-[#2A201A] font-bold">Email Address</Label>
+                    <Label htmlFor="customer_email" className="text-foreground font-bold">Email Address</Label>
                     <Input
                         id="customer_email"
                         type="email"
                         placeholder="you@domain.com"
-                        className="h-12 border-[#D9C5B2]/50 bg-white rounded-xl focus:ring-[#2A201A]"
+                        className="h-12 border-border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl"
                         {...register("customer_email")}
                     />
                     {errors.customer_email && (
@@ -138,11 +138,11 @@ export function MaintenanceRequestForm() {
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="details" className="text-[#2A201A] font-bold">Issue Details</Label>
+                    <Label htmlFor="details" className="text-foreground font-bold">Issue Details</Label>
                     <Textarea
                         id="details"
                         placeholder="Please describe the issue in detail..."
-                        className="min-h-[120px] resize-y border-[#D9C5B2]/50 bg-white rounded-xl focus:ring-[#2A201A]"
+                        className="min-h-[120px] resize-y border-border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl"
                         {...register("details")}
                     />
                     {errors.details && (
@@ -152,7 +152,7 @@ export function MaintenanceRequestForm() {
 
                 <Button
                     type="submit"
-                    className="w-full h-14 bg-[#2A201A] hover:bg-black text-white rounded-xl font-bold text-lg transition-transform hover:-translate-y-1"
+                    className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-lg transition-transform hover:-translate-y-1"
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? (

@@ -10,7 +10,7 @@ import { JoinTeam } from "@/components/home/join-team";
 
 export default function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#FCF9F2] dark:bg-[#0F0D0B] text-[#2A201A] dark:text-[#F5F0EA] font-sans overflow-x-hidden">
+    <div className="flex min-h-screen flex-col bg-background text-foreground font-sans overflow-x-hidden">
       <HomepageNav />
 
       <main className="flex-1 w-full">
@@ -36,7 +36,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#D9C5B2]/30 dark:border-white/5 bg-[#2A201A] dark:bg-[#080605] text-white py-16">
+      <footer className="border-t border-border bg-slate-900 dark:bg-slate-950 text-white py-16">
         <div className="container mx-auto px-5 lg:px-12 max-w-[1400px]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
             {/* Brand */}

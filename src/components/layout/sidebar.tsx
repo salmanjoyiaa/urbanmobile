@@ -70,13 +70,13 @@ export function Sidebar({ items, title, userName }: SidebarProps) {
 
   return (
     <>
-      <aside className="hidden h-screen w-64 shrink-0 border-r bg-white lg:block">
+      <aside className="hidden h-screen w-64 shrink-0 border-r bg-card dark:bg-slate-950 lg:block">
         <div className="flex h-full flex-col p-4">
-          <div className="mb-6 px-2 text-lg font-bold text-navy">{title}</div>
+          <div className="mb-6 px-2 text-lg font-bold text-foreground">{title}</div>
           <SidebarNav items={items} />
-          <div className="mt-auto pt-4 flex flex-col gap-2 border-t">
+          <div className="mt-auto pt-4 flex flex-col gap-2 border-t border-border">
             {userName && (
-              <div className="px-2 pb-1 text-sm font-medium text-navy/80 truncate">
+              <div className="px-2 pb-1 text-sm font-medium text-muted-foreground truncate">
                 {userName}
               </div>
             )}
@@ -88,7 +88,7 @@ export function Sidebar({ items, title, userName }: SidebarProps) {
         </div>
       </aside>
 
-      <div className="border-b bg-white px-4 py-3 lg:hidden">
+      <div className="border-b bg-card dark:bg-slate-950 px-4 py-3 lg:hidden">
         <div className="flex items-center gap-3">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -96,15 +96,15 @@ export function Sidebar({ items, title, userName }: SidebarProps) {
                 <Menu className="h-4 w-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72">
+            <SheetContent side="left" className="w-72 bg-card dark:bg-slate-950 border-border">
               <SheetHeader>
-                <SheetTitle>{title}</SheetTitle>
+                <SheetTitle className="text-foreground">{title}</SheetTitle>
               </SheetHeader>
               <div className="mt-6">
                 <SidebarNav items={items} onNavigate={() => setOpen(false)} />
-                <div className="mt-6 flex flex-col gap-2 border-t pt-4">
+                <div className="mt-6 flex flex-col gap-2 border-t border-border pt-4">
                   {userName && (
-                    <div className="px-2 text-sm font-medium text-navy/80 truncate">
+                    <div className="px-2 text-sm font-medium text-muted-foreground truncate">
                       {userName}
                     </div>
                   )}
@@ -116,7 +116,7 @@ export function Sidebar({ items, title, userName }: SidebarProps) {
               </div>
             </SheetContent>
           </Sheet>
-          <p className="font-semibold text-navy">{title}</p>
+          <p className="font-semibold text-foreground">{title}</p>
         </div>
       </div>
     </>
