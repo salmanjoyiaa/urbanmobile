@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthProvider } from "@/providers/auth-provider";
@@ -85,6 +86,7 @@ export default function RootLayout({
             <AuthProvider>
               {children}
               <ToastProvider />
+              <Analytics />
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>

@@ -24,6 +24,7 @@ export function PropertyMap({ latitude, longitude, onChange }: PropertyMapProps)
             id="latitude"
             type="number"
             step="any"
+            placeholder="-90 to 90 (e.g. 24.71)"
             value={latitude ?? ""}
             onChange={(event) =>
               onChange({
@@ -39,6 +40,7 @@ export function PropertyMap({ latitude, longitude, onChange }: PropertyMapProps)
             id="longitude"
             type="number"
             step="any"
+            placeholder="-180 to 180 (e.g. 46.68)"
             value={longitude ?? ""}
             onChange={(event) =>
               onChange({
