@@ -16,6 +16,7 @@ const bodySchema = z
     profileId: z.string().uuid().optional(),
     agentId: z.string().uuid().optional(),
     preview: z.boolean().optional(),
+    emailOnly: z.boolean().optional(),
   })
   .refine(
     (d) =>
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { date, recipientType, profileId, agentId, preview } = parsed.data;
+  const { date, recipientType, profileId, agentId, preview, emailOnly } = parsed.data;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let visits: any[] = [];
@@ -127,10 +128,12 @@ export async function POST(request: Request) {
         agentPhone = agentPhone || ownerAgent?.phone || null;
       }
 
-      let line = `• ${propertyTitle} — ${visitTime}\n  Visitor: ${v.visitor_name}`;
-      if (v.visitor_phone) line += ` (${v.visitor_phone})`;
-      if (visitingAgent?.full_name && recipientType === "property_agent") {
-        line += `\n  Visiting Agent: ${visitingAgent.full_name}`;
+      let line: string;
+      if (recipientType === "property_agent") {
+        line = `• ${propertyTitle} — ${visitTime}\n  Visiting Agent: ${visitingAgent?.full_name ?? "—"}${visitingAgent?.phone ? ` (${visitingAgent.phone})` : ""}`;
+      } else {
+        line = `• ${propertyTitle} — ${visitTime}\n  Visitor: ${v.visitor_name}`;
+        if (v.visitor_phone) line += ` (${v.visitor_phone})`;
       }
       lines.push(line);
     }
@@ -154,6 +157,7 @@ export async function POST(request: Request) {
     visitorName: string;
     visitorPhone?: string | null;
     visitingAgentName?: string | null;
+    visitingAgentPhone?: string | null;
   }[] = [];
   let agentEmail: string | null = null;
   let agentName = "Agent";
@@ -172,13 +176,14 @@ export async function POST(request: Request) {
       visitorName: v.visitor_name,
       visitorPhone: v.visitor_phone,
       visitingAgentName: visitingAgent?.full_name ?? null,
+      visitingAgentPhone: visitingAgent?.phone ?? null,
     });
 
     if (recipientType === "visiting_agent") {
       agentName = visitingAgent?.full_name || "Agent";
       agentEmail = agentEmail || visitingAgent?.email || null;
 
-      if (visitingAgent?.phone) {
+      if (!emailOnly && visitingAgent?.phone) {
         const content = visitAssignedVisitingAgentContent({
           visitingAgentName: visitingAgent.full_name,
           propertyTitle,
@@ -204,7 +209,7 @@ export async function POST(request: Request) {
       agentName = ownerAgent?.full_name || "Agent";
       agentEmail = agentEmail || ownerAgent?.email || null;
 
-      if (ownerAgent?.phone) {
+      if (!emailOnly && ownerAgent?.phone) {
         const content = visitAssignedPropertyAgentContent({
           ownerName: ownerAgent.full_name || "Agent",
           visitorName: v.visitor_name,
@@ -231,6 +236,7 @@ export async function POST(request: Request) {
     const emailTpl = dayVisitsSummaryEmail({
       agentName,
       date,
+      forPropertyAgent: recipientType === "property_agent",
       visits: emailVisitRows,
     });
     const result = await sendEmail({

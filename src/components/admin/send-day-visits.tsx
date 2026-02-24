@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarDays, Send, Loader2, ExternalLink } from "lucide-react";
+import { CalendarDays, Send, Loader2, MessageCircle } from "lucide-react";
 
 type Agent = { id: string; name: string };
 
@@ -88,7 +88,7 @@ export function SendDayVisits({ visitingAgents, propertyAgents }: Props) {
     const key = recipientType === "visiting_agent" ? "visiting" : "property";
     setSending(key);
     try {
-      const payload: Record<string, string> = { date, recipientType };
+      const payload: Record<string, string | boolean> = { date, recipientType, emailOnly: true };
       if (recipientType === "visiting_agent") payload.profileId = id;
       else payload.agentId = id;
 
@@ -116,7 +116,9 @@ export function SendDayVisits({ visitingAgents, propertyAgents }: Props) {
           : propertyAgents.find((a) => a.id === id)?.name;
 
       toast.success(
-        `Sent ${json.sent.whatsApp} WhatsApp(s) and ${json.sent.email} email to ${agentName || "agent"}`
+        json.sent.email
+          ? `Sent schedule by email to ${agentName || "agent"}`
+          : `No email sent (agent has no email on file). ${agentName || "Agent"} has ${json.totalVisits} visit(s) on this date.`
       );
       router.refresh();
     } catch {
@@ -173,19 +175,21 @@ export function SendDayVisits({ visitingAgents, propertyAgents }: Props) {
                 ) : (
                   <Send className="mr-2 h-4 w-4" />
                 )}
-                Send via Twilio
+                Send via email
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 disabled={!visitingAgentId || !date || opening !== null}
                 onClick={() => openOnDevice("visiting_agent", visitingAgentId)}
-                title="Open WhatsApp on your device"
+                title="Send via WhatsApp on your device"
+                aria-label="Open in WhatsApp on your device"
+                className="text-green-500 hover:text-green-600 focus-visible:ring-green-500"
               >
                 {opening === "visiting" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <ExternalLink className="h-4 w-4" />
+                  <MessageCircle className="h-4 w-4" />
                 )}
               </Button>
             </div>
@@ -218,19 +222,21 @@ export function SendDayVisits({ visitingAgents, propertyAgents }: Props) {
                 ) : (
                   <Send className="mr-2 h-4 w-4" />
                 )}
-                Send via Twilio
+                Send via email
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 disabled={!propertyAgentId || !date || opening !== null}
                 onClick={() => openOnDevice("property_agent", propertyAgentId)}
-                title="Open WhatsApp on your device"
+                title="Send via WhatsApp on your device"
+                aria-label="Open in WhatsApp on your device"
+                className="text-green-500 hover:text-green-600 focus-visible:ring-green-500"
               >
                 {opening === "property" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <ExternalLink className="h-4 w-4" />
+                  <MessageCircle className="h-4 w-4" />
                 )}
               </Button>
             </div>

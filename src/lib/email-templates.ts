@@ -320,14 +320,18 @@ export function maintenanceRejectedEmail(params: {
 export function dayVisitsSummaryEmail(params: {
   agentName: string;
   date: string;
+  /** When true, show visiting agent name/phone per visit and do not show visitor/customer details. */
+  forPropertyAgent?: boolean;
   visits: Array<{
     propertyTitle: string;
     visitTime: string;
     visitorName: string;
     visitorPhone?: string | null;
     visitingAgentName?: string | null;
+    visitingAgentPhone?: string | null;
   }>;
 }) {
+  const { forPropertyAgent = false } = params;
   if (params.visits.length === 0) {
     return {
       subject: `Your visits for ${params.date} — UrbanSaudi`,
@@ -341,18 +345,25 @@ export function dayVisitsSummaryEmail(params: {
 
   const rows = params.visits
     .map((v, i) => {
+      if (forPropertyAgent) {
+        const visitingAgent = v.visitingAgentPhone
+          ? `${v.visitingAgentName ?? "Visiting Agent"} (${v.visitingAgentPhone})`
+          : v.visitingAgentName ?? "—";
+        return `
+        <div style="padding:12px 0;${i > 0 ? "border-top:1px solid #eff3f4;" : ""}">
+          <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#0f1419">${i + 1}. ${v.propertyTitle}</p>
+          ${detail("Time", v.visitTime)}
+          ${detail("Visiting Agent", visitingAgent)}
+        </div>`;
+      }
       const visitor = v.visitorPhone
         ? `${v.visitorName} (${v.visitorPhone})`
         : v.visitorName;
-      const agent = v.visitingAgentName
-        ? detail("Visiting Agent", v.visitingAgentName)
-        : "";
       return `
         <div style="padding:12px 0;${i > 0 ? "border-top:1px solid #eff3f4;" : ""}">
           <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#0f1419">${i + 1}. ${v.propertyTitle}</p>
           ${detail("Time", v.visitTime)}
           ${detail("Visitor", visitor)}
-          ${agent}
         </div>`;
     })
     .join("");
