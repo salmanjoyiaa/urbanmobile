@@ -314,3 +314,59 @@ export function maintenanceRejectedEmail(params: {
     `),
   };
 }
+
+// ── Day Visit Summary Email ──
+
+export function dayVisitsSummaryEmail(params: {
+  agentName: string;
+  date: string;
+  visits: Array<{
+    propertyTitle: string;
+    visitTime: string;
+    visitorName: string;
+    visitorPhone?: string | null;
+    visitingAgentName?: string | null;
+  }>;
+}) {
+  if (params.visits.length === 0) {
+    return {
+      subject: `Your visits for ${params.date} — UrbanSaudi`,
+      html: layout(`
+        ${heading(`Your visits for ${params.date}`)}
+        ${paragraph(`Hello ${params.agentName},`)}
+        ${paragraph("You have no visits scheduled on this date.")}
+      `),
+    };
+  }
+
+  const rows = params.visits
+    .map((v, i) => {
+      const visitor = v.visitorPhone
+        ? `${v.visitorName} (${v.visitorPhone})`
+        : v.visitorName;
+      const agent = v.visitingAgentName
+        ? detail("Visiting Agent", v.visitingAgentName)
+        : "";
+      return `
+        <div style="padding:12px 0;${i > 0 ? "border-top:1px solid #eff3f4;" : ""}">
+          <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#0f1419">${i + 1}. ${v.propertyTitle}</p>
+          ${detail("Time", v.visitTime)}
+          ${detail("Visitor", visitor)}
+          ${agent}
+        </div>`;
+    })
+    .join("");
+
+  return {
+    subject: `Your visits for ${params.date} — UrbanSaudi`,
+    html: layout(`
+      ${heading(`Your visits for ${params.date}`)}
+      ${paragraph(`Hello ${params.agentName},`)}
+      ${paragraph(`You have <strong>${params.visits.length}</strong> visit(s) scheduled for this day.`)}
+      ${divider()}
+      ${rows}
+      ${divider()}
+      ${paragraph("Please ensure you are prepared for all visits. Contact admin if you need to reschedule.")}
+    `),
+  };
+}

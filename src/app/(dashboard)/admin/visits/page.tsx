@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 
 import { VisitRowActions } from "@/components/admin/visit-row-actions";
+import { SendDayVisits } from "@/components/admin/send-day-visits";
 import { MessageCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -66,12 +67,26 @@ export default async function AdminVisitsPage() {
     name: agent.profiles?.full_name || "Unknown",
   }));
 
+  const { data: propAgentsData } = await supabase
+    .from("agents")
+    .select("id, profiles:profile_id(full_name)")
+    .neq("agent_type", "visiting")
+    .eq("status", "approved");
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const propertyAgents = (propAgentsData || []).map((a: any) => ({
+    id: a.id,
+    name: a.profiles?.full_name || "Unknown",
+  }));
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-navy">Visit Requests</h1>
         <p className="text-sm text-muted-foreground">Orchestrate and route scheduled visits.</p>
       </div>
+
+      <SendDayVisits visitingAgents={visitingAgents} propertyAgents={propertyAgents} />
 
       <DataTable
         rows={rows}
