@@ -44,6 +44,10 @@ function AgentSignupPage() {
   const country = useMemo(() => getCountryByCode(selectedCountry), [selectedCountry]);
   const cities = country?.cities || [];
 
+  const typeParam = searchParams.get("type");
+  const initialAgentType: "property" | "visiting" =
+    typeParam === "visiting" || typeParam === "property" ? typeParam : "property";
+
   const {
     register,
     handleSubmit,
@@ -61,7 +65,7 @@ function AgentSignupPage() {
       phone: "",
       company_name: "",
       license_number: "",
-      agent_type: "property",
+      agent_type: initialAgentType,
     },
   });
 
