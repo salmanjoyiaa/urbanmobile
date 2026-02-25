@@ -3,7 +3,6 @@ import { DataTable } from "@/components/dashboard/data-table";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateVisitingAgentDialog } from "@/components/admin/create-visiting-agent-dialog";
 import { AgentRowActions } from "@/components/admin/agent-row-actions";
-import { AgentPropertyAssignmentDialog } from "@/components/admin/agent-property-assignment-dialog";
 import { MessageCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -79,10 +78,7 @@ export default async function AdminVisitingTeamPage() {
                         key: "actions",
                         title: "Actions",
                         render: (row) => (
-                            <div className="flex items-center gap-2">
-                                <AgentPropertyAssignmentDialog agentId={row.id} agentName={row.profiles?.full_name || "Agent"} />
-                                <AgentRowActions id={row.id} status={row.status} agentType="visiting" row={row} />
-                            </div>
+                            <AgentRowActions id={row.id} status={row.status} agentType="visiting" row={row} />
                         ),
                     },
                 ]}
