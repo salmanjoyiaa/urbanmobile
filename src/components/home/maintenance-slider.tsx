@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Zap, Droplets, Thermometer, Wrench, Paintbrush, Sparkles, Star, Hammer, ShieldCheck, TreePine } from "lucide-react";
+import { ChevronLeft, ChevronRight, Zap, Droplets, Thermometer, Wrench, Paintbrush, Sparkles, Star, Hammer, ShieldCheck, TreePine, MessageCircle } from "lucide-react";
 
 const SERVICES = [
   {
@@ -115,9 +115,10 @@ export function MaintenanceSlider() {
             href="https://wa.me/923177779990?text=Hi%2C%20I%20need%20maintenance%20help%20for%20my%20property"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-emerald-500/25 whitespace-nowrap"
+            className="inline-flex items-center gap-2 self-start px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-emerald-500/25 whitespace-nowrap"
           >
-            Request via WhatsApp
+            <MessageCircle className="h-5 w-5 shrink-0" />
+            Request on WhatsApp
           </a>
         </div>
 

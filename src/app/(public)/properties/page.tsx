@@ -81,10 +81,10 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   };
 
   return (
-    <div className="container mx-auto space-y-6 px-4 py-8">
-      <div>
+    <div className="container mx-auto px-4 py-6 sm:py-8 space-y-4">
+      <div className="space-y-1">
         <h1 className="text-[24px] font-extrabold text-foreground">Rental Listings</h1>
-        <p className="mt-1 text-[15px] text-muted-foreground">Find affordable homes and spaces for rent across Saudi Arabia.</p>
+        <p className="text-[15px] text-muted-foreground">Find affordable homes and spaces for rent across Saudi Arabia.</p>
       </div>
 
       <PropertyFilters initialValues={searchParams} />
@@ -100,7 +100,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-1">
           {properties.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}

@@ -89,7 +89,7 @@ export default async function HomePage() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-            <div className="max-w-xl">
+            <div className="max-w-xl flex flex-col">
               <div className="animate-fade-in-up inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm mb-8 animate-soft-glow">
                 <Star className="h-4 w-4 text-yellow-400" />
                 Trusted by 500+ tenants worldwide
@@ -107,6 +107,29 @@ export default async function HomePage() {
                 agents. Book directly via WhatsApp — no middlemen, no hassle.
               </p>
 
+              {/* Mobile-only stats card: shows between text and buttons so buttons are last */}
+              <div className="animate-fade-in-up flex justify-center lg:hidden mb-8" style={{ animationDelay: "0.35s" }}>
+                <div className="relative w-full max-w-sm animate-hero-card-float">
+                  <div className="absolute inset-0 bg-white/5 rounded-3xl blur-xl" />
+                  <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-xl animate-hero-card-glow">
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        { label: "Properties Listed", value: "500+", icon: Building2 },
+                        { label: "Trusted Agents", value: "50+", icon: Shield },
+                        { label: "Happy Tenants", value: "1,200+", icon: Star },
+                        { label: "Cities Covered", value: "10+", icon: MapPin },
+                      ].map((stat) => (
+                        <div key={`mobile-${stat.label}`} className="hero-stat-cell bg-white/10 rounded-2xl p-4 text-center">
+                          <stat.icon className="h-6 w-6 text-white/70 mx-auto mb-2" />
+                          <div className="text-2xl font-bold text-white">{stat.value}</div>
+                          <div className="text-xs text-white/60">{stat.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="animate-fade-in-up flex flex-col sm:flex-row gap-4" style={{ animationDelay: "0.3s" }}>
                 <Button asChild size="lg" className="bg-white text-gray-900 hover:bg-gray-100 font-semibold shadow-lg shadow-white/20 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
                   <Link href="/properties">
@@ -120,8 +143,8 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Stats card */}
-            <div className="animate-fade-in-up flex justify-center lg:justify-end" style={{ animationDelay: "0.4s" }}>
+            {/* Stats card – desktop only (on mobile shown above buttons in left column) */}
+            <div className="animate-fade-in-up hidden lg:flex justify-center lg:justify-end" style={{ animationDelay: "0.4s" }}>
               <div className="relative w-full max-w-sm animate-hero-card-float">
                 <div className="absolute inset-0 bg-white/5 rounded-3xl blur-xl" />
                 <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-xl transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:border-white/30 animate-hero-card-glow">

@@ -52,11 +52,11 @@ export function PropertyCard({ property }: { property: Property }) {
             {rentalLabel}
           </div>
         </div>
-        <div className="p-4">
-          <h3 className="truncate text-[15px] font-bold text-foreground">
+        <div className="p-3 sm:p-4">
+          <h3 className="line-clamp-2 text-[15px] font-bold leading-snug text-foreground">
             {property.title}
           </h3>
-          <p className="mt-0.5 text-[15px] font-bold text-blue-600 dark:text-blue-400">
+          <p className="mt-1 text-[15px] font-bold text-blue-600 dark:text-blue-400">
             SAR {property.price.toLocaleString()}<span className="text-[12px] font-medium text-muted-foreground">{priceSuffix}</span>
           </p>
           <div className="mt-2 flex items-center gap-3 text-[13px] text-muted-foreground">
