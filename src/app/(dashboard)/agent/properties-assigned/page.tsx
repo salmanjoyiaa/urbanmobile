@@ -24,7 +24,7 @@ export default async function AgentPropertiesAssignedPage() {
         redirect("/agent");
     }
 
-    const { data: assignments } = await supabase
+    const { data: assignments, error: assignmentsError } = await supabase
         .from("agent_property_assignments")
         .select(`
             id, created_at,
@@ -38,6 +38,7 @@ export default async function AgentPropertiesAssignedPage() {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = (assignments || []) as any[];
+    const rowsWithProperty = rows.filter((r: { properties?: unknown }) => r.properties != null);
 
     return (
         <div className="space-y-6">
@@ -48,15 +49,26 @@ export default async function AgentPropertiesAssignedPage() {
                 </p>
             </div>
 
-            {rows.length === 0 ? (
+            {assignmentsError ? (
+                <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-12 text-center">
+                    <p className="text-destructive font-medium">Could not load your assignments.</p>
+                    <p className="text-xs text-muted-foreground mt-1">Please try again later or contact your admin.</p>
+                </div>
+            ) : rows.length === 0 ? (
                 <div className="rounded-lg border bg-card p-12 text-center">
                     <Building2 className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
                     <p className="text-muted-foreground">No properties assigned yet.</p>
                     <p className="text-xs text-muted-foreground mt-1">Contact your admin to get properties assigned.</p>
                 </div>
+            ) : rowsWithProperty.length === 0 ? (
+                <div className="rounded-lg border bg-card p-12 text-center">
+                    <Building2 className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">Assigned property details could not be loaded.</p>
+                    <p className="text-xs text-muted-foreground mt-1">You have assignments but property data is unavailable. Contact your admin if this persists.</p>
+                </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {rows.map((row) => {
+                    {rowsWithProperty.map((row) => {
                         const prop = row.properties;
                         if (!prop) return null;
                         const img = prop.images?.[0];
