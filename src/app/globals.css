@@ -190,6 +190,37 @@ select {
   animation: float 6s ease-in-out infinite;
 }
 
+/* Hero stats card: smooth floating motion */
+@keyframes hero-card-float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-8px) translateX(2px); }
+  50% { transform: translateY(-4px) translateX(-1px); }
+  75% { transform: translateY(-12px) translateX(1px); }
+}
+
+@keyframes hero-card-glow {
+  0%, 100% { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.08); }
+  50% { box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25), 0 0 40px -8px rgba(255, 255, 255, 0.08); }
+}
+
+.animate-hero-card-float {
+  animation: hero-card-float 5s ease-in-out infinite;
+}
+
+.animate-hero-card-glow {
+  animation: hero-card-glow 4s ease-in-out infinite;
+}
+
+/* Hero stat cells: staggered fade-in */
+.hero-stat-cell {
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+.hero-stat-cell:nth-child(1) { animation-delay: 0.5s; }
+.hero-stat-cell:nth-child(2) { animation-delay: 0.6s; }
+.hero-stat-cell:nth-child(3) { animation-delay: 0.7s; }
+.hero-stat-cell:nth-child(4) { animation-delay: 0.8s; }
+
 /* Hero: subtle gradient text shine (uses existing theme gradient) */
 @keyframes gradient-shine {
   0%, 100% { background-position: 0% 50%; }
@@ -246,7 +277,9 @@ select {
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
   .animate-gradient-shine,
-  .animate-soft-glow {
+  .animate-soft-glow,
+  .animate-hero-card-float,
+  .animate-hero-card-glow {
     animation: none;
   }
   .animate-fade-in-up,
@@ -256,6 +289,11 @@ select {
   .animate-reveal-up,
   .animate-slide-down {
     animation-duration: 0.01ms;
+  }
+  .hero-stat-cell {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+    opacity: 1;
   }
   .stagger-children > * {
     animation-duration: 0.01ms;

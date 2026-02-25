@@ -122,9 +122,9 @@ export default async function HomePage() {
 
             {/* Stats card */}
             <div className="animate-fade-in-up flex justify-center lg:justify-end" style={{ animationDelay: "0.4s" }}>
-              <div className="relative w-full max-w-sm">
+              <div className="relative w-full max-w-sm animate-hero-card-float">
                 <div className="absolute inset-0 bg-white/5 rounded-3xl blur-xl" />
-                <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-8">
+                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-xl transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:border-white/30 animate-hero-card-glow">
                   <div className="grid grid-cols-2 gap-4">
                     {[
                       { label: "Properties Listed", value: "500+", icon: Building2 },
@@ -132,7 +132,7 @@ export default async function HomePage() {
                       { label: "Happy Tenants", value: "1,200+", icon: Star },
                       { label: "Cities Covered", value: "10+", icon: MapPin },
                     ].map((stat) => (
-                      <div key={stat.label} className="bg-white/10 rounded-2xl p-4 text-center">
+                      <div key={stat.label} className="hero-stat-cell bg-white/10 rounded-2xl p-4 text-center transition-transform duration-300 hover:bg-white/15 hover:scale-[1.03]">
                         <stat.icon className="h-6 w-6 text-white/70 mx-auto mb-2" />
                         <div className="text-2xl font-bold text-white">{stat.value}</div>
                         <div className="text-xs text-white/60">{stat.label}</div>
@@ -227,21 +227,21 @@ export default async function HomePage() {
 
       {/* ── Footer ── */}
       <AnimateSection amount={0.08} duration={0.4} delay={0}>
-        <footer className="gradient-primary border-t border-white/10 py-12 sm:py-16">
+        <footer className="gradient-primary border-t border-white/10 py-10 sm:py-12">
         <div className="container mx-auto px-4 sm:px-5 lg:px-12 max-w-[1400px]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 mb-10 md:mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 mb-8 md:mb-10">
             <div>
-              <span className="text-xl font-black tracking-tight block mb-4 text-white">
+              <span className="text-xl font-black tracking-tight block mb-2 text-white">
                 TheUrbanRealEstate<span className="text-xl font-black">Saudi</span>
               </span>
-              <p className="text-white/70 text-sm leading-relaxed max-w-xs">
+              <p className="text-white/70 text-sm leading-snug max-w-xs">
                 Saudi Arabia&apos;s trusted platform for verified property rentals, quality products, and reliable maintenance services.
               </p>
             </div>
 
             <div>
-              <h4 className="font-bold text-sm uppercase tracking-wider mb-4 text-white/90">Quick Links</h4>
-              <ul className="space-y-1 sm:space-y-2.5">
+              <h4 className="font-bold text-sm uppercase tracking-wider mb-2 text-white/90">Quick Links</h4>
+              <ul className="space-y-0.5">
                 {[
                   { href: "/properties", label: "Browse Properties" },
                   { href: "/products", label: "Browse Products" },
@@ -249,7 +249,7 @@ export default async function HomePage() {
                   { href: "/login", label: "Agent Login" },
                 ].map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="inline-flex items-center py-2 text-white/70 hover:text-white text-sm transition-colors min-h-[44px]">
+                    <Link href={link.href} className="inline-flex items-center py-1.5 text-white/70 hover:text-white text-sm transition-colors min-h-[36px]">
                       {link.label}
                     </Link>
                   </li>
@@ -258,14 +258,14 @@ export default async function HomePage() {
             </div>
 
             <div>
-              <h4 className="font-bold text-sm uppercase tracking-wider mb-4 text-white/90">Join Our Team</h4>
-              <ul className="space-y-1 sm:space-y-2.5">
+              <h4 className="font-bold text-sm uppercase tracking-wider mb-2 text-white/90">Join Our Team</h4>
+              <ul className="space-y-0.5">
                 {[
                   { href: "/signup/agent?type=property", label: "Apply as Property Agent" },
                   { href: "/signup/agent?type=visiting", label: "Apply as Team Agent" },
                 ].map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="inline-flex items-center py-2 text-white/70 hover:text-white text-sm transition-colors min-h-[44px]">
+                    <Link href={link.href} className="inline-flex items-center py-1.5 text-white/70 hover:text-white text-sm transition-colors min-h-[36px]">
                       {link.label}
                     </Link>
                   </li>
@@ -274,7 +274,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-8 text-center">
+          <div className="border-t border-white/10 pt-6 text-center">
             <p className="text-[12px] font-medium text-white/50 uppercase tracking-widest">
               &copy; {new Date().getFullYear()} TheUrbanRealEstateSaudi. All rights reserved.
             </p>
