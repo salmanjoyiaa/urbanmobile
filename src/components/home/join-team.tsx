@@ -62,7 +62,7 @@ export function JoinTeam() {
             <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-5 md:mb-6 mx-auto md:mx-0 shadow-lg shadow-primary/20">
               <MapPin className="h-6 w-6 text-primary-foreground" />
             </div>
-            <h3 className="text-[22px] font-extrabold text-foreground dark:text-white mb-3">Visiting Team Agent</h3>
+            <h3 className="text-[22px] font-extrabold text-foreground dark:text-white mb-3">Team Agent</h3>
             <p className="text-muted-foreground dark:text-white/70 text-[15px] md:text-[16px] leading-relaxed mb-6 md:mb-8 flex-1 max-w-sm mx-auto md:mx-0">
               Conduct property tours, guide tenants through viewings, and help close deals across Saudi Arabia.
             </p>
@@ -70,7 +70,7 @@ export function JoinTeam() {
               href="/signup/agent?type=visiting"
               className="inline-flex w-full md:w-auto items-center justify-center gap-2 rounded-2xl border-2 border-primary bg-transparent px-6 py-4 md:py-3.5 text-[15px] font-bold text-primary transition-all hover:bg-primary/5 active:scale-95 shadow-sm dark:border-white dark:text-white dark:bg-white/10 dark:hover:bg-white/15"
             >
-              Apply as Visiting Team
+              Apply as Team Agent
               <ArrowRight className="h-4 w-4" />
             </Link>
           </motion.div>

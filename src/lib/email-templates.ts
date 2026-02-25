@@ -46,7 +46,15 @@ export function visitConfirmedCustomerEmail(params: {
   visitDate: string;
   visitTime: string;
   locationUrl?: string | null;
+  visitingAgentName?: string | null;
+  visitingAgentPhone?: string | null;
 }) {
+  const mapHtml = params.locationUrl
+    ? detail("Location", `<a href="${params.locationUrl}" style="color:${BRAND_COLOR}">View on Map</a>`)
+    : "";
+  const agentHtml = params.visitingAgentName
+    ? detail("Your Visiting Agent", `${params.visitingAgentName}${params.visitingAgentPhone ? ` (${params.visitingAgentPhone})` : ""}`)
+    : "";
   return {
     subject: `Visit Confirmed — ${params.propertyTitle}`,
     html: layout(`
@@ -57,6 +65,8 @@ export function visitConfirmedCustomerEmail(params: {
       ${detail("Property", params.propertyTitle)}
       ${detail("Date", params.visitDate)}
       ${detail("Time", params.visitTime)}
+      ${mapHtml}
+      ${agentHtml}
       ${divider()}
       ${paragraph("Please arrive on time. If you need to reschedule, contact us.")}
     `),

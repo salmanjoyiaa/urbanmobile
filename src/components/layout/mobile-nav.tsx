@@ -67,14 +67,14 @@ export function MobileNav() {
                                 onClick={() => setOpen(false)}
                                 className="flex w-full items-center justify-center rounded-xl bg-primary dark:bg-accent px-4 py-3.5 text-[15px] font-bold text-primary-foreground dark:text-foreground transition-all hover:bg-primary/90 dark:hover:bg-accent/90 active:scale-95 shadow-md"
                             >
-                                Property Team Login
+                                AQARI Login
                             </Link>
                             <Link
                                 href="/login?type=visiting"
                                 onClick={() => setOpen(false)}
                                 className="flex w-full items-center justify-center rounded-xl border-2 border-primary dark:border-accent px-4 py-3.5 text-[15px] font-bold text-primary dark:text-accent transition-all hover:bg-primary/5 dark:hover:bg-accent/10 active:scale-95 shadow-sm"
                             >
-                                Visiting Team Login
+                                Team Login
                             </Link>
                         </div>
                     </nav>

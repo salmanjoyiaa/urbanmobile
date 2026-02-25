@@ -31,11 +31,12 @@ export const agentNav: NavItem[] = [
 export const visitingAgentNav: NavItem[] = [
   { title: "Overview", href: "/agent", icon: LayoutDashboard },
   { title: "My Assignments", href: "/agent/assignments", icon: MapPin },
+  { title: "My Properties", href: "/agent/properties-assigned", icon: Building2 },
 ];
 
 export const adminNav: NavItem[] = [
   { title: "Overview", href: "/admin", icon: LayoutDashboard },
-  { title: "Property Team", href: "/admin/agents", icon: Users },
+  { title: "AQARI Team", href: "/admin/agents", icon: Users },
   { title: "Visiting Team", href: "/admin/visiting-team", icon: MapPin },
   { title: "Properties", href: "/admin/properties", icon: Building2 },
   { title: "Products", href: "/admin/products", icon: Package },

@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/api";
 import { cacheAside } from "@/lib/redis";
 
-const supabase = createApiClient();
-
 function toNumber(value: string | null, fallback: number) {
   const parsed = value ? Number(value) : NaN;
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -30,6 +28,7 @@ export async function GET(request: NextRequest) {
   const key = `properties:list:${city || "*"}:${type || "*"}:${purpose || "*"}:${minPrice || "*"}:${maxPrice || "*"}:${bedrooms || "*"}:${page}:${pageSize}`;
 
   try {
+    const supabase = createApiClient();
     const result = await cacheAside({
       key,
       ttlSeconds: 60,

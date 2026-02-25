@@ -248,7 +248,7 @@ export default async function HomePage() {
               <ul className="space-y-1 sm:space-y-2.5">
                 {[
                   { href: "/signup/agent?type=property", label: "Apply as Property Agent" },
-                  { href: "/signup/agent?type=visiting", label: "Apply as Visiting Team" },
+                  { href: "/signup/agent?type=visiting", label: "Apply as Team Agent" },
                 ].map((link) => (
                   <li key={link.href}>
                     <Link href={link.href} className="inline-flex items-center py-2 text-white/70 hover:text-white text-sm transition-colors min-h-[44px]">

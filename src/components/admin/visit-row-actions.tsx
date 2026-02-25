@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Trash2, Eye, Ban, CheckCircle, Clock, Pencil } from "lucide-react";
+import { MoreHorizontal, Trash2, Eye, Ban, Clock, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -117,13 +117,7 @@ export function VisitRowActions({ visit, visitingAgents }: VisitRowActionsProps)
 
                 <DropdownMenuSeparator />
 
-                {visit.status === "pending" && (
-                    <DropdownMenuItem onClick={() => handleAction("confirmed")} className="cursor-pointer">
-                        <CheckCircle className="mr-2 h-4 w-4 text-green-600" /> Confirm
-                    </DropdownMenuItem>
-                )}
-
-                {visit.status === "confirmed" && (
+                {(visit.status === "confirmed" || visit.status === "assigned") && (
                     <DropdownMenuItem onClick={() => handleAction("pending")} className="cursor-pointer">
                         <Clock className="mr-2 h-4 w-4 text-blue-600" /> Mark as Pending
                     </DropdownMenuItem>

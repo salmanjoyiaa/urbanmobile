@@ -47,7 +47,7 @@ export default async function AdminAgentsPage({ searchParams }: { searchParams: 
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-navy">Property Team</h1>
+          <h1 className="text-2xl font-bold text-navy">AQARI Team</h1>
           <p className="text-sm text-muted-foreground">Approve, reject, or suspend property agent accounts.</p>
         </div>
         <div className="flex items-center gap-3">

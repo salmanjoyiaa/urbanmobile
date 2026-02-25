@@ -7,8 +7,6 @@ import { cacheAside, cacheDel } from "@/lib/redis";
 import { buildAvailabilitySlots, isFutureDate, isWeekday } from "@/lib/slots";
 import { visitRequestSchema } from "@/lib/validators";
 
-const supabase = createAdminClient();
-
 const redisEnabled =
   Boolean(process.env.UPSTASH_REDIS_REST_URL) &&
   Boolean(process.env.UPSTASH_REDIS_REST_TOKEN);
@@ -70,6 +68,7 @@ export async function GET(request: NextRequest) {
 
   const cacheKey = `slots:${propertyId}:${date}`;
 
+  const supabase = createAdminClient();
   try {
     const slots = await cacheAside({
       key: cacheKey,
@@ -138,6 +137,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const supabase = createAdminClient();
   let body;
   try {
     body = await request.json();

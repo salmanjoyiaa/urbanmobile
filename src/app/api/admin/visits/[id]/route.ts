@@ -18,6 +18,7 @@ import {
   visitAssignedVisitingAgentEmail,
   visitAssignedPropertyAgentEmail,
 } from "@/lib/email-templates";
+import { formatMessageDate, formatMessageTime } from "@/lib/format";
 
 const payloadSchema = z.object({
   status: z.enum(["confirmed", "cancelled", "completed", "assigned"]),
@@ -42,6 +43,13 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
   }
 
+  if (parsed.data.status === "confirmed" && !parsed.data.visiting_agent_id) {
+    return NextResponse.json(
+      { error: "Cannot confirm a visit without assigning a visiting agent. Use the Manage Request dialog to assign an agent." },
+      { status: 400 }
+    );
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const payload: any = {
     status: parsed.data.status,
@@ -50,7 +58,15 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     confirmed_at: new Date().toISOString(),
   };
 
+  let oldVisitingAgentId: string | null = null;
   if (parsed.data.status === "assigned" && parsed.data.visiting_agent_id) {
+    const { data: current } = await admin.supabase
+      .from("visit_requests")
+      .select("visiting_agent_id")
+      .eq("id", context.params.id)
+      .single();
+    oldVisitingAgentId = (current as { visiting_agent_id: string | null } | null)?.visiting_agent_id ?? null;
+
     payload.visiting_agent_id = parsed.data.visiting_agent_id;
     payload.visiting_status = "view";
   }
@@ -62,6 +78,15 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  if (parsed.data.status === "assigned" && parsed.data.visiting_agent_id) {
+    await admin.supabase.from("visit_assignment_history").insert({
+      visit_id: context.params.id,
+      old_agent_id: oldVisitingAgentId,
+      new_agent_id: parsed.data.visiting_agent_id,
+      changed_by: admin.profile.id,
+    } as never);
   }
 
   const { data: rawData } = await admin.supabase
@@ -90,8 +115,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     const templateParams = {
       visitorName: visitDetails.visitor_name,
       propertyTitle: visitDetails.properties.title,
-      visitDate: visitDetails.visit_date,
-      visitTime: visitDetails.visit_time,
+      visitDate: formatMessageDate(visitDetails.visit_date),
+      visitTime: formatMessageTime(visitDetails.visit_time),
       locationUrl: visitDetails.properties.location_url,
     };
 

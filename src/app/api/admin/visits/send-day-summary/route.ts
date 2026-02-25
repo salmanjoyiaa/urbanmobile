@@ -32,7 +32,7 @@ const RICH_SELECT = `
   id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time,
   visiting_agent:visiting_agent_id (full_name, phone, email),
   properties:property_id (
-    id, title, location_url, visiting_agent_instructions,
+    id, title, location_url, visiting_agent_instructions, visiting_agent_image,
     agents:agent_id (
       profile_id,
       profiles:profile_id (full_name, phone, email)
@@ -194,6 +194,7 @@ export async function POST(request: Request) {
           ownerName: ownerAgent?.full_name || "Agent",
           ownerPhone: ownerAgent?.phone || "N/A",
           instructions: v.properties?.visiting_agent_instructions ?? "",
+          image: v.properties?.visiting_agent_image ?? null,
         });
         whatsAppJobs.push(
           sendWhatsAppTemplate(

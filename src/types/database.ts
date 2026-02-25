@@ -110,6 +110,9 @@ export interface VisitRequest {
   admin_notes: string | null;
   confirmed_by: string | null;
   confirmed_at: string | null;
+  reschedule_reason: string | null;
+  reschedule_date: string | null;
+  reschedule_time: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -191,6 +194,32 @@ export interface Testimonial {
   rating: number;
   avatar_url: string | null;
   is_active: boolean;
+  created_at: string;
+}
+
+export interface VisitAssignmentHistory {
+  id: string;
+  visit_id: string;
+  old_agent_id: string | null;
+  new_agent_id: string;
+  changed_by: string;
+  reason: string | null;
+  created_at: string;
+}
+
+export interface VisitComment {
+  id: string;
+  visit_id: string;
+  author_id: string;
+  content: string;
+  created_at: string;
+}
+
+export interface AgentPropertyAssignment {
+  id: string;
+  agent_id: string;
+  property_id: string;
+  assigned_by: string;
   created_at: string;
 }
 

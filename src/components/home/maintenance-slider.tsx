@@ -154,7 +154,7 @@ export function MaintenanceSlider() {
           <button
             onClick={prev}
             aria-label="Previous service"
-            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/95 shadow-lg flex items-center justify-center hover:bg-white transition-all hover:scale-105 active:scale-95"
+            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/95 shadow-lg hidden md:flex items-center justify-center hover:bg-white transition-all hover:scale-105 active:scale-95"
           >
             <ChevronLeft className="h-5 w-5 text-gray-800" />
           </button>
@@ -162,7 +162,7 @@ export function MaintenanceSlider() {
           <button
             onClick={next}
             aria-label="Next service"
-            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/95 shadow-lg flex items-center justify-center hover:bg-white transition-all hover:scale-105 active:scale-95"
+            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/95 shadow-lg hidden md:flex items-center justify-center hover:bg-white transition-all hover:scale-105 active:scale-95"
           >
             <ChevronRight className="h-5 w-5 text-gray-800" />
           </button>

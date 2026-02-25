@@ -56,13 +56,13 @@ export function HomepageNav() {
             href="/login?type=property"
             className="inline-flex items-center justify-center min-h-11 rounded-xl bg-white text-primary px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/90 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 shadow-sm"
           >
-            Property Team Login
+            AQARI Login
           </Link>
           <Link
             href="/login?type=visiting"
             className="inline-flex items-center justify-center min-h-11 rounded-xl border-2 border-white bg-transparent text-white px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/10 dark:border-white/35 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
           >
-            Visiting Team Login
+            Team Login
           </Link>
         </div>
 
@@ -98,14 +98,14 @@ export function HomepageNav() {
                 onClick={() => setOpen(false)}
                 className="block w-full text-center rounded-xl bg-white text-primary px-7 py-3.5 min-h-[44px] flex items-center justify-center text-[14px] font-bold transition-all hover:bg-white/90 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
               >
-                Property Team Login
+                AQARI Login
               </Link>
               <Link
                 href="/login?type=visiting"
                 onClick={() => setOpen(false)}
                 className="block w-full text-center rounded-xl border-2 border-white text-white px-7 py-3.5 min-h-[44px] flex items-center justify-center text-[14px] font-bold transition-all hover:bg-white/10 dark:bg-white/10 dark:border-white/35 dark:text-white dark:hover:bg-white/15"
               >
-                Visiting Team Login
+                Team Login
               </Link>
             </div>
           </nav>

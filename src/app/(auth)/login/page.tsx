@@ -88,9 +88,9 @@ function LoginContent() {
       <CardHeader className="space-y-2">
         <CardTitle className="text-2xl font-extrabold text-foreground">
           {loginType === "property"
-            ? "Property Team Login"
+            ? "AQARI Login"
             : loginType === "visiting"
-              ? "Visiting Team Login"
+              ? "Team Login"
               : "Agent Login"}
         </CardTitle>
         <CardDescription className="text-muted-foreground">Access your UrbanSaudi account.</CardDescription>
@@ -129,7 +129,7 @@ function LoginContent() {
                 Signing in...
               </>
             ) : (
-              `Sign In${loginType ? ` as ${loginType === "property" ? "Property" : "Visiting"} Agent` : ""}`
+              `Sign In${loginType ? ` as ${loginType === "property" ? "AQARI" : "Team"} Agent` : ""}`
             )}
           </Button>
         </form>

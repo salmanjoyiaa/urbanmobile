@@ -26,7 +26,12 @@ export default async function AgentAssignmentsPage() {
         .select(
             `
       id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status, visiting_status, customer_remarks,
-      properties:property_id (title, location_url)
+      properties:property_id (
+        title, location_url, visiting_agent_instructions, visiting_agent_image,
+        agents:agent_id (
+          profiles:profile_id (full_name, phone)
+        )
+      )
     `
         )
         .eq("visiting_agent_id", user.id)

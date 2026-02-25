@@ -6,8 +6,6 @@ import { notifyAdmins } from "@/lib/admin";
 import { buyRequestSchema } from "@/lib/validators";
 import * as Sentry from "@sentry/nextjs";
 
-const supabase = createAdminClient();
-
 const redisEnabled =
   Boolean(process.env.UPSTASH_REDIS_REST_URL) &&
   Boolean(process.env.UPSTASH_REDIS_REST_TOKEN);
@@ -119,6 +117,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const supabase = createAdminClient();
   const { data, error } = (await supabase
     .from("buy_requests")
     .insert(parsed.data as never)

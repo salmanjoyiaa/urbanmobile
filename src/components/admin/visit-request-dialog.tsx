@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
@@ -15,9 +15,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Calendar, Clock, Phone, User, Trash2 } from "lucide-react";
+import { Building2, Calendar, Clock, Phone, User, Trash2, Send } from "lucide-react";
 import { toast } from "sonner";
+
+type CommentRow = {
+    id: string;
+    content: string;
+    created_at: string;
+    author: { full_name: string } | null;
+};
 
 type VisitRow = {
     id: string;
@@ -58,6 +66,43 @@ export function VisitRequestDialog({ visit, visitingAgents, triggerNode }: Visit
     const [open, setOpen] = useState(false);
     const [isLgLoading, setIsLgLoading] = useState(false);
     const [selectedAgentId, setSelectedAgentId] = useState<string>("");
+    const [comments, setComments] = useState<CommentRow[]>([]);
+    const [newComment, setNewComment] = useState("");
+    const [commentLoading, setCommentLoading] = useState(false);
+
+    const fetchComments = useCallback(async () => {
+        const res = await fetch(`/api/admin/visits/${visit.id}/comments`);
+        if (res.ok) {
+            const data = await res.json();
+            setComments(data.comments || []);
+        }
+    }, [visit.id]);
+
+    useEffect(() => {
+        if (open) fetchComments();
+    }, [open, fetchComments]);
+
+    const handleAddComment = async () => {
+        if (!newComment.trim()) return;
+        setCommentLoading(true);
+        try {
+            const res = await fetch(`/api/admin/visits/${visit.id}/comments`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: newComment.trim() }),
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Failed to add comment");
+            }
+            setNewComment("");
+            await fetchComments();
+        } catch (e) {
+            toast.error(e instanceof Error ? e.message : "Failed to add comment");
+        } finally {
+            setCommentLoading(false);
+        }
+    };
 
     const handleAssign = async () => {
         if (!selectedAgentId) return;
@@ -202,6 +247,36 @@ export function VisitRequestDialog({ visit, visitingAgents, triggerNode }: Visit
                                 </div>
                             )}
                         </div>
+                    </div>
+                </div>
+
+                <div className="border-t pt-4 mt-2 space-y-3">
+                    <Label className="text-sm font-semibold">Comments</Label>
+                    {comments.length > 0 ? (
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                            {comments.map((c) => (
+                                <div key={c.id} className="bg-muted/50 p-2.5 rounded-md text-sm border">
+                                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                                        <span className="font-medium">{c.author?.full_name || "System"}</span>
+                                        <span>{format(new Date(c.created_at), "MMM d, h:mm a")}</span>
+                                    </div>
+                                    <p className="text-foreground">{c.content}</p>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-xs text-muted-foreground italic">No comments yet.</p>
+                    )}
+                    <div className="flex gap-2">
+                        <Textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Add a comment..."
+                            className="min-h-[60px] text-sm resize-none"
+                        />
+                        <Button size="icon" onClick={handleAddComment} disabled={!newComment.trim() || commentLoading} className="shrink-0 self-end">
+                            <Send className="h-4 w-4" />
+                        </Button>
                     </div>
                 </div>
 

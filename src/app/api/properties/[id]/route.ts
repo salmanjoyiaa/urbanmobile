@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/api";
 
-const supabase = createApiClient();
-
 export async function GET(_request: Request, context: { params: { id: string } }) {
+  const supabase = createApiClient();
   const { data, error } = await supabase
     .from("properties")
     .select("*")

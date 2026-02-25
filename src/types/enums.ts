@@ -32,7 +32,7 @@ export type ProductCategory =
 
 export type VisitStatus = "pending" | "confirmed" | "cancelled" | "completed" | "assigned";
 
-export type VisitingStatus = "view" | "visit_done" | "customer_remarks" | "deal_pending" | "deal_fail" | "commission_got" | "deal_close";
+export type VisitingStatus = "view" | "contact_done" | "customer_confirmed" | "customer_arrived" | "visit_done" | "customer_remarks" | "deal_pending" | "deal_fail" | "commission_got" | "deal_close" | "reschedule";
 
 export type LeadStatus = "pending" | "confirmed" | "rejected" | "completed";
 

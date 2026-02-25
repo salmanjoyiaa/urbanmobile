@@ -158,9 +158,14 @@ export function visitAssignedVisitingAgentContent(params: {
   ownerName: string;
   ownerPhone: string;
   instructions?: string | null;
+  image?: string | null;
 }): { contentSid: string; contentVariables: Record<string, string> } {
   const contentSid =
     process.env.TWILIO_TEMPLATE_VISIT_ASSIGNED_VISITING_AGENT_SID || DEFAULT_SID_VISIT_ASSIGNED_VISITING_AGENT;
+  const step5Parts = [
+    params.instructions,
+    params.image ? `Image/Layout: ${params.image}` : null,
+  ].filter(Boolean).join("\n");
   return {
     contentSid,
     contentVariables: {
@@ -172,7 +177,7 @@ export function visitAssignedVisitingAgentContent(params: {
       "6": params.visitorPhone,
       "7": params.ownerName,
       "8": params.ownerPhone,
-      "9": params.instructions || "No special instructions",
+      "9": step5Parts || "No special instructions",
     },
   };
 }

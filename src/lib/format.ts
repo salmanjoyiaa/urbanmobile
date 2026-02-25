@@ -29,6 +29,18 @@ export function formatTime(time: string): string {
   return `${displayHours}:${minutes.toString().padStart(2, "0")} ${period}`;
 }
 
+export function formatMessageDate(date: string): string {
+  const d = new Date(date + "T00:00:00");
+  return `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
+}
+
+export function formatMessageTime(time: string): string {
+  const [hours, minutes] = time.split(":").map(Number);
+  const period = hours >= 12 ? "PM" : "AM";
+  const displayHours = hours % 12 || 12;
+  return `${displayHours}:${minutes.toString().padStart(2, "0")} ${period}`;
+}
+
 export function formatPhone(phone: string): string {
   if (!phone) return "";
   // Mask middle digits: +966 5xx xxx xx3
