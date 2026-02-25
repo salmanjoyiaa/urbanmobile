@@ -33,14 +33,14 @@ export function PropertyCard({ property }: { property: Property }) {
 
   return (
     <Link href={`/properties/${property.id}`}>
-      <div className="group overflow-hidden rounded-2xl border border-border bg-background dark:bg-card transition-colors hover:bg-background/90 dark:hover:bg-card/90">
+      <div className="group overflow-hidden rounded-2xl border border-border bg-background dark:bg-card transition-all duration-300 hover:bg-background/90 dark:hover:bg-card/90 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5">
         <div className="relative aspect-[4/3] overflow-hidden bg-muted dark:bg-muted/50">
           {imgSrc ? (
             <Image
               src={imgSrc}
               alt={property.title}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (

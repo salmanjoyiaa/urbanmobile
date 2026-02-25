@@ -16,14 +16,14 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <Link href={`/products/${product.id}`}>
-      <div className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+      <div className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5">
         <div className="relative aspect-square sm:aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
           {imgSrc ? (
             <Image
               src={imgSrc}
               alt={product.title}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (

@@ -12,6 +12,7 @@ import { HomepageNav } from "@/components/home/homepage-nav";
 import { PropertySlider } from "@/components/home/property-slider";
 import { ProductSlider } from "@/components/home/product-slider";
 import { MaintenanceSlider } from "@/components/home/maintenance-slider";
+import { AnimateSection, AnimateStagger, AnimateItem } from "@/components/home/animate-section";
 import { createClient } from "@/lib/supabase/server";
 
 type Property = {
@@ -89,14 +90,14 @@ export default async function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
             <div className="max-w-xl">
-              <div className="animate-fade-in-up inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm mb-8">
+              <div className="animate-fade-in-up inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm mb-8 animate-soft-glow">
                 <Star className="h-4 w-4 text-yellow-400" />
                 Trusted by 500+ tenants worldwide
               </div>
 
               <h1 className="animate-fade-in-up font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6" style={{ animationDelay: "0.1s" }}>
                 Find Your
-                <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-shine">
                   Perfect Rental
                 </span>
               </h1>
@@ -146,56 +147,67 @@ export default async function HomePage() {
       </section>
 
       {/* ── Property Slider ── */}
-      <PropertySlider properties={featuredProperties} />
+      <AnimateSection amount={0.12} duration={0.5}>
+        <PropertySlider properties={featuredProperties} />
+      </AnimateSection>
 
       {/* ── Product Slider ── */}
-      <ProductSlider products={featuredProducts} />
+      <AnimateSection amount={0.12} duration={0.5} delay={0.05}>
+        <ProductSlider products={featuredProducts} />
+      </AnimateSection>
 
       {/* ── Maintenance Slider ── */}
-      <MaintenanceSlider />
+      <AnimateSection amount={0.12} duration={0.5} delay={0.05}>
+        <MaintenanceSlider />
+      </AnimateSection>
 
       {/* ── Value Props ── */}
-      <section className="py-16 lg:py-20 bg-secondary/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="font-display text-3xl font-bold mb-4">Why Choose UrbanSaudi?</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              The simplest way to find and book rental properties
-            </p>
-          </div>
+      <AnimateSection amount={0.1} duration={0.45}>
+        <section className="py-16 lg:py-20 bg-secondary/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="font-display text-3xl font-bold mb-4">Why Choose UrbanSaudi?</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                The simplest way to find and book rental properties
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-children">
-            {[
-              {
-                icon: Building2,
-                title: "Verified Listings",
-                description: "Every property is listed by a verified agent with detailed photos, pricing, and availability.",
-              },
-              {
-                icon: MessageCircle,
-                title: "Book via WhatsApp",
-                description: "Connect directly with agents on WhatsApp. No forms, no waiting — just instant communication.",
-              },
-              {
-                icon: Shield,
-                title: "Secure & Transparent",
-                description: "Clear pricing, real photos, and verified agent profiles. What you see is what you get.",
-              },
-            ].map((item) => (
-              <div key={item.title} className="group p-8 rounded-2xl bg-background border hover:shadow-xl card-glow transition-all duration-300 hover:-translate-y-1">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                  <item.icon className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="font-display text-lg font-semibold mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
-              </div>
-            ))}
+            <AnimateStagger className="grid grid-cols-1 md:grid-cols-3 gap-8" staggerDelay={0.1}>
+              {[
+                {
+                  icon: Building2,
+                  title: "Verified Listings",
+                  description: "Every property is listed by a verified agent with detailed photos, pricing, and availability.",
+                },
+                {
+                  icon: MessageCircle,
+                  title: "Book via WhatsApp",
+                  description: "Connect directly with agents on WhatsApp. No forms, no waiting — just instant communication.",
+                },
+                {
+                  icon: Shield,
+                  title: "Secure & Transparent",
+                  description: "Clear pricing, real photos, and verified agent profiles. What you see is what you get.",
+                },
+              ].map((item) => (
+                <AnimateItem key={item.title}>
+                  <div className="group p-8 rounded-2xl bg-background border hover:shadow-xl card-glow transition-all duration-300 hover:-translate-y-1">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+                      <item.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="font-display text-lg font-semibold mb-2">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+                  </div>
+                </AnimateItem>
+              ))}
+            </AnimateStagger>
           </div>
-        </div>
-      </section>
+        </section>
+      </AnimateSection>
 
       {/* ── CTA ── */}
-      <section className="py-20 gradient-primary">
+      <AnimateSection amount={0.2} duration={0.5}>
+        <section className="py-20 gradient-primary">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mb-6">
             Are You a Property Agent?
@@ -210,10 +222,12 @@ export default async function HomePage() {
             </Link>
           </Button>
         </div>
-      </section>
+        </section>
+      </AnimateSection>
 
       {/* ── Footer ── */}
-      <footer className="gradient-primary border-t border-white/10 py-12 sm:py-16">
+      <AnimateSection amount={0.08} duration={0.4} delay={0}>
+        <footer className="gradient-primary border-t border-white/10 py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-5 lg:px-12 max-w-[1400px]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 mb-10 md:mb-12">
             <div>
@@ -266,7 +280,8 @@ export default async function HomePage() {
             </p>
           </div>
         </div>
-      </footer>
+        </footer>
+      </AnimateSection>
     </main>
   );
 }

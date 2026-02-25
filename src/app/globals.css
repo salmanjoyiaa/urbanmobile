@@ -190,7 +190,78 @@ select {
   animation: float 6s ease-in-out infinite;
 }
 
-/* Stagger children animations */
+/* Hero: subtle gradient text shine (uses existing theme gradient) */
+@keyframes gradient-shine {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient-shine {
+  background-size: 200% auto;
+  animation: gradient-shine 8s ease-in-out infinite;
+}
+
+/* Hero badge: very subtle glow pulse */
+@keyframes soft-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.08); }
+  50% { box-shadow: 0 0 20px 2px rgba(255, 255, 255, 0.12); }
+}
+
+.animate-soft-glow {
+  animation: soft-glow 3s ease-in-out infinite;
+}
+
+/* Section reveal (for use with JS or as fallback) */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-reveal-up {
+  animation: reveal-up 0.6s cubic-bezier(0.21, 0.47, 0.32, 0.98) forwards;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.25s ease-out forwards;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-gradient-shine,
+  .animate-soft-glow {
+    animation: none;
+  }
+  .animate-fade-in-up,
+  .animate-fade-in,
+  .animate-slide-in-right,
+  .animate-scale-in,
+  .animate-reveal-up,
+  .animate-slide-down {
+    animation-duration: 0.01ms;
+  }
+  .stagger-children > * {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+  }
+}
 .stagger-children>* {
   opacity: 0;
   animation: fadeInUp 0.5s ease-out forwards;

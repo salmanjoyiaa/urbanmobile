@@ -29,12 +29,16 @@ export default async function AgentPropertiesAssignedPage() {
         .select(`
             id, created_at,
             properties:property_id (
-                id, title, city, district, property_type, listing_status, price, location_url,
+                id, title, city, district, type, status, price, location_url,
                 images
             )
         `)
         .eq("agent_id", agent.id)
         .order("created_at", { ascending: false });
+
+    if (assignmentsError && process.env.NODE_ENV === "development") {
+        console.error("[AgentPropertiesAssigned] assignments error:", assignmentsError);
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = (assignments || []) as any[];
@@ -83,7 +87,7 @@ export default async function AgentPropertiesAssignedPage() {
                                     <div className="flex items-start justify-between">
                                         <CardTitle className="text-base leading-snug">{prop.title}</CardTitle>
                                         <Badge variant="secondary" className="capitalize shrink-0 ml-2 text-xs">
-                                            {prop.listing_status}
+                                            {prop.status}
                                         </Badge>
                                     </div>
                                     <CardDescription className="flex items-center gap-1 text-xs">
@@ -93,7 +97,7 @@ export default async function AgentPropertiesAssignedPage() {
                                 </CardHeader>
                                 <CardContent className="pt-0">
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="text-muted-foreground capitalize">{prop.property_type?.replace("_", " ")}</span>
+                                        <span className="text-muted-foreground capitalize">{prop.type?.replace("_", " ")}</span>
                                         {prop.price && (
                                             <span className="font-semibold text-primary">
                                                 SAR {Number(prop.price).toLocaleString()}

@@ -135,7 +135,7 @@ export function MaintenanceSlider() {
             {SERVICES.map((service) => (
               <div
                 key={service.title}
-                className={`flex-none w-[85%] sm:w-[45%] lg:w-[calc(33.333%-14px)] p-6 rounded-2xl bg-gradient-to-br ${service.color} border`}
+                className={`flex-none w-[85%] sm:w-[45%] lg:w-[calc(33.333%-14px)] p-6 rounded-2xl bg-gradient-to-br ${service.color} border transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`}
                 style={{ scrollSnapAlign: "start" }}
               >
                 <div className="w-12 h-12 rounded-xl bg-white/80 flex items-center justify-center mb-4 shadow-sm">

@@ -43,7 +43,7 @@ export function HomepageNav() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-[15px] font-semibold tracking-wide text-white/90 hover:text-white dark:text-foreground/80 dark:hover:text-foreground transition-all"
+              className="relative text-[15px] font-semibold tracking-wide text-white/90 hover:text-white dark:text-foreground/80 dark:hover:text-foreground transition-colors after:absolute after:left-0 after:bottom-[-2px] after:h-[2px] after:w-0 after:bg-current after:transition-[width] after:duration-200 hover:after:w-full"
             >
               {link.title}
             </Link>
@@ -69,7 +69,7 @@ export function HomepageNav() {
         {/* Mobile: Hamburger */}
         <div className="md:hidden flex items-center gap-2">
           <button
-            className="p-2 -mr-2 text-white dark:text-foreground"
+            className="p-2 -mr-2 text-white dark:text-foreground rounded-lg hover:bg-white/10 active:scale-95 transition-transform duration-150"
             onClick={() => setOpen(!open)}
             aria-label="Toggle menu"
           >
@@ -80,7 +80,7 @@ export function HomepageNav() {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-[#1a1a2e] border-b border-white/10 shadow-lg z-50 pb-4">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-[#1a1a2e] border-b border-white/10 shadow-lg z-50 pb-4 animate-slide-down origin-top">
           <nav className="flex flex-col px-4 py-4 gap-0">
             {navLinks.map((link) => (
               <Link
