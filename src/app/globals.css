@@ -359,6 +359,19 @@ select {
   background: hsl(var(--muted-foreground) / 0.5);
 }
 
+/* Hide scrollbar on slider tracks (touch scroll still works) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.overscroll-x-contain {
+  overscroll-behavior-x: contain;
+}
+
 /* Glassmorphism utility */
 .glass {
   background: rgba(255, 255, 255, 0.85);

@@ -81,8 +81,26 @@ export function PropertySlider({ properties }: { properties: Property[] }) {
         >
           <div
             ref={trackRef}
-            className="flex gap-5 overflow-x-hidden"
-            style={{ scrollSnapType: "x mandatory" }}
+            className="flex gap-5 overflow-x-auto overflow-y-hidden scrollbar-hide overscroll-x-contain"
+            style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
+            onScroll={() => {
+              const track = trackRef.current;
+              if (!track || total === 0) return;
+              const scrollLeft = track.scrollLeft;
+              const trackCenter = scrollLeft + track.clientWidth / 2;
+              let nearest = 0;
+              let nearestDist = Infinity;
+              for (let i = 0; i < track.children.length; i++) {
+                const el = track.children[i] as HTMLElement;
+                const center = el.offsetLeft + el.offsetWidth / 2;
+                const dist = Math.abs(center - trackCenter);
+                if (dist < nearestDist) {
+                  nearestDist = dist;
+                  nearest = i;
+                }
+              }
+              setCurrent((prev) => (prev !== nearest ? nearest : prev));
+            }}
           >
             {properties.map((property) => (
               <div
