@@ -29,7 +29,6 @@ import {
 import type { Property } from "@/types/database";
 import { ImageUploader } from "@/components/dashboard/image-uploader";
 import { PropertyMap } from "@/components/property/property-map";
-import { BlockedDatesCalendar } from "@/components/property/blocked-dates-calendar";
 import { toast } from "sonner";
 import { Loader2, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 
@@ -456,12 +455,6 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div>
-              <Label>Block Dates</Label>
-              <p className="text-xs text-muted-foreground mb-2">Select dates when the property is unavailable.</p>
-              <BlockedDatesCalendar value={blockedDates} onChange={setBlockedDates} />
             </div>
           </div>
         )}

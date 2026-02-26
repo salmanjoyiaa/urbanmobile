@@ -1,6 +1,7 @@
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { createAdminClient } from "@/lib/supabase/admin";
+import Link from "next/link";
 
 export const revalidate = 0;
 
@@ -24,6 +25,7 @@ export default async function AdminOverviewPage() {
     { count: approvedVisitingAgents },
     { count: totalProperties },
     { count: activeProperties },
+    { count: pendingProperties },
     { count: pendingVisits },
     { count: pendingLeads },
     { count: pendingMaintenance },
@@ -36,6 +38,7 @@ export default async function AdminOverviewPage() {
     supabase.from("agents").select("id", { count: "exact", head: true }).eq("status", "approved").eq("agent_type", "visiting"),
     supabase.from("properties").select("id", { count: "exact", head: true }),
     supabase.from("properties").select("id", { count: "exact", head: true }).eq("status", "available"),
+    supabase.from("properties").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("visit_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("buy_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("maintenance_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
@@ -59,7 +62,10 @@ export default async function AdminOverviewPage() {
       {/* Pending / Action Required */}
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Action Required</h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+          <Link href="/admin/properties?status=pending" className="block">
+            <StatCard title="Pending Properties" value={pendingProperties || 0} description="Awaiting approval" />
+          </Link>
           <StatCard title="Pending Property Agents" value={pendingPropertyAgents || 0} />
           <StatCard title="Pending Visiting Agents" value={pendingVisitingAgents || 0} />
           <StatCard title="Pending Visits" value={pendingVisits || 0} />

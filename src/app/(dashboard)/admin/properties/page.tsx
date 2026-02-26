@@ -28,12 +28,22 @@ const STATUS_COLORS: Record<string, string> = {
   reserved: "bg-orange-100 text-orange-800 border-orange-300",
 };
 
-export default async function AdminPropertiesPage() {
+export default async function AdminPropertiesPage({
+  searchParams,
+}: {
+  searchParams: { status?: string };
+}) {
   const supabase = createAdminClient();
-  const { data } = (await supabase
+  let query = supabase
     .from("properties")
     .select("id, title, city, status, price, agents:agent_id(profiles:profile_id(full_name))")
-    .order("created_at", { ascending: false })) as { data: Row[] | null };
+    .order("created_at", { ascending: false });
+
+  if (searchParams?.status) {
+    query = query.eq("status", searchParams.status);
+  }
+
+  const { data } = (await query) as { data: Row[] | null };
 
   const rows = data || [];
   const pendingCount = rows.filter((r) => r.status === "pending").length;

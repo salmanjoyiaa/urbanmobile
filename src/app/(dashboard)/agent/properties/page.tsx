@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Pencil } from "lucide-react";
+import { Pencil, CalendarX } from "lucide-react";
 import { DataTable } from "@/components/dashboard/data-table";
 import { DeleteItemButton } from "@/components/dashboard/delete-item-button";
 import { Button } from "@/components/ui/button";
@@ -63,6 +63,12 @@ export default async function AgentPropertiesPage() {
             title: "Actions",
             render: (row) => (
               <div className="flex items-center gap-2">
+                <Link href={`/agent/properties/${row.id}/block-dates`}>
+                  <Button size="sm" variant="outline">
+                    <CalendarX className="mr-1 h-3 w-3" />
+                    Block dates
+                  </Button>
+                </Link>
                 <Link href={`/agent/properties/${row.id}/edit`}>
                   <Button size="sm" variant="outline">
                     <Pencil className="mr-1 h-3 w-3" />

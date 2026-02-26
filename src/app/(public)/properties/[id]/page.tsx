@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatPhone, formatSAR } from "@/lib/format";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { VisitScheduler } from "@/components/visit/visit-scheduler";
-import { BlockedDatesCalendar } from "@/components/property/blocked-dates-calendar";
+import { AvailabilityCalendar } from "@/components/property/availability-calendar";
 
 type PropertyDetail = {
   id: string;
@@ -204,17 +204,6 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                   </div>
                 </>
               )}
-
-              {property.blocked_dates?.length > 0 && (
-                <>
-                  <hr className="border-[#eff3f4]" />
-                  <div>
-                    <p className="mb-2 font-bold text-[#0f1419]">Availability Calendar</p>
-                    <p className="text-[13px] text-[#536471] mb-3">Highlighted dates are blocked/unavailable.</p>
-                    <BlockedDatesCalendar value={property.blocked_dates} readOnly />
-                  </div>
-                </>
-              )}
             </div>
           </div>
         </div>
@@ -235,6 +224,8 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           <div id="visit-scheduler">
             <VisitScheduler propertyId={property.id} propertyTitle={property.title} />
           </div>
+
+          <AvailabilityCalendar blockedDates={property.blocked_dates || []} />
         </div>
       </div>
     </div>
