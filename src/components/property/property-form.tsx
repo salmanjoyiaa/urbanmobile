@@ -62,6 +62,9 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
 
   const [bedrooms, setBedrooms] = useState(String(initialData?.bedrooms ?? ""));
   const [bathrooms, setBathrooms] = useState(String(initialData?.bathrooms ?? ""));
+  const [kitchens, setKitchens] = useState(String(initialData?.kitchens ?? ""));
+  const [livingRooms, setLivingRooms] = useState(String(initialData?.living_rooms ?? ""));
+  const [drawingRooms, setDrawingRooms] = useState(String(initialData?.drawing_rooms ?? ""));
   const [area, setArea] = useState(String(initialData?.area_sqm ?? ""));
   const [yearBuilt, setYearBuilt] = useState(String(initialData?.year_built ?? ""));
   const [amenities, setAmenities] = useState<string[]>(initialData?.amenities || []);
@@ -76,6 +79,8 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [nearbyPlaces, setNearbyPlaces] = useState<string[]>(initialData?.nearby_places || []);
   const [driveLink, setDriveLink] = useState(initialData?.drive_link || "");
   const [brokerFee, setBrokerFee] = useState(initialData?.broker_fee || "");
+  const [officeFee, setOfficeFee] = useState(initialData?.office_fee || "");
+  const [paymentMethodsAccepted, setPaymentMethodsAccepted] = useState(initialData?.payment_methods_accepted || "");
   const [coverImageIndex, setCoverImageIndex] = useState(initialData?.cover_image_index ?? 0);
 
   const toggleArrayItem = (
@@ -106,6 +111,9 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         longitude: longitude ?? undefined,
         bedrooms: bedrooms ? Number(bedrooms) : undefined,
         bathrooms: bathrooms ? Number(bathrooms) : undefined,
+        kitchens: kitchens ? Number(kitchens) : undefined,
+        living_rooms: livingRooms ? Number(livingRooms) : undefined,
+        drawing_rooms: drawingRooms ? Number(drawingRooms) : undefined,
         area_sqm: area ? Number(area) : undefined,
         year_built: yearBuilt ? Number(yearBuilt) : undefined,
         amenities,
@@ -116,12 +124,13 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         apartment_features: apartmentFeatures,
         location_url: locationUrl || undefined,
         rental_period: rentalPeriod || undefined,
-        office_fee: initialData?.office_fee || undefined,
+        office_fee: officeFee || undefined,
         water_bill_included: initialData?.water_bill_included || undefined,
         security_deposit: securityDeposit || undefined,
         nearby_places: nearbyPlaces,
         drive_link: driveLink || undefined,
         broker_fee: brokerFee || undefined,
+        payment_methods_accepted: paymentMethodsAccepted || undefined,
         cover_image_index: coverImageIndex,
         blocked_dates: initialData?.blocked_dates || [],
         visiting_agent_instructions: visitingAgentInstructions || undefined,
@@ -254,12 +263,30 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Broker Fee (SAR)</Label>
+              <Label>Service Fee (SAR)</Label>
               <Input
                 value={brokerFee}
                 onChange={(event) => setBrokerFee(event.target.value)}
                 disabled={isSubmitting}
                 placeholder="e.g., 2000"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Office Fee (SAR)</Label>
+              <Input
+                value={officeFee}
+                onChange={(event) => setOfficeFee(event.target.value)}
+                disabled={isSubmitting}
+                placeholder="e.g., 500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Payment methods accepted</Label>
+              <Input
+                value={paymentMethodsAccepted}
+                onChange={(event) => setPaymentMethodsAccepted(event.target.value)}
+                disabled={isSubmitting}
+                placeholder="e.g., Bank transfer, Cash, Check"
               />
             </div>
             <div className="space-y-2">
@@ -350,6 +377,36 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                   type="number"
                   value={bathrooms}
                   onChange={(event) => setBathrooms(event.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="0"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Kitchens</Label>
+                <Input
+                  type="number"
+                  value={kitchens}
+                  onChange={(event) => setKitchens(event.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="0"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Living rooms</Label>
+                <Input
+                  type="number"
+                  value={livingRooms}
+                  onChange={(event) => setLivingRooms(event.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="0"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Drawing rooms</Label>
+                <Input
+                  type="number"
+                  value={drawingRooms}
+                  onChange={(event) => setDrawingRooms(event.target.value)}
                   disabled={isSubmitting}
                   placeholder="0"
                 />

@@ -60,7 +60,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   const stringFields = [
     "district", "address", "property_ref", "layout", "location_url",
     "rental_period", "office_fee", "water_bill_included", "security_deposit", "drive_link",
-    "broker_fee", "visiting_agent_image"
+    "broker_fee", "visiting_agent_image", "payment_methods_accepted"
   ];
   for (const field of stringFields) {
     if (updatePayload[field] === "") {

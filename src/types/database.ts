@@ -56,6 +56,9 @@ export interface Property {
   longitude: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
+  kitchens: number | null;
+  living_rooms: number | null;
+  drawing_rooms: number | null;
   area_sqm: number | null;
   year_built: number | null;
   amenities: string[];
@@ -74,6 +77,7 @@ export interface Property {
   nearby_places: string[];
   drive_link: string | null;
   broker_fee: string | null;
+  payment_methods_accepted: string | null;
   cover_image_index: number;
   blocked_dates: string[];
   visiting_agent_instructions: string | null;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Building2, MapPin, ExternalLink, Tag, Banknote } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, formatPhone, formatSAR } from "@/lib/format";
+import { formatPhone, formatSAR } from "@/lib/format";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { VisitScheduler } from "@/components/visit/visit-scheduler";
 import { AvailabilityCalendar } from "@/components/property/availability-calendar";
@@ -19,9 +19,13 @@ type PropertyDetail = {
   price: number;
   bedrooms: number | null;
   bathrooms: number | null;
+  kitchens: number | null;
+  living_rooms: number | null;
+  drawing_rooms: number | null;
   area_sqm: number | null;
   year_built: number | null;
   amenities: string[];
+  building_features: string[];
   images: string[];
   property_ref: string | null;
   location_url: string | null;
@@ -29,6 +33,7 @@ type PropertyDetail = {
   broker_fee: string | null;
   water_bill_included: string | null;
   security_deposit: string | null;
+  payment_methods_accepted: string | null;
   blocked_dates: string[];
   cover_image_index: number;
   created_at: string;
@@ -55,9 +60,10 @@ async function getProperty(id: string) {
     .select(
       `
       id, title, description, city, district, address, type, purpose,
-      price, bedrooms, bathrooms, area_sqm, year_built, amenities, images,
+      price, bedrooms, bathrooms, kitchens, living_rooms, drawing_rooms,
+      area_sqm, year_built, amenities, building_features, images,
       property_ref, location_url, office_fee, broker_fee, water_bill_included,
-      security_deposit, blocked_dates, cover_image_index, created_at,
+      security_deposit, payment_methods_accepted, blocked_dates, cover_image_index, created_at,
       agents:agent_id (
         company_name,
         profiles:profile_id (full_name, phone)
@@ -158,38 +164,15 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
               <hr className="border-[#eff3f4]" />
 
+              <p className="text-[14px]"><span className="font-bold text-[#0f1419]">Property ID:</span> <span className="text-[#536471]">{propertyId}</span></p>
+
               <div className="grid gap-3 text-[14px] sm:grid-cols-2">
                 <p><span className="font-bold text-[#0f1419]">Bedrooms:</span> <span className="text-[#536471]">{property.bedrooms ?? "—"}</span></p>
                 <p><span className="font-bold text-[#0f1419]">Bathrooms:</span> <span className="text-[#536471]">{property.bathrooms ?? "—"}</span></p>
-                <p><span className="font-bold text-[#0f1419]">Area:</span> <span className="text-[#536471]">{property.area_sqm ? `${property.area_sqm} m²` : "—"}</span></p>
-                <p><span className="font-bold text-[#0f1419]">Year built:</span> <span className="text-[#536471]">{property.year_built ?? "—"}</span></p>
-                <p><span className="font-bold text-[#0f1419]">Listed:</span> <span className="text-[#536471]">{formatDate(property.created_at)}</span></p>
+                <p><span className="font-bold text-[#0f1419]">Kitchens:</span> <span className="text-[#536471]">{property.kitchens ?? "—"}</span></p>
+                <p><span className="font-bold text-[#0f1419]">Living rooms:</span> <span className="text-[#536471]">{property.living_rooms ?? "—"}</span></p>
+                <p><span className="font-bold text-[#0f1419]">Drawing rooms:</span> <span className="text-[#536471]">{property.drawing_rooms ?? "—"}</span></p>
               </div>
-
-              {(property.office_fee || property.broker_fee || property.water_bill_included || property.security_deposit) && (
-                <>
-                  <hr className="border-[#eff3f4]" />
-                  <div>
-                    <p className="mb-2 font-bold text-[#0f1419] flex items-center gap-1.5">
-                      <Banknote className="h-4 w-4 text-[#1d9bf0]" /> Fees & Costs
-                    </p>
-                    <div className="grid gap-2 text-[14px] sm:grid-cols-2">
-                      {property.office_fee && (
-                        <p><span className="font-medium text-[#0f1419]">Office Fee:</span> <span className="text-[#536471]">SAR {property.office_fee}</span></p>
-                      )}
-                      {property.broker_fee && (
-                        <p><span className="font-medium text-[#0f1419]">Broker Fee:</span> <span className="text-[#536471]">SAR {property.broker_fee}</span></p>
-                      )}
-                      {property.water_bill_included && (
-                        <p><span className="font-medium text-[#0f1419]">Water Bill Included:</span> <span className="text-[#536471]">{property.water_bill_included}</span></p>
-                      )}
-                      {property.security_deposit && (
-                        <p><span className="font-medium text-[#0f1419]">Security Deposit:</span> <span className="text-[#536471]">SAR {property.security_deposit}</span></p>
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
 
               {property.amenities?.length > 0 && (
                 <>
@@ -200,6 +183,43 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                       {property.amenities.map((item) => (
                         <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
                       ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {((property.building_features || []).length > 0) && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <div>
+                    <p className="mb-2 font-bold text-[#0f1419]">Building Features</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(property.building_features || []).map((item) => (
+                        <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {(property.payment_methods_accepted || property.office_fee || property.broker_fee || property.security_deposit) && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <div>
+                    <p className="mb-2 font-bold text-[#0f1419] flex items-center gap-1.5">
+                      <Banknote className="h-4 w-4 text-[#1d9bf0]" /> Fees & Costs
+                    </p>
+                    <div className="grid gap-2 text-[14px] sm:grid-cols-2">
+                      <p className="sm:col-span-2"><span className="font-medium text-[#0f1419]">Payment methods accepted:</span> <span className="text-[#536471]">{property.payment_methods_accepted || "—"}</span></p>
+                      {property.office_fee && (
+                        <p><span className="font-medium text-[#0f1419]">Office Fee:</span> <span className="text-[#536471]">SAR {property.office_fee}</span></p>
+                      )}
+                      {property.broker_fee && (
+                        <p><span className="font-medium text-[#0f1419]">Service Fee:</span> <span className="text-[#536471]">SAR {property.broker_fee}</span></p>
+                      )}
+                      {property.security_deposit && (
+                        <p><span className="font-medium text-[#0f1419]">Security Deposit:</span> <span className="text-[#536471]">SAR {property.security_deposit}</span></p>
+                      )}
                     </div>
                   </div>
                 </>
