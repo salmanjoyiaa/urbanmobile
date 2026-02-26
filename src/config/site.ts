@@ -5,6 +5,6 @@ export const siteConfig = {
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   ogImage: "/og-image.jpg",
   links: {
-    whatsapp: "https://wa.me/966500000000",
+    whatsapp: "https://wa.me/966549586498",
   },
 } as const;

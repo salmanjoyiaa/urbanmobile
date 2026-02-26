@@ -10,12 +10,14 @@ ALTER TABLE properties ADD COLUMN IF NOT EXISTS broker_fee TEXT;
 ALTER TABLE properties ADD COLUMN IF NOT EXISTS cover_image_index INT DEFAULT 0;
 ALTER TABLE properties ADD COLUMN IF NOT EXISTS blocked_dates DATE[] DEFAULT '{}';
 
--- 2. Migrate existing statuses before changing constraint
+-- 2. Drop old constraint FIRST so we can write new values
+ALTER TABLE properties DROP CONSTRAINT IF EXISTS properties_status_check;
+
+-- 3. Migrate existing statuses
 UPDATE properties SET status = 'available' WHERE status = 'active';
 UPDATE properties SET status = 'available' WHERE status = 'draft';
 UPDATE properties SET status = 'available' WHERE status = 'archived';
 
--- 3. Drop old constraint, add new one
-ALTER TABLE properties DROP CONSTRAINT IF EXISTS properties_status_check;
+-- 4. Add new constraint
 ALTER TABLE properties ADD CONSTRAINT properties_status_check
   CHECK (status IN ('pending', 'available', 'sold', 'rented', 'reserved'));

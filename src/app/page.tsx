@@ -312,13 +312,13 @@ export default async function HomePage() {
               &copy; {new Date().getFullYear()} TheUrbanRealEstateSaudi. All rights reserved.
             </p>
             <a
-              href="https://wa.me/966500000000"
+              href="https://wa.me/966549586498"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
             >
               <Phone className="h-4 w-4" />
-              +966 500 000 000
+              +966 549 586 498
             </a>
           </div>
         </div>
