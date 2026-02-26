@@ -28,7 +28,7 @@ type Property = {
 
 const INTERVAL_MS = 4500;
 
-export function PropertySlider({ properties }: { properties: Property[] }) {
+export function PropertySlider({ properties, showAmenitiesAndBuildingFeatures = false }: { properties: Property[]; showAmenitiesAndBuildingFeatures?: boolean }) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -117,7 +117,7 @@ export function PropertySlider({ properties }: { properties: Property[] }) {
                 className="flex-none w-[85%] sm:w-[45%] lg:w-[calc(33.333%-14px)]"
                 style={{ scrollSnapAlign: "start" }}
               >
-                <PropertyCard property={property} />
+                <PropertyCard property={property} showAmenitiesAndBuildingFeatures={showAmenitiesAndBuildingFeatures} />
               </div>
             ))}
           </div>

@@ -35,7 +35,7 @@ const PRICE_SUFFIX: Record<string, string> = {
   contract: "/yr",
 };
 
-export function PropertyCard({ property }: { property: Property }) {
+export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = false }: { property: Property; showAmenitiesAndBuildingFeatures?: boolean }) {
   const coverIdx = property.cover_image_index ?? 0;
   const imgSrc = property.images?.[coverIdx] || property.images?.[0] || null;
   const rentalLabel = RENTAL_LABELS[property.purpose] || property.purpose;
@@ -94,6 +94,38 @@ export function PropertyCard({ property }: { property: Property }) {
             <p className="mt-1.5 text-[12px] text-muted-foreground truncate">
               {property.address}
             </p>
+          )}
+
+          {showAmenitiesAndBuildingFeatures && property.amenities && property.amenities.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              <span className="sr-only">Amenities:</span>
+              {property.amenities.slice(0, 4).map((item) => (
+                <span key={item} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  {item.replace(/_/g, " ")}
+                </span>
+              ))}
+              {property.amenities.length > 4 && (
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  +{property.amenities.length - 4}
+                </span>
+              )}
+            </div>
+          )}
+
+          {showAmenitiesAndBuildingFeatures && property.building_features && property.building_features.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              <span className="w-full text-[11px] font-semibold text-muted-foreground mb-0.5">Building:</span>
+              {property.building_features.slice(0, 4).map((item) => (
+                <span key={item} className="rounded-full bg-secondary/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  {item.replace(/_/g, " ")}
+                </span>
+              ))}
+              {property.building_features.length > 4 && (
+                <span className="rounded-full bg-secondary/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  +{property.building_features.length - 4}
+                </span>
+              )}
+            </div>
           )}
         </div>
       </div>

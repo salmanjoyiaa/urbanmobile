@@ -190,7 +190,7 @@ export default async function HomePage() {
 
       {/* ── Property Slider ── */}
       <AnimateSection amount={0.12} duration={0.5}>
-        <PropertySlider properties={featuredProperties} />
+        <PropertySlider properties={featuredProperties} showAmenitiesAndBuildingFeatures />
       </AnimateSection>
 
       {/* ── Product Slider ── */}
