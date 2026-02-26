@@ -15,6 +15,7 @@ type Property = {
   property_ref?: string | null;
   address?: string | null;
   amenities?: string[] | null;
+  building_features?: string[] | null;
   office_fee?: string | null;
   broker_fee?: string | null;
   water_bill_included?: string | null;
@@ -93,21 +94,6 @@ export function PropertyCard({ property }: { property: Property }) {
             <p className="mt-1.5 text-[12px] text-muted-foreground truncate">
               {property.address}
             </p>
-          )}
-
-          {property.amenities && property.amenities.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1">
-              {property.amenities.slice(0, 4).map((item) => (
-                <span key={item} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                  {item}
-                </span>
-              ))}
-              {property.amenities.length > 4 && (
-                <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                  +{property.amenities.length - 4}
-                </span>
-              )}
-            </div>
           )}
         </div>
       </div>

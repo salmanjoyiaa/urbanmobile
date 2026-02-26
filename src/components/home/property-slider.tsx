@@ -18,6 +18,7 @@ type Property = {
   property_ref?: string | null;
   address?: string | null;
   amenities?: string[] | null;
+  building_features?: string[] | null;
   office_fee?: string | null;
   broker_fee?: string | null;
   water_bill_included?: string | null;
