@@ -3,6 +3,7 @@
 -- - Add broker_fee, cover_image_index, blocked_dates columns
 -- - Update status enum: (draft,active,rented,archived) → (pending,available,sold,rented,reserved)
 -- - Migrate existing status data
+-- - Update RLS policy to use new status values
 -- =============================================
 
 -- 1. Add new columns
@@ -21,3 +22,14 @@ UPDATE properties SET status = 'available' WHERE status = 'archived';
 -- 4. Add new constraint
 ALTER TABLE properties ADD CONSTRAINT properties_status_check
   CHECK (status IN ('pending', 'available', 'sold', 'rented', 'reserved'));
+
+-- 5. Update RLS policy: change 'active' → 'available'
+DROP POLICY IF EXISTS "Active properties publicly readable" ON properties;
+CREATE POLICY "Available properties publicly readable"
+  ON properties FOR SELECT
+  TO anon, authenticated
+  USING (
+    status = 'available'
+    OR agent_id = get_agent_id()
+    OR get_user_role() = 'admin'
+  );

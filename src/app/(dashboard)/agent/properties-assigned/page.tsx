@@ -78,54 +78,47 @@ export default async function AgentPropertiesAssignedPage() {
                         if (!prop) return null;
                         const img = prop.images?.[0];
                         return (
-                            <Card key={row.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                                {img && (
-                                    <div className="h-40 bg-muted overflow-hidden relative">
-                                        <Image src={img} alt={prop.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
-                                    </div>
-                                )}
-                                <CardHeader className="pb-2">
-                                    <div className="flex items-start justify-between">
-                                        <CardTitle className="text-base leading-snug">{prop.title}</CardTitle>
-                                        <Badge variant="secondary" className="capitalize shrink-0 ml-2 text-xs">
-                                            {prop.status}
-                                        </Badge>
-                                    </div>
-                                    <CardDescription className="flex items-center gap-1 text-xs">
-                                        <MapPin className="h-3 w-3" />
-                                        {[prop.district, prop.city].filter(Boolean).join(", ") || "—"}
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="pt-0">
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-muted-foreground capitalize">{prop.type?.replace("_", " ")}</span>
-                                        {prop.price && (
-                                            <span className="font-semibold text-primary">
-                                                SAR {Number(prop.price).toLocaleString()}
+                            <Link key={row.id} href={`/properties/${prop.id}`} target="_blank">
+                                <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                                    {img && (
+                                        <div className="h-40 bg-muted overflow-hidden relative">
+                                            <Image src={img} alt={prop.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
+                                        </div>
+                                    )}
+                                    <CardHeader className="pb-2">
+                                        <div className="flex items-start justify-between">
+                                            <CardTitle className="text-base leading-snug">{prop.title}</CardTitle>
+                                            <Badge variant="secondary" className="capitalize shrink-0 ml-2 text-xs">
+                                                {prop.status}
+                                            </Badge>
+                                        </div>
+                                        <CardDescription className="flex items-center gap-1 text-xs">
+                                            <MapPin className="h-3 w-3" />
+                                            {[prop.district, prop.city].filter(Boolean).join(", ") || "—"}
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="pt-0">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-muted-foreground capitalize">{prop.type?.replace("_", " ")}</span>
+                                            {prop.price && (
+                                                <span className="font-semibold text-primary">
+                                                    SAR {Number(prop.price).toLocaleString()}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-3 mt-2">
+                                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                                                <Eye className="h-3 w-3" /> View Property
                                             </span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-3 mt-2">
-                                        <Link
-                                            href={`/properties/${prop.id}`}
-                                            target="_blank"
-                                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                                        >
-                                            <Eye className="h-3 w-3" /> View Property
-                                        </Link>
-                                        {prop.location_url && (
-                                            <a
-                                                href={prop.location_url}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                                            >
-                                                <ExternalLink className="h-3 w-3" /> View on Map
-                                            </a>
-                                        )}
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                            {prop.location_url && (
+                                                <span className="inline-flex items-center gap-1 text-xs text-primary">
+                                                    <ExternalLink className="h-3 w-3" /> View on Map
+                                                </span>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </Link>
                         );
                     })}
                 </div>

@@ -46,6 +46,8 @@ type Product = {
   images: string[] | null;
 };
 
+export const revalidate = 0;
+
 export default async function HomePage() {
   let featuredProperties: Property[] = [];
   let featuredProducts: Product[] = [];
@@ -54,13 +56,16 @@ export default async function HomePage() {
     const supabase = await createClient();
     const shuffle = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
-    // Properties — status "available" matches this project's schema
-    const { data: propData } = await supabase
+    const { data: propData, error: propError } = await supabase
       .from("properties")
       .select("id, title, city, price, type, purpose, bedrooms, area_sqm, images, property_ref, address, amenities, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates")
       .eq("status", "available")
       .order("created_at", { ascending: false })
       .limit(12);
+
+    if (propError) {
+      console.error("[HomePage] properties query error:", propError.message);
+    }
 
     const rawProps = (propData as Property[]) || [];
     featuredProperties = [
@@ -68,21 +73,24 @@ export default async function HomePage() {
       ...shuffle(rawProps.filter((p) => (p.images?.length ?? 0) === 0)),
     ];
 
-    // Products — from "products" table with is_available flag
-    const { data: prodData } = await supabase
+    const { data: prodData, error: prodError } = await supabase
       .from("products")
       .select("id, title, price, category, condition, images")
       .eq("is_available", true)
       .order("created_at", { ascending: false })
       .limit(12);
 
+    if (prodError) {
+      console.error("[HomePage] products query error:", prodError.message);
+    }
+
     const rawProds = (prodData as Product[]) || [];
     featuredProducts = [
       ...shuffle(rawProds.filter((p) => (p.images?.length ?? 0) > 0)),
       ...shuffle(rawProds.filter((p) => (p.images?.length ?? 0) === 0)),
     ];
-  } catch {
-    // Supabase not connected — show empty states in sliders
+  } catch (err) {
+    console.error("[HomePage] unexpected error:", err);
   }
 
   return (
