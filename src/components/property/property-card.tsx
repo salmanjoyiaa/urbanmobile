@@ -109,13 +109,6 @@ export function PropertyCard({ property }: { property: Property }) {
               )}
             </div>
           )}
-
-          {(property.office_fee || property.broker_fee) && (
-            <div className="mt-2 flex gap-2 text-[11px] text-muted-foreground">
-              {property.office_fee && <span>Office: SAR {property.office_fee}</span>}
-              {property.broker_fee && <span>Broker: SAR {property.broker_fee}</span>}
-            </div>
-          )}
         </div>
       </div>
     </Link>
