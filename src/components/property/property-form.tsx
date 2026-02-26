@@ -77,7 +77,6 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [driveLink, setDriveLink] = useState(initialData?.drive_link || "");
   const [brokerFee, setBrokerFee] = useState(initialData?.broker_fee || "");
   const [coverImageIndex, setCoverImageIndex] = useState(initialData?.cover_image_index ?? 0);
-  const [blockedDates, setBlockedDates] = useState<string[]>(initialData?.blocked_dates || []);
 
   const toggleArrayItem = (
     setter: React.Dispatch<React.SetStateAction<string[]>>,
@@ -124,7 +123,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         drive_link: driveLink || undefined,
         broker_fee: brokerFee || undefined,
         cover_image_index: coverImageIndex,
-        blocked_dates: blockedDates,
+        blocked_dates: initialData?.blocked_dates || [],
         visiting_agent_instructions: visitingAgentInstructions || undefined,
         visiting_agent_image: visitingAgentImage[0] || undefined,
       };
