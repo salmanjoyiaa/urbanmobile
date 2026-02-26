@@ -73,6 +73,9 @@ export interface Property {
   security_deposit: string | null;
   nearby_places: string[];
   drive_link: string | null;
+  broker_fee: string | null;
+  cover_image_index: number;
+  blocked_dates: string[];
   visiting_agent_instructions: string | null;
   visiting_agent_image: string | null;
   created_at: string;
@@ -239,7 +242,7 @@ export interface Database {
       };
       properties: {
         Row: Property;
-        Insert: Omit<Property, "id" | "created_at" | "updated_at" | "views_count" | "featured" | "building_features" | "apartment_features" | "nearby_places"> & { id?: string; featured?: boolean; building_features?: string[]; apartment_features?: string[]; nearby_places?: string[] };
+        Insert: Omit<Property, "id" | "created_at" | "updated_at" | "views_count" | "featured" | "building_features" | "apartment_features" | "nearby_places" | "cover_image_index" | "blocked_dates"> & { id?: string; featured?: boolean; building_features?: string[]; apartment_features?: string[]; nearby_places?: string[]; cover_image_index?: number; blocked_dates?: string[] };
         Update: Partial<Omit<Property, "id" | "created_at">>;
       };
       products: {

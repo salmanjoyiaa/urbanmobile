@@ -37,7 +37,7 @@ export function JoinTeam() {
             <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-5 md:mb-6 mx-auto md:mx-0 shadow-lg shadow-primary/20">
               <Building2 className="h-6 w-6 text-primary-foreground" />
             </div>
-            <h3 className="text-[22px] font-extrabold text-foreground dark:text-white mb-3">Property Agent</h3>
+            <h3 className="text-[22px] font-extrabold text-foreground dark:text-white mb-3">Aqari Agent</h3>
             <p className="text-muted-foreground dark:text-white/70 text-[15px] md:text-[16px] leading-relaxed mb-6 md:mb-8 flex-1 max-w-sm mx-auto md:mx-0">
               List and manage rental properties, connect with tenants, and grow your portfolio on our verified platform.
             </p>
@@ -45,7 +45,7 @@ export function JoinTeam() {
               href="/signup/agent?type=property"
               className="inline-flex w-full md:w-auto items-center justify-center gap-2 rounded-2xl bg-primary text-primary-foreground px-6 py-4 md:py-3.5 text-[15px] font-bold transition-all hover:bg-primary/90 active:scale-95 shadow-md"
             >
-              Apply as Property Agent
+              Apply as Aqari
               <ArrowRight className="h-4 w-4" />
             </Link>
           </motion.div>

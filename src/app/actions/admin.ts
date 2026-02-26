@@ -54,6 +54,96 @@ export async function deleteProperty(id: string) {
     }
 }
 
+export async function approveProperty(id: string) {
+    try {
+        const { userId } = await checkAdmin();
+        const adminDb = createAdminClient();
+
+        const { error } = await adminDb
+            .from("properties")
+            .update({ status: "available" } as never)
+            .eq("id", id);
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        await writeAuditLog({
+            actorId: userId,
+            action: "approved",
+            entityType: "properties",
+            entityId: id,
+        });
+
+        revalidatePath("/admin/properties");
+        revalidatePath("/properties");
+        revalidatePath("/");
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : "Failed to approve property" };
+    }
+}
+
+export async function rejectProperty(id: string) {
+    try {
+        const { userId } = await checkAdmin();
+        const adminDb = createAdminClient();
+
+        const { error } = await adminDb.from("properties").delete().eq("id", id);
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        await writeAuditLog({
+            actorId: userId,
+            action: "rejected",
+            entityType: "properties",
+            entityId: id,
+        });
+
+        revalidatePath("/admin/properties");
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : "Failed to reject property" };
+    }
+}
+
+export async function updatePropertyStatus(id: string, status: string) {
+    try {
+        const { userId } = await checkAdmin();
+        const adminDb = createAdminClient();
+
+        const validStatuses = ["pending", "available", "sold", "rented", "reserved"];
+        if (!validStatuses.includes(status)) {
+            return { success: false, error: "Invalid status" };
+        }
+
+        const { error } = await adminDb
+            .from("properties")
+            .update({ status } as never)
+            .eq("id", id);
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        await writeAuditLog({
+            actorId: userId,
+            action: `status_changed_to_${status}`,
+            entityType: "properties",
+            entityId: id,
+        });
+
+        revalidatePath("/admin/properties");
+        revalidatePath("/properties");
+        revalidatePath("/");
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : "Failed to update property status" };
+    }
+}
+
 export async function deleteProduct(id: string) {
     try {
         const { userId } = await checkAdmin();

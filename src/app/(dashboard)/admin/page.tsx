@@ -35,7 +35,7 @@ export default async function AdminOverviewPage() {
     supabase.from("agents").select("id", { count: "exact", head: true }).eq("status", "approved").neq("agent_type", "visiting"),
     supabase.from("agents").select("id", { count: "exact", head: true }).eq("status", "approved").eq("agent_type", "visiting"),
     supabase.from("properties").select("id", { count: "exact", head: true }),
-    supabase.from("properties").select("id", { count: "exact", head: true }).eq("status", "active"),
+    supabase.from("properties").select("id", { count: "exact", head: true }).eq("status", "available"),
     supabase.from("visit_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("buy_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("maintenance_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),

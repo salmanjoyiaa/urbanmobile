@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, BedDouble, Maximize, Package } from "lucide-react";
+import { MapPin, BedDouble, Maximize, Package, Tag } from "lucide-react";
 
 type Property = {
   id: string;
@@ -12,6 +12,14 @@ type Property = {
   bedrooms: number | null;
   area_sqm: number | null;
   images: string[] | null;
+  property_ref?: string | null;
+  address?: string | null;
+  amenities?: string[] | null;
+  office_fee?: string | null;
+  broker_fee?: string | null;
+  water_bill_included?: string | null;
+  cover_image_index?: number;
+  location_url?: string | null;
 };
 
 const RENTAL_LABELS: Record<string, string> = {
@@ -22,14 +30,16 @@ const RENTAL_LABELS: Record<string, string> = {
 
 const PRICE_SUFFIX: Record<string, string> = {
   short_term: "/night",
-  long_term: "/mo",
+  long_term: "/yr",
   contract: "/yr",
 };
 
 export function PropertyCard({ property }: { property: Property }) {
-  const imgSrc = property.images?.[0] || null;
+  const coverIdx = property.cover_image_index ?? 0;
+  const imgSrc = property.images?.[coverIdx] || property.images?.[0] || null;
   const rentalLabel = RENTAL_LABELS[property.purpose] || property.purpose;
   const priceSuffix = PRICE_SUFFIX[property.purpose] || "";
+  const propertyId = property.property_ref || property.id.slice(0, 8).toUpperCase();
 
   return (
     <Link href={`/properties/${property.id}`}>
@@ -50,6 +60,10 @@ export function PropertyCard({ property }: { property: Property }) {
           )}
           <div className="absolute left-3 top-3 rounded-full bg-background/90 dark:bg-card/90 px-2.5 py-0.5 text-[12px] font-bold text-foreground backdrop-blur-sm">
             {rentalLabel}
+          </div>
+          <div className="absolute right-3 top-3 rounded-full bg-primary/90 px-2.5 py-0.5 text-[11px] font-bold text-white backdrop-blur-sm flex items-center gap-1">
+            <Tag className="h-3 w-3" />
+            {propertyId}
           </div>
         </div>
         <div className="p-3 sm:p-4">
@@ -74,6 +88,34 @@ export function PropertyCard({ property }: { property: Property }) {
               </span>
             )}
           </div>
+
+          {property.address && (
+            <p className="mt-1.5 text-[12px] text-muted-foreground truncate">
+              {property.address}
+            </p>
+          )}
+
+          {property.amenities && property.amenities.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {property.amenities.slice(0, 4).map((item) => (
+                <span key={item} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  {item}
+                </span>
+              ))}
+              {property.amenities.length > 4 && (
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  +{property.amenities.length - 4}
+                </span>
+              )}
+            </div>
+          )}
+
+          {(property.office_fee || property.broker_fee) && (
+            <div className="mt-2 flex gap-2 text-[11px] text-muted-foreground">
+              {property.office_fee && <span>Office: SAR {property.office_fee}</span>}
+              {property.broker_fee && <span>Broker: SAR {property.broker_fee}</span>}
+            </div>
+          )}
         </div>
       </div>
     </Link>

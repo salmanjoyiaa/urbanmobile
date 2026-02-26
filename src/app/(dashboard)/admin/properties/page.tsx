@@ -20,6 +20,14 @@ type Row = {
   } | null;
 };
 
+const STATUS_COLORS: Record<string, string> = {
+  pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
+  available: "bg-green-100 text-green-800 border-green-300",
+  rented: "bg-blue-100 text-blue-800 border-blue-300",
+  sold: "bg-red-100 text-red-800 border-red-300",
+  reserved: "bg-orange-100 text-orange-800 border-orange-300",
+};
+
 export default async function AdminPropertiesPage() {
   const supabase = createAdminClient();
   const { data } = (await supabase
@@ -28,12 +36,20 @@ export default async function AdminPropertiesPage() {
     .order("created_at", { ascending: false })) as { data: Row[] | null };
 
   const rows = data || [];
+  const pendingCount = rows.filter((r) => r.status === "pending").length;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-navy">All Properties</h1>
-        <p className="text-sm text-muted-foreground">Global listings overview for administrators.</p>
+        <p className="text-sm text-muted-foreground">
+          Global listings overview for administrators.
+          {pendingCount > 0 && (
+            <span className="ml-2 inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800">
+              {pendingCount} pending approval
+            </span>
+          )}
+        </p>
       </div>
 
       <DataTable
@@ -46,12 +62,16 @@ export default async function AdminPropertiesPage() {
           {
             key: "status",
             title: "Status",
-            render: (row) => <Badge className="capitalize">{row.status}</Badge>,
+            render: (row) => (
+              <Badge className={`capitalize border ${STATUS_COLORS[row.status] || ""}`}>
+                {row.status}
+              </Badge>
+            ),
           },
           {
             key: "actions",
             title: "Actions",
-            render: (row) => <PropertyActions id={row.id} title={row.title} />,
+            render: (row) => <PropertyActions id={row.id} title={row.title} status={row.status} />,
           },
         ]}
       />

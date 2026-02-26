@@ -15,6 +15,14 @@ type Property = {
   bedrooms: number | null;
   area_sqm: number | null;
   images: string[] | null;
+  property_ref?: string | null;
+  address?: string | null;
+  amenities?: string[] | null;
+  office_fee?: string | null;
+  broker_fee?: string | null;
+  water_bill_included?: string | null;
+  cover_image_index?: number;
+  location_url?: string | null;
 };
 
 const INTERVAL_MS = 4500;

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Building2, MapPin } from "lucide-react";
+import { Building2, MapPin, ExternalLink, Tag, Banknote } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatPhone, formatSAR } from "@/lib/format";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { VisitScheduler } from "@/components/visit/visit-scheduler";
+import { BlockedDatesCalendar } from "@/components/property/blocked-dates-calendar";
 
 type PropertyDetail = {
   id: string;
@@ -22,6 +23,14 @@ type PropertyDetail = {
   year_built: number | null;
   amenities: string[];
   images: string[];
+  property_ref: string | null;
+  location_url: string | null;
+  office_fee: string | null;
+  broker_fee: string | null;
+  water_bill_included: string | null;
+  security_deposit: string | null;
+  blocked_dates: string[];
+  cover_image_index: number;
   created_at: string;
   agents: {
     company_name: string | null;
@@ -32,6 +41,12 @@ type PropertyDetail = {
   } | null;
 };
 
+const PRICE_SUFFIX: Record<string, string> = {
+  short_term: "/night",
+  long_term: "/yr",
+  contract: "/yr",
+};
+
 async function getProperty(id: string) {
   const supabase = await createClient();
 
@@ -40,7 +55,9 @@ async function getProperty(id: string) {
     .select(
       `
       id, title, description, city, district, address, type, purpose,
-      price, bedrooms, bathrooms, area_sqm, year_built, amenities, images, created_at,
+      price, bedrooms, bathrooms, area_sqm, year_built, amenities, images,
+      property_ref, location_url, office_fee, broker_fee, water_bill_included,
+      security_deposit, blocked_dates, cover_image_index, created_at,
       agents:agent_id (
         company_name,
         profiles:profile_id (full_name, phone)
@@ -48,7 +65,7 @@ async function getProperty(id: string) {
     `
     )
     .eq("id", id)
-    .eq("status", "active")
+    .eq("status", "available")
     .single()) as { data: PropertyDetail | null };
 
   return data;
@@ -87,16 +104,35 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   const maskedPhone = property.agents?.profiles?.phone
     ? formatPhone(property.agents.profiles.phone)
     : "Not provided";
+  const priceSuffix = PRICE_SUFFIX[property.purpose] || "";
+  const propertyId = property.property_ref || property.id.slice(0, 8).toUpperCase();
 
   return (
     <div className="container mx-auto space-y-6 px-4 py-8">
       <div>
-        <h1 className="text-[24px] font-extrabold text-[#0f1419] sm:text-[28px]">{property.title}</h1>
+        <div className="flex items-center gap-3 mb-1">
+          <h1 className="text-[24px] font-extrabold text-[#0f1419] sm:text-[28px]">{property.title}</h1>
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-[13px] font-bold text-primary">
+            <Tag className="h-3.5 w-3.5" />
+            {propertyId}
+          </span>
+        </div>
         <p className="mt-1 inline-flex items-center gap-1 text-[15px] text-[#536471]">
           <MapPin className="h-4 w-4" />
           {property.city}
           {property.district ? `, ${property.district}` : ""}
+          {property.address ? ` — ${property.address}` : ""}
         </p>
+        {property.location_url && (
+          <a
+            href={property.location_url}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-1 inline-flex items-center gap-1 text-[13px] text-primary hover:underline ml-3"
+          >
+            <ExternalLink className="h-3.5 w-3.5" /> View on Google Maps
+          </a>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
@@ -112,7 +148,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                   {property.purpose === "short_term" ? "Short-term" : property.purpose === "long_term" ? "Long-term" : property.purpose === "contract" ? "Contract" : property.purpose}
                 </span>
                 <span className="rounded-full bg-[#1d9bf0] px-3 py-1 text-[13px] font-bold text-white">
-                  {formatSAR(property.price)}{property.purpose === "short_term" ? "/night" : property.purpose === "long_term" ? "/mo" : property.purpose === "contract" ? "/yr" : ""}
+                  {formatSAR(property.price)}{priceSuffix}
                 </span>
               </div>
 
@@ -130,6 +166,31 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 <p><span className="font-bold text-[#0f1419]">Listed:</span> <span className="text-[#536471]">{formatDate(property.created_at)}</span></p>
               </div>
 
+              {(property.office_fee || property.broker_fee || property.water_bill_included || property.security_deposit) && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <div>
+                    <p className="mb-2 font-bold text-[#0f1419] flex items-center gap-1.5">
+                      <Banknote className="h-4 w-4 text-[#1d9bf0]" /> Fees & Costs
+                    </p>
+                    <div className="grid gap-2 text-[14px] sm:grid-cols-2">
+                      {property.office_fee && (
+                        <p><span className="font-medium text-[#0f1419]">Office Fee:</span> <span className="text-[#536471]">SAR {property.office_fee}</span></p>
+                      )}
+                      {property.broker_fee && (
+                        <p><span className="font-medium text-[#0f1419]">Broker Fee:</span> <span className="text-[#536471]">SAR {property.broker_fee}</span></p>
+                      )}
+                      {property.water_bill_included && (
+                        <p><span className="font-medium text-[#0f1419]">Water Bill Included:</span> <span className="text-[#536471]">{property.water_bill_included}</span></p>
+                      )}
+                      {property.security_deposit && (
+                        <p><span className="font-medium text-[#0f1419]">Security Deposit:</span> <span className="text-[#536471]">SAR {property.security_deposit}</span></p>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
               {property.amenities?.length > 0 && (
                 <>
                   <hr className="border-[#eff3f4]" />
@@ -140,6 +201,17 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                         <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
                       ))}
                     </div>
+                  </div>
+                </>
+              )}
+
+              {property.blocked_dates?.length > 0 && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <div>
+                    <p className="mb-2 font-bold text-[#0f1419]">Availability Calendar</p>
+                    <p className="text-[13px] text-[#536471] mb-3">Highlighted dates are blocked/unavailable.</p>
+                    <BlockedDatesCalendar value={property.blocked_dates} readOnly />
                   </div>
                 </>
               )}

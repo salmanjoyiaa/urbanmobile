@@ -12,11 +12,11 @@ function formatPrice(price: number): string {
 export async function FeaturedSliders() {
   const supabase = await createClient();
 
-  // Fetch 5 random active properties with images
+  // Fetch 5 random available properties with images
   const { data: properties } = (await supabase
     .from("properties")
     .select("id, title, images, price, city, purpose")
-    .eq("status", "active")
+    .eq("status", "available")
     .not("images", "eq", "{}")
     .order("created_at", { ascending: false })
     .limit(10)) as {

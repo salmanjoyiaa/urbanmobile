@@ -6,6 +6,7 @@ import {
   MessageCircle,
   Star,
   MapPin,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HomepageNav } from "@/components/home/homepage-nav";
@@ -25,6 +26,15 @@ type Property = {
   bedrooms: number | null;
   area_sqm: number | null;
   images: string[] | null;
+  property_ref: string | null;
+  address: string | null;
+  amenities: string[];
+  office_fee: string | null;
+  broker_fee: string | null;
+  water_bill_included: string | null;
+  cover_image_index: number;
+  location_url: string | null;
+  blocked_dates: string[];
 };
 
 type Product = {
@@ -44,11 +54,11 @@ export default async function HomePage() {
     const supabase = await createClient();
     const shuffle = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
-    // Properties — status "active" matches this project's schema
+    // Properties — status "available" matches this project's schema
     const { data: propData } = await supabase
       .from("properties")
-      .select("id, title, city, price, type, purpose, bedrooms, area_sqm, images")
-      .eq("status", "active")
+      .select("id, title, city, price, type, purpose, bedrooms, area_sqm, images, property_ref, address, amenities, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates")
+      .eq("status", "available")
       .order("created_at", { ascending: false })
       .limit(12);
 
@@ -284,7 +294,7 @@ export default async function HomePage() {
               <h4 className="font-bold text-sm uppercase tracking-wider mb-2 text-white/90">Join Our Team</h4>
               <ul className="space-y-0.5">
                 {[
-                  { href: "/signup/agent?type=property", label: "Apply as Property Agent" },
+                  { href: "/signup/agent?type=property", label: "Apply as Aqari" },
                   { href: "/signup/agent?type=visiting", label: "Apply as Team Agent" },
                 ].map((link) => (
                   <li key={link.href}>
@@ -297,10 +307,19 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-6 text-center">
+          <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[12px] font-medium text-white/50 uppercase tracking-widest">
               &copy; {new Date().getFullYear()} TheUrbanRealEstateSaudi. All rights reserved.
             </p>
+            <a
+              href="https://wa.me/966500000000"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
+            >
+              <Phone className="h-4 w-4" />
+              +966 500 000 000
+            </a>
           </div>
         </div>
         </footer>

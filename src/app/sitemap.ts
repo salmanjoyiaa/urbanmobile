@@ -30,11 +30,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
         const supabase = await createAdminClient();
 
-        // Fetch active properties
+        // Fetch available properties
         const { data: properties } = (await supabase
             .from("properties")
             .select("id, updated_at")
-            .eq("status", "active")
+            .eq("status", "available")
             .limit(1000)) as { data: Array<{ id: string; updated_at: string | null }> | null };
 
         // Fetch available products

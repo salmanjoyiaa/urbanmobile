@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, MapPin, ExternalLink } from "lucide-react";
+import { Building2, MapPin, ExternalLink, Eye } from "lucide-react";
+import Link from "next/link";
 
 export default async function AgentPropertiesAssignedPage() {
     const supabase = await createClient();
@@ -104,16 +105,25 @@ export default async function AgentPropertiesAssignedPage() {
                                             </span>
                                         )}
                                     </div>
-                                    {prop.location_url && (
-                                        <a
-                                            href={prop.location_url}
+                                    <div className="flex items-center gap-3 mt-2">
+                                        <Link
+                                            href={`/properties/${prop.id}`}
                                             target="_blank"
-                                            rel="noreferrer"
-                                            className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline"
+                                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                                         >
-                                            <ExternalLink className="h-3 w-3" /> View on Map
-                                        </a>
-                                    )}
+                                            <Eye className="h-3 w-3" /> View Property
+                                        </Link>
+                                        {prop.location_url && (
+                                            <a
+                                                href={prop.location_url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                                            >
+                                                <ExternalLink className="h-3 w-3" /> View on Map
+                                            </a>
+                                        )}
+                                    </div>
                                 </CardContent>
                             </Card>
                         );

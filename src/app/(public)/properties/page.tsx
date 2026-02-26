@@ -41,7 +41,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   let query = supabase
     .from("properties")
     .select("*", { count: "exact" })
-    .eq("status", "active")
+    .eq("status", "available")
     .order("created_at", { ascending: false })
     .range(from, to);
 

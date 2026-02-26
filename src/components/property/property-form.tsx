@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,16 +23,15 @@ import {
   BUILDING_FEATURES,
   APARTMENT_FEATURES,
   RENTAL_PERIODS,
-  FEE_OPTIONS,
-  WATER_OPTIONS,
   SECURITY_DEPOSITS,
   NEARBY_PLACES,
 } from "@/lib/constants";
 import type { Property } from "@/types/database";
 import { ImageUploader } from "@/components/dashboard/image-uploader";
 import { PropertyMap } from "@/components/property/property-map";
+import { BlockedDatesCalendar } from "@/components/property/blocked-dates-calendar";
 import { toast } from "sonner";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 
 type PropertyFormProps = {
   mode: "create" | "edit";
@@ -69,16 +69,16 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [images, setImages] = useState<string[]>(initialData?.images || []);
 
   const [propertyRef, setPropertyRef] = useState(initialData?.property_ref || "");
-  const [layout, setLayout] = useState(initialData?.layout || "");
   const [buildingFeatures, setBuildingFeatures] = useState<string[]>(initialData?.building_features || []);
   const [apartmentFeatures, setApartmentFeatures] = useState<string[]>(initialData?.apartment_features || []);
   const [locationUrl, setLocationUrl] = useState(initialData?.location_url || "");
   const [rentalPeriod, setRentalPeriod] = useState(initialData?.rental_period || "");
-  const [officeFee, setOfficeFee] = useState(initialData?.office_fee || "");
-  const [waterBillIncluded, setWaterBillIncluded] = useState(initialData?.water_bill_included || "");
   const [securityDeposit, setSecurityDeposit] = useState(initialData?.security_deposit || "");
   const [nearbyPlaces, setNearbyPlaces] = useState<string[]>(initialData?.nearby_places || []);
   const [driveLink, setDriveLink] = useState(initialData?.drive_link || "");
+  const [brokerFee, setBrokerFee] = useState(initialData?.broker_fee || "");
+  const [coverImageIndex, setCoverImageIndex] = useState(initialData?.cover_image_index ?? 0);
+  const [blockedDates, setBlockedDates] = useState<string[]>(initialData?.blocked_dates || []);
 
   const toggleArrayItem = (
     setter: React.Dispatch<React.SetStateAction<string[]>>,
@@ -113,16 +113,19 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         amenities,
         images,
         property_ref: propertyRef || undefined,
-        layout: layout || undefined,
+        layout: initialData?.layout || undefined,
         building_features: buildingFeatures,
         apartment_features: apartmentFeatures,
         location_url: locationUrl || undefined,
         rental_period: rentalPeriod || undefined,
-        office_fee: officeFee || undefined,
-        water_bill_included: waterBillIncluded || undefined,
+        office_fee: initialData?.office_fee || undefined,
+        water_bill_included: initialData?.water_bill_included || undefined,
         security_deposit: securityDeposit || undefined,
         nearby_places: nearbyPlaces,
         drive_link: driveLink || undefined,
+        broker_fee: brokerFee || undefined,
+        cover_image_index: coverImageIndex,
+        blocked_dates: blockedDates,
         visiting_agent_instructions: visitingAgentInstructions || undefined,
         visiting_agent_image: visitingAgentImage[0] || undefined,
       };
@@ -142,11 +145,10 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
 
       toast.success(
         mode === "create"
-          ? "Property created successfully! Redirecting..."
+          ? "Property submitted for admin approval! Redirecting..."
           : "Property updated successfully! Redirecting..."
       );
 
-      // Redirect after a short delay
       setTimeout(() => {
         router.push(redirectPath || "/agent/properties");
         router.refresh();
@@ -243,37 +245,6 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
               />
             </div>
             <div className="space-y-2">
-              <Label>Layout (e.g. 2BR/2BH/1LV/1DR)</Label>
-              <Input
-                value={layout}
-                onChange={(event) => setLayout(event.target.value)}
-                disabled={isSubmitting}
-                placeholder="2BR/2BH/1LV/1DR"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Office Fee</Label>
-              <Select value={officeFee} onValueChange={setOfficeFee} disabled={isSubmitting}>
-                <SelectTrigger><SelectValue placeholder="Select fee" /></SelectTrigger>
-                <SelectContent>
-                  {FEE_OPTIONS.map((item) => (
-                    <SelectItem key={item} value={item}>{item}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Water Bill Included</Label>
-              <Select value={waterBillIncluded} onValueChange={setWaterBillIncluded} disabled={isSubmitting}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>
-                  {WATER_OPTIONS.map((item) => (
-                    <SelectItem key={item} value={item}>{item}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
               <Label>Security Deposit</Label>
               <Select value={securityDeposit} onValueChange={setSecurityDeposit} disabled={isSubmitting}>
                 <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
@@ -285,7 +256,16 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Price (SAR)</Label>
+              <Label>Broker Fee (SAR)</Label>
+              <Input
+                value={brokerFee}
+                onChange={(event) => setBrokerFee(event.target.value)}
+                disabled={isSubmitting}
+                placeholder="e.g., 2000"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Price (SAR / Year)</Label>
               <Input
                 type="number"
                 value={price}
@@ -477,12 +457,47 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                 ))}
               </div>
             </div>
+
+            <div>
+              <Label>Block Dates</Label>
+              <p className="text-xs text-muted-foreground mb-2">Select dates when the property is unavailable.</p>
+              <BlockedDatesCalendar value={blockedDates} onChange={setBlockedDates} />
+            </div>
           </div>
         )}
 
         {step === 4 && (
           <div className="space-y-6">
             <ImageUploader bucket="property-images" values={images} onChange={setImages} />
+
+            {images.length > 0 && (
+              <div className="space-y-2">
+                <Label>Select Cover Photo</Label>
+                <p className="text-xs text-muted-foreground">Click an image to set it as the cover photo shown on the homepage.</p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {images.map((img, idx) => (
+                    <button
+                      key={img}
+                      type="button"
+                      onClick={() => setCoverImageIndex(idx)}
+                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                        coverImageIndex === idx
+                          ? "border-primary ring-2 ring-primary/30"
+                          : "border-transparent hover:border-muted-foreground/30"
+                      }`}
+                    >
+                      <Image src={img} alt={`Photo ${idx + 1}`} fill className="object-cover" sizes="120px" />
+                      {coverImageIndex === idx && (
+                        <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                          <CheckCircle2 className="h-6 w-6 text-primary drop-shadow" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Drive Link (Additional Photos)</Label>
               <Input
@@ -559,7 +574,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                   Saving...
                 </>
               ) : (
-                mode === "create" ? "Create property" : "Save changes"
+                mode === "create" ? "Submit for Approval" : "Save changes"
               )}
             </Button>
           )}

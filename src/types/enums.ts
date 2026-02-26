@@ -15,7 +15,7 @@ export type PropertyType =
   | "storage_space"
   | "other";
 
-export type ListingStatus = "draft" | "active" | "rented" | "archived";
+export type ListingStatus = "pending" | "available" | "sold" | "rented" | "reserved";
 
 export type ListingPurpose = "short_term" | "long_term" | "contract";
 

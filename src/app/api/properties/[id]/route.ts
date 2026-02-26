@@ -7,7 +7,7 @@ export async function GET(_request: Request, context: { params: { id: string } }
     .from("properties")
     .select("*")
     .eq("id", context.params.id)
-    .eq("status", "active")
+    .eq("status", "available")
     .single();
 
   if (error) {

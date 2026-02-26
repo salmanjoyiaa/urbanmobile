@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         let query = supabase
           .from("properties")
           .select("*", { count: "exact" })
-          .eq("status", "active")
+          .eq("status", "available")
           .order("created_at", { ascending: false })
           .range(from, to);
 
