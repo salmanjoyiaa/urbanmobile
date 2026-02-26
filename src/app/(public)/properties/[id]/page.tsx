@@ -113,6 +113,14 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   const priceSuffix = PRICE_SUFFIX[property.purpose] || "";
   const propertyId = property.property_ref || property.id.slice(0, 8).toUpperCase();
 
+  const roomCounts = [
+    { label: "Bedrooms", value: property.bedrooms },
+    { label: "Bathrooms", value: property.bathrooms },
+    { label: "Kitchens", value: property.kitchens },
+    { label: "Living rooms", value: property.living_rooms },
+    { label: "Drawing rooms", value: property.drawing_rooms },
+  ].filter((entry): entry is { label: string; value: number } => entry.value != null);
+
   return (
     <div className="container mx-auto space-y-6 px-4 py-8">
       <div>
@@ -166,13 +174,13 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
               <p className="text-[14px]"><span className="font-bold text-[#0f1419]">Property ID:</span> <span className="text-[#536471]">{propertyId}</span></p>
 
-              <div className="grid gap-3 text-[14px] sm:grid-cols-2">
-                <p><span className="font-bold text-[#0f1419]">Bedrooms:</span> <span className="text-[#536471]">{property.bedrooms ?? "—"}</span></p>
-                <p><span className="font-bold text-[#0f1419]">Bathrooms:</span> <span className="text-[#536471]">{property.bathrooms ?? "—"}</span></p>
-                <p><span className="font-bold text-[#0f1419]">Kitchens:</span> <span className="text-[#536471]">{property.kitchens ?? "—"}</span></p>
-                <p><span className="font-bold text-[#0f1419]">Living rooms:</span> <span className="text-[#536471]">{property.living_rooms ?? "—"}</span></p>
-                <p><span className="font-bold text-[#0f1419]">Drawing rooms:</span> <span className="text-[#536471]">{property.drawing_rooms ?? "—"}</span></p>
-              </div>
+              {roomCounts.length > 0 && (
+                <div className="grid gap-3 text-[14px] sm:grid-cols-2">
+                  {roomCounts.map(({ label, value }) => (
+                    <p key={label}><span className="font-bold text-[#0f1419]">{label}:</span> <span className="text-[#536471]">{value}</span></p>
+                  ))}
+                </div>
+              )}
 
               {property.amenities?.length > 0 && (
                 <>
@@ -210,7 +218,9 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                       <Banknote className="h-4 w-4 text-[#1d9bf0]" /> Fees & Costs
                     </p>
                     <div className="grid gap-2 text-[14px] sm:grid-cols-2">
-                      <p className="sm:col-span-2"><span className="font-medium text-[#0f1419]">Payment methods accepted:</span> <span className="text-[#536471]">{property.payment_methods_accepted || "—"}</span></p>
+                      {property.payment_methods_accepted && (
+                        <p className="sm:col-span-2"><span className="font-medium text-[#0f1419]">Payment methods accepted:</span> <span className="text-[#536471]">{property.payment_methods_accepted}</span></p>
+                      )}
                       {property.office_fee && (
                         <p><span className="font-medium text-[#0f1419]">Office Fee:</span> <span className="text-[#536471]">SAR {property.office_fee}</span></p>
                       )}
@@ -236,8 +246,12 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 <Building2 className="h-4 w-4 text-[#1d9bf0]" />
                 {agentName}
               </p>
-              <p className="text-[#536471]">Company: {property.agents?.company_name || "—"}</p>
-              <p className="text-[#536471]">Phone: {maskedPhone}</p>
+              {property.agents?.company_name && (
+                <p className="text-[#536471]">Company: {property.agents.company_name}</p>
+              )}
+              {property.agents?.profiles?.phone && (
+                <p className="text-[#536471]">Phone: {maskedPhone}</p>
+              )}
             </div>
           </div>
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { addDays } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { isFutureDate, isWeekday } from "@/lib/slots";
+import { isFutureDate } from "@/lib/slots";
 
 function toDateStr(d: Date): string {
   const y = d.getFullYear();
@@ -23,7 +23,7 @@ export function AvailabilityCalendar({ blockedDates }: AvailabilityCalendarProps
 
   const isBlocked = (date: Date) => blockedSet.has(toDateStr(date));
   const isAvailable = (date: Date) =>
-    isFutureDate(date) && isWeekday(date) && !blockedSet.has(toDateStr(date));
+    isFutureDate(date) && !blockedSet.has(toDateStr(date));
 
   return (
     <Card>
@@ -54,7 +54,7 @@ export function AvailabilityCalendar({ blockedDates }: AvailabilityCalendarProps
         <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
           <span className="inline-flex items-center gap-1.5">
             <span className="h-4 w-4 rounded bg-green-600" aria-hidden />
-            Available (Mon–Fri)
+            Available
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="h-4 w-4 rounded bg-red-500" aria-hidden />
