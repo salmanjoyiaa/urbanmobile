@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Trash2, Eye, Ban, Clock, Pencil } from "lucide-react";
+import { MoreHorizontal, Trash2, Eye, Ban, Clock, Pencil, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -93,7 +93,7 @@ export function VisitRowActions({ visit, visitingAgents }: VisitRowActionsProps)
                     )}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-52">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
                 <EditVisitDialog
@@ -116,6 +116,12 @@ export function VisitRowActions({ visit, visitingAgents }: VisitRowActionsProps)
                 />
 
                 <DropdownMenuSeparator />
+
+                {visit.status === "assigned" && (
+                    <DropdownMenuItem onClick={() => handleAction("confirmed")} className="cursor-pointer text-green-600 focus:text-green-600">
+                        <CheckCircle2 className="mr-2 h-4 w-4" /> Confirm & Notify
+                    </DropdownMenuItem>
+                )}
 
                 {(visit.status === "confirmed" || visit.status === "assigned") && (
                     <DropdownMenuItem onClick={() => handleAction("pending")} className="cursor-pointer">

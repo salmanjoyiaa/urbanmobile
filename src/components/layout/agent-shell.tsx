@@ -12,8 +12,8 @@ export function AgentShell({ children, agentType = "property", userName }: { chi
         <div className="min-h-screen bg-muted/20 lg:grid lg:grid-cols-[16rem_1fr]">
             <Sidebar items={nav} title={title} userName={userName} />
             <div>
-                <header className="sticky top-0 z-20 border-b border-border bg-background/95 dark:bg-slate-950/95 px-4 py-3 backdrop-blur lg:px-6">
-                    <div className="flex items-center justify-end">
+                <header className="sticky top-0 z-20 border-b border-border bg-background/95 dark:bg-slate-950/95 px-4 py-2.5 backdrop-blur sm:py-3 lg:px-6">
+                    <div className="flex items-center justify-end gap-2">
                         <ThemeToggle />
                     </div>
                 </header>

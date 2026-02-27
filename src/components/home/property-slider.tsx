@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { PropertyCard } from "@/components/property/property-card";
@@ -27,11 +27,8 @@ type Property = {
   location_url?: string | null;
 };
 
-const INTERVAL_MS = 4500;
-
 export function PropertySlider({ properties, showAmenitiesAndBuildingFeatures = false }: { properties: Property[]; showAmenitiesAndBuildingFeatures?: boolean }) {
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const total = properties.length;
 
@@ -52,12 +49,6 @@ export function PropertySlider({ properties, showAmenitiesAndBuildingFeatures = 
   const prev = useCallback(() => {
     scrollToIndex((current - 1 + total) % total);
   }, [current, total, scrollToIndex]);
-
-  useEffect(() => {
-    if (paused || total <= 1) return;
-    const timer = setInterval(next, INTERVAL_MS);
-    return () => clearInterval(timer);
-  }, [next, paused, total]);
 
   if (!total) return null;
 
@@ -84,11 +75,7 @@ export function PropertySlider({ properties, showAmenitiesAndBuildingFeatures = 
         </div>
 
         {/* Slider track */}
-        <div
-          className="relative"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
+        <div className="relative">
           <div
             ref={trackRef}
             className="flex gap-5 overflow-x-auto overflow-y-hidden scrollbar-hide overscroll-x-contain"

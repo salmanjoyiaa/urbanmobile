@@ -27,7 +27,8 @@ export function DataTable<T extends { id?: string }>({
 }: DataTableProps<T>) {
   return (
     <div className="rounded-lg border bg-card overflow-hidden">
-      <Table>
+      <div className="overflow-x-auto">
+      <Table className="min-w-[600px]">
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
             {columns.map((column) => (
@@ -65,6 +66,7 @@ export function DataTable<T extends { id?: string }>({
           )}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

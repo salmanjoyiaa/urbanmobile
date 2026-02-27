@@ -85,9 +85,18 @@ export async function GET(request: NextRequest) {
             error: { message: string } | null;
           };
 
-        if (error) {
-          throw new Error(error.message);
-        }
+        if (error) throw new Error(error.message);
+
+        const { data: blockedData } = (await supabase
+          .from("blocked_slots")
+          .select("time")
+          .eq("date", date)) as {
+            data: Array<{ time: string }> | null;
+          };
+
+        const adminBlockedTimes = new Set(
+          (blockedData || []).map((s: { time: string }) => s.time.slice(0, 5))
+        );
 
         const now = new Date();
         const bookedTimes = (data || [])
@@ -101,7 +110,10 @@ export async function GET(request: NextRequest) {
             return slotAt > now;
           })
           .map(({ normalized }) => normalized);
-        const slots = buildAvailabilitySlots(bookedTimes);
+
+        const slots = buildAvailabilitySlots(bookedTimes)
+          .map((s) => adminBlockedTimes.has(s.time) ? { ...s, available: false } : s);
+
         const today = new Date().toISOString().slice(0, 10);
         if (date === today) {
           const now = new Date();

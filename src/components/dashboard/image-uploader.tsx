@@ -16,6 +16,20 @@ function sanitizeName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
+function isHeif(file: File): boolean {
+  const type = file.type.toLowerCase();
+  if (type === "image/heic" || type === "image/heif") return true;
+  const ext = file.name.split(".").pop()?.toLowerCase();
+  return ext === "heic" || ext === "heif";
+}
+
+async function convertHeifToJpeg(file: File): Promise<File> {
+  const heic2any = (await import("heic2any")).default;
+  const blob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 }) as Blob;
+  const name = file.name.replace(/\.(heic|heif)$/i, ".jpg");
+  return new File([blob], name, { type: "image/jpeg" });
+}
+
 export function ImageUploader({ bucket, values, onChange }: ImageUploaderProps) {
   const supabase = useMemo(() => createClient(), []);
   const [isUploading, setUploading] = useState(false);
@@ -27,7 +41,11 @@ export function ImageUploader({ bucket, values, onChange }: ImageUploaderProps) 
     try {
       const uploaded: string[] = [];
 
-      for (const file of Array.from(files)) {
+      for (let file of Array.from(files)) {
+        if (isHeif(file)) {
+          file = await convertHeifToJpeg(file);
+        }
+
         const path = `${Date.now()}-${sanitizeName(file.name)}`;
         const { error } = await supabase.storage.from(bucket).upload(path, file, {
           cacheControl: "3600",
@@ -61,7 +79,7 @@ export function ImageUploader({ bucket, values, onChange }: ImageUploaderProps) 
       <label className="block cursor-pointer rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground hover:bg-muted/40">
         <input
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           multiple
           className="hidden"
           onChange={(event) => upload(event.target.files)}

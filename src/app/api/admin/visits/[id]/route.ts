@@ -43,11 +43,22 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
   }
 
-  if (parsed.data.status === "confirmed" && !parsed.data.visiting_agent_id) {
-    return NextResponse.json(
-      { error: "Cannot confirm a visit without assigning a visiting agent. Use the Manage Request dialog to assign an agent." },
-      { status: 400 }
-    );
+  // For "confirmed", check that a visiting agent is assigned (either passed now or already in DB)
+  if (parsed.data.status === "confirmed") {
+    if (!parsed.data.visiting_agent_id) {
+      const { data: existingVisit } = await admin.supabase
+        .from("visit_requests")
+        .select("visiting_agent_id")
+        .eq("id", context.params.id)
+        .single();
+      const existingAgentId = (existingVisit as { visiting_agent_id: string | null } | null)?.visiting_agent_id;
+      if (!existingAgentId) {
+        return NextResponse.json(
+          { error: "Cannot confirm a visit without assigning a visiting agent first. Dispatch a visit team agent first." },
+          { status: 400 }
+        );
+      }
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,6 +80,10 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
     payload.visiting_agent_id = parsed.data.visiting_agent_id;
     payload.visiting_status = "view";
+  }
+
+  if (parsed.data.status === "confirmed" && parsed.data.visiting_agent_id) {
+    payload.visiting_agent_id = parsed.data.visiting_agent_id;
   }
 
   const { error } = await admin.supabase
@@ -120,49 +135,14 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       locationUrl: visitDetails.properties.location_url,
     };
 
-    if (parsed.data.status === "confirmed") {
-      // Standard confirmed logic – WhatsApp via approved template (avoids 63016)
-      const custContent = visitConfirmationCustomerContent(templateParams);
-      notifyJobs.push(
-        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables)
-      );
-      if (visitDetails.visitor_email) {
-        const emailTpl = visitConfirmedCustomerEmail(templateParams);
-        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
-      }
-
-      const agent = visitDetails.properties.agents;
-      if (agent?.profiles?.phone) {
-        const paContent = visitAssignedPropertyAgentContent({
-          ownerName: agent.profiles.full_name || "Agent",
-          visitorName: visitDetails.visitor_name,
-          visitingAgentName: "Not yet assigned",
-          visitingAgentPhone: "N/A",
-        });
-        notifyJobs.push(
-          sendWhatsAppTemplate(agent.profiles.phone, paContent.contentSid, paContent.contentVariables)
-        );
-      }
-      if (agent?.profiles?.email) {
-        const agentEmailTpl = visitConfirmedAgentEmail({
-          agentName: agent.profiles.full_name || "Agent",
-          visitorName: visitDetails.visitor_name,
-          propertyTitle: visitDetails.properties.title,
-          visitDate: visitDetails.visit_date,
-          visitTime: visitDetails.visit_time,
-        });
-        notifyJobs.push(sendEmail({ to: agent.profiles.email, ...agentEmailTpl }));
-      }
-    }
-
-    if (parsed.data.status === "assigned" && visitDetails.visiting_agent) {
+    if (parsed.data.status === "confirmed" && visitDetails.visiting_agent) {
       const visitingAgentProfile = visitDetails.visiting_agent;
       const ownerAgentProfile = visitDetails.properties.agents?.profiles;
 
       const ownerName = ownerAgentProfile?.full_name || "Agent";
       const ownerPhone = ownerAgentProfile?.phone || "N/A";
 
-      // 1. WhatsApp + Email to Customer (approved template)
+      // 1. WhatsApp + Email to Customer
       const custContent = visitConfirmationCustomerContent({
         ...templateParams,
         visitingAgentName: visitingAgentProfile.full_name,
@@ -176,7 +156,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
       }
 
-      // 2. WhatsApp + Email to Visiting Agent (approved template; var 9 = property step 5 instructions)
+      // 2. WhatsApp + Email to Visiting Agent
       const visitingAgentParams = {
         visitingAgentName: visitingAgentProfile.full_name,
         propertyTitle: visitDetails.properties.title,
@@ -199,7 +179,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         notifyJobs.push(sendEmail({ to: visitingAgentProfile.email, ...visitAssignedVisitingAgentEmail(visitingAgentParams) }));
       }
 
-      // 3. WhatsApp + Email to Property Agent Owner (approved template)
+      // 3. WhatsApp + Email to Property Agent Owner
       const propertyAgentParams = {
         ownerName: ownerName,
         propertyTitle: visitDetails.properties.title,
@@ -216,6 +196,29 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       }
       if (ownerAgentProfile?.email) {
         notifyJobs.push(sendEmail({ to: ownerAgentProfile.email, ...visitAssignedPropertyAgentEmail(propertyAgentParams) }));
+      }
+    }
+
+    if (parsed.data.status === "confirmed" && !visitDetails.visiting_agent) {
+      const custContent = visitConfirmationCustomerContent(templateParams);
+      notifyJobs.push(
+        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables)
+      );
+      if (visitDetails.visitor_email) {
+        const emailTpl = visitConfirmedCustomerEmail(templateParams);
+        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
+      }
+
+      const agent = visitDetails.properties.agents;
+      if (agent?.profiles?.email) {
+        const agentEmailTpl = visitConfirmedAgentEmail({
+          agentName: agent.profiles.full_name || "Agent",
+          visitorName: visitDetails.visitor_name,
+          propertyTitle: visitDetails.properties.title,
+          visitDate: visitDetails.visit_date,
+          visitTime: visitDetails.visit_time,
+        });
+        notifyJobs.push(sendEmail({ to: agent.profiles.email, ...agentEmailTpl }));
       }
     }
 

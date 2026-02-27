@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -36,7 +36,6 @@ export default function AgentSignupPageWrapper() {
 }
 
 function AgentSignupPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
   const [selectedCountry, setSelectedCountry] = useState("SA");
@@ -106,7 +105,7 @@ function AgentSignupPage() {
 
     if (!userId) {
       toast.error("Signup succeeded but user id is missing. Please sign in and retry.");
-      router.push("/login");
+      window.location.href = "/login";
       return;
     }
 
@@ -116,7 +115,7 @@ function AgentSignupPage() {
     const session = await supabase.auth.getSession();
     if (!session?.data?.session) {
       toast.success("Account created. Please verify your email (if required) and sign in to complete your agent application.");
-      router.push("/login");
+      window.location.href = "/login";
       return;
     }
 
@@ -161,7 +160,7 @@ function AgentSignupPage() {
     }
 
     toast.success("Agent application submitted. Awaiting admin approval.");
-    router.push("/pending-approval");
+    window.location.href = "/pending-approval";
   };
 
   return (

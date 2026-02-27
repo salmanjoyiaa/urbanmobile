@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Calendar, Clock, Phone, User, Trash2, Send } from "lucide-react";
+import { Building2, Calendar, Clock, Phone, User, Trash2, Send, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 type CommentRow = {
@@ -132,6 +132,30 @@ export function VisitRequestDialog({ visit, visitingAgents, triggerNode }: Visit
         }
     };
 
+    const handleConfirm = async () => {
+        setIsLgLoading(true);
+        try {
+            const res = await fetch(`/api/admin/visits/${visit.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "confirmed" }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Failed to confirm visit");
+            }
+
+            toast.success("Visit confirmed! Notifications sent to customer, property agent, and visiting agent.");
+            router.refresh();
+            setOpen(false);
+        } catch (e) {
+            toast.error(e instanceof Error ? e.message : "An error occurred");
+        } finally {
+            setIsLgLoading(false);
+        }
+    };
+
     const handleDelete = async () => {
         if (!confirm("Are you sure you want to delete this visit request? This cannot be undone.")) return;
 
@@ -181,7 +205,7 @@ export function VisitRequestDialog({ visit, visitingAgents, triggerNode }: Visit
                     </div>
                 </DialogHeader>
 
-                <div className="grid grid-cols-2 gap-6 py-4">
+                <div className="grid grid-cols-1 gap-6 py-4 sm:grid-cols-2">
                     <div className="space-y-4">
                         <div>
                             <Label className="text-muted-foreground text-xs uppercase tracking-wider">Property</Label>
@@ -280,11 +304,13 @@ export function VisitRequestDialog({ visit, visitingAgents, triggerNode }: Visit
                     </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 -mx-6 -mb-6 mt-2 border-t flex flex-col gap-3 rounded-b-lg">
-                    <Label className="text-sm font-semibold">Assign Visiting Team Agent</Label>
-                    <div className="flex gap-2">
+                <div className="bg-muted/30 p-4 mt-2 border-t flex flex-col gap-3 rounded-b-lg">
+                    <Label className="text-sm font-semibold">
+                        {visit.status === "pending" ? "Step 1: Assign Visiting Team Agent" : "Visiting Team Agent"}
+                    </Label>
+                    <div className="flex flex-col gap-2 sm:flex-row">
                         <Select value={selectedAgentId} onValueChange={setSelectedAgentId}>
-                            <SelectTrigger className="flex-1 bg-background">
+                            <SelectTrigger className="w-full sm:flex-1 bg-background min-h-[44px]">
                                 <SelectValue placeholder={visit.visiting_agent?.full_name || "Select an agent to dispatch"} />
                             </SelectTrigger>
                             <SelectContent>
@@ -295,10 +321,27 @@ export function VisitRequestDialog({ visit, visitingAgents, triggerNode }: Visit
                                 ))}
                             </SelectContent>
                         </Select>
-                        <Button onClick={handleAssign} disabled={!selectedAgentId || isLgLoading}>
-                            {isLgLoading ? "Updating..." : "Dispatch"}
+                        <Button onClick={handleAssign} disabled={!selectedAgentId || isLgLoading} className="min-h-[44px] rounded-xl w-full sm:w-auto">
+                            {isLgLoading ? "Updating..." : visit.visiting_agent ? "Reassign" : "Dispatch"}
                         </Button>
                     </div>
+
+                    {(visit.status === "assigned" || visit.visiting_agent) && visit.status !== "confirmed" && (
+                        <div className="mt-2 pt-3 border-t border-border/60">
+                            <Label className="text-sm font-semibold mb-2 block">Step 2: Confirm & Send Notifications</Label>
+                            <p className="text-xs text-muted-foreground mb-2">
+                                Confirming will send auto-notification via email/WhatsApp to the customer, property agent, and visiting agent.
+                            </p>
+                            <Button
+                                onClick={handleConfirm}
+                                disabled={isLgLoading}
+                                className="min-h-[44px] rounded-xl w-full bg-green-600 hover:bg-green-700 text-white"
+                            >
+                                <CheckCircle2 className="mr-2 h-4 w-4" />
+                                {isLgLoading ? "Confirming..." : "Confirm & Notify All Parties"}
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
             </DialogContent>

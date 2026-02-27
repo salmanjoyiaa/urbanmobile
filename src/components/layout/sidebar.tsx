@@ -38,7 +38,7 @@ function SidebarNav({ items, onNavigate }: { items: NavItem[]; onNavigate?: () =
             href={item.href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition",
+              "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition min-h-[44px]",
               active
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground"

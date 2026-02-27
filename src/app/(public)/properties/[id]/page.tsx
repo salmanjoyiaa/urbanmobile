@@ -35,6 +35,7 @@ type PropertyDetail = {
   security_deposit: string | null;
   payment_methods_accepted: string | null;
   rental_period: string | null;
+  apartment_features: string[];
   nearby_places: string[];
   blocked_dates: string[];
   cover_image_index: number;
@@ -65,7 +66,8 @@ async function getProperty(id: string) {
       price, bedrooms, bathrooms, kitchens, living_rooms, drawing_rooms,
       area_sqm, year_built, amenities, building_features, images,
       property_ref, location_url, office_fee, broker_fee, water_bill_included,
-      security_deposit, payment_methods_accepted, rental_period, nearby_places,
+      security_deposit, payment_methods_accepted, rental_period,
+      apartment_features, nearby_places,
       blocked_dates, cover_image_index, created_at,
       agents:agent_id (
         company_name,
@@ -194,6 +196,20 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                     <p className="mb-2 font-bold text-[#0f1419]">Building Features</p>
                     <div className="flex flex-wrap gap-2">
                       {(property.building_features || []).map((item) => (
+                        <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {(property.apartment_features?.length ?? 0) > 0 && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <div>
+                    <p className="mb-2 font-bold text-[#0f1419]">Apartment Features</p>
+                    <div className="flex flex-wrap gap-2">
+                      {property.apartment_features.map((item) => (
                         <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
                       ))}
                     </div>
