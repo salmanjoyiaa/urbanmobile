@@ -46,7 +46,7 @@ export default async function AgentPropertiesPage() {
       <DataTable
         rows={rows}
         columns={[
-          { key: "id", title: "Property ID", render: (row) => <span className="font-mono text-xs">{row.id}</span> },
+          { key: "id", title: "Property ID", render: (row) => <span className="font-mono text-xs">{row.property_ref || "—"}</span> },
           { key: "title", title: "Title" },
           {
             key: "status",

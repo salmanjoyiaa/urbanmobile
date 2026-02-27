@@ -13,6 +13,7 @@ type Row = {
   city: string;
   status: string;
   price: number;
+  property_ref: string | null;
   agents: {
     profiles: {
       full_name: string;
@@ -36,7 +37,7 @@ export default async function AdminPropertiesPage({
   const supabase = createAdminClient();
   let query = supabase
     .from("properties")
-    .select("id, title, city, status, price, agents:agent_id(profiles:profile_id(full_name))")
+    .select("id, title, city, status, price, property_ref, agents:agent_id(profiles:profile_id(full_name))")
     .order("created_at", { ascending: false });
 
   if (searchParams?.status) {
@@ -65,7 +66,7 @@ export default async function AdminPropertiesPage({
       <DataTable
         rows={rows}
         columns={[
-          { key: "id", title: "Property ID", render: (row) => <span className="font-mono text-xs">{row.id}</span> },
+          { key: "id", title: "Property ID", render: (row) => <span className="font-mono text-xs">{row.property_ref ?? "—"}</span> },
           { key: "title", title: "Title" },
           { key: "agent", title: "Listed By", render: (row) => row.agents?.profiles?.full_name || "—" },
           { key: "city", title: "City" },
