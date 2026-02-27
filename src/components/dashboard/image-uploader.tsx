@@ -50,10 +50,37 @@ function convertViaCanvas(file: File): Promise<File> {
   });
 }
 
+function convertViaImageBitmap(file: File): Promise<File> {
+  return createImageBitmap(file).then((bitmap) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) { bitmap.close(); throw new Error("Canvas not supported"); }
+    ctx.drawImage(bitmap, 0, 0);
+    bitmap.close();
+    return new Promise<File>((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) { reject(new Error("Canvas export failed")); return; }
+          const name = file.name.replace(/\.(heic|heif|hif)$/i, ".jpg");
+          resolve(new File([blob], name, { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        0.85,
+      );
+    });
+  });
+}
+
 async function convertHeifToJpeg(file: File): Promise<File> {
   try {
     return await convertViaCanvas(file);
-  } catch { /* browser lacks native HEIF — fall back to heic2any */ }
+  } catch { /* try next */ }
+
+  try {
+    return await convertViaImageBitmap(file);
+  } catch { /* try heic2any */ }
 
   const heic2any = (await import("heic2any")).default;
   const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
@@ -83,7 +110,13 @@ export function ImageUploader({ bucket, values, onChange }: ImageUploaderProps) 
               typeof convErr === "object" && convErr && "message" in convErr ? String((convErr as { message: unknown }).message) :
               "Unknown error";
             console.error("HEIF conversion failed:", msg, convErr);
-            toast.error(`Could not convert ${file.name} — ${msg}`);
+            const isUnsupported =
+              /format not supported|ERR_LIBHEIF/i.test(msg);
+            toast.error(
+              isUnsupported
+                ? `${file.name}: This format isn't supported. Save as JPEG first (e.g. iPhone: Settings > Camera > Most Compatible).`
+                : `Could not convert ${file.name} — ${msg}`,
+            );
             continue;
           }
         }
