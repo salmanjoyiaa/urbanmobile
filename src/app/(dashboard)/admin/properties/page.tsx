@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 import { DataTable } from "@/components/dashboard/data-table";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatSAR } from "@/lib/format";
@@ -67,7 +68,15 @@ export default async function AdminPropertiesPage({
         rows={rows}
         columns={[
           { key: "id", title: "Property ID", render: (row) => <span className="font-mono text-xs">{row.property_ref ?? "—"}</span> },
-          { key: "title", title: "Title" },
+          {
+            key: "title",
+            title: "Title",
+            render: (row) => (
+              <Link href={`/properties/${row.id}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                {row.title}
+              </Link>
+            ),
+          },
           { key: "agent", title: "Listed By", render: (row) => row.agents?.profiles?.full_name || "—" },
           { key: "city", title: "City" },
           { key: "price", title: "Price", render: (row) => formatSAR(row.price) },

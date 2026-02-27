@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 type PropertyGalleryProps = {
   images: string[];
   title: string;
+  coverImageIndex?: number;
 };
 
 function Lightbox({
@@ -101,9 +102,10 @@ function Lightbox({
   );
 }
 
-export function PropertyGallery({ images, title }: PropertyGalleryProps) {
+export function PropertyGallery({ images, title, coverImageIndex = 0 }: PropertyGalleryProps) {
   const safeImages = useMemo(() => images.filter(Boolean), [images]);
-  const [index, setIndex] = useState(0);
+  const startIdx = safeImages.length > 0 ? Math.min(Math.max(0, coverImageIndex), safeImages.length - 1) : 0;
+  const [index, setIndex] = useState(startIdx);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   if (safeImages.length === 0) {

@@ -144,7 +144,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-5">
-          <PropertyGallery images={property.images || []} title={property.title} />
+          <PropertyGallery images={property.images || []} title={property.title} coverImageIndex={property.cover_image_index} />
 
           <div className="rounded-2xl border border-[#eff3f4] p-5 sm:p-6">
             <h2 className="text-[16px] font-bold text-[#0f1419]">Property details</h2>

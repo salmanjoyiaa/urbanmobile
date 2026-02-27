@@ -47,7 +47,15 @@ export default async function AgentPropertiesPage() {
         rows={rows}
         columns={[
           { key: "id", title: "Property ID", render: (row) => <span className="font-mono text-xs">{row.property_ref || "—"}</span> },
-          { key: "title", title: "Title" },
+          {
+            key: "title",
+            title: "Title",
+            render: (row) => (
+              <Link href={`/properties/${row.id}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                {row.title}
+              </Link>
+            ),
+          },
           {
             key: "status",
             title: "Status",
