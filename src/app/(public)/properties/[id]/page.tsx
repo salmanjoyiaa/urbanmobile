@@ -125,44 +125,28 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   ].filter((entry): entry is { label: string; value: number } => entry.value != null);
 
   return (
-    <div className="container mx-auto space-y-6 px-4 py-8">
+    <div className="container mx-auto space-y-6 px-4 py-6 sm:py-8 max-w-7xl">
       <div>
-        <div className="flex items-center gap-3 mb-1">
-          <h1 className="text-[24px] font-extrabold text-[#0f1419] sm:text-[28px]">{property.title}</h1>
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-[13px] font-bold text-primary">
-            <Tag className="h-3.5 w-3.5" />
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <h1 className="text-[22px] font-extrabold text-[#0f1419] sm:text-[28px] leading-tight">{property.title}</h1>
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[12px] font-bold text-primary whitespace-nowrap">
+            <Tag className="h-3 w-3" />
             {propertyId}
           </span>
         </div>
-        <p className="mt-1 inline-flex items-center gap-1 text-[15px] text-[#536471]">
-          <MapPin className="h-4 w-4" />
-          {property.city}
-          {property.district ? `, ${property.district}` : ""}
-          {property.address ? ` — ${property.address}` : ""}
+        <p className="mt-1.5 inline-flex items-center gap-1.5 text-[14px] text-[#536471]">
+          <MapPin className="h-4 w-4 shrink-0" />
+          <span>{property.city}{property.district ? `, ${property.district}` : ""}{property.address ? ` — ${property.address}` : ""}</span>
         </p>
-        {property.location_url && (
-          <a
-            href={property.location_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center gap-2 rounded-lg border-2 border-[#1d9bf0] bg-[#1d9bf0]/10 px-4 py-2.5 text-[14px] font-semibold text-[#1d9bf0] transition-colors hover:bg-[#1d9bf0] hover:text-white"
-          >
-            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-            View on Google Maps
-          </a>
-        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="space-y-6">
+        <div className="space-y-5">
           <PropertyGallery images={property.images || []} title={property.title} />
 
-          <div className="rounded-2xl border border-[#eff3f4] p-6">
-            <h2 className="text-[17px] font-bold text-[#0f1419]">Property details</h2>
-            <div className="mt-4 space-y-4">
+          <div className="rounded-2xl border border-[#eff3f4] p-5 sm:p-6">
+            <h2 className="text-[16px] font-bold text-[#0f1419]">Property details</h2>
+            <div className="mt-3 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-[#cfd9de] px-3 py-1 text-[13px] font-medium capitalize text-[#0f1419]">{property.type}</span>
                 <span className="rounded-full border border-[#cfd9de] px-3 py-1 text-[13px] font-medium text-[#0f1419]">
@@ -258,14 +242,32 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                   </div>
                 </>
               )}
+
+              {property.location_url && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <a
+                    href={property.location_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#0f1419] px-5 py-2.5 text-[14px] font-semibold text-white transition-all hover:bg-[#0f1419]/85 active:scale-[0.98]"
+                  >
+                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    View on Google Maps
+                  </a>
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-[#eff3f4] p-6">
-            <h2 className="text-[17px] font-bold text-[#0f1419]">Agent</h2>
-            <div className="mt-4 space-y-2 text-[14px]">
+        <div className="space-y-5">
+          <div className="rounded-2xl border border-[#eff3f4] p-5">
+            <h2 className="text-[15px] font-bold text-[#0f1419]">Agent</h2>
+            <div className="mt-3 space-y-1.5 text-[14px]">
               <p className="inline-flex items-center gap-2 font-bold text-[#0f1419]">
                 <Building2 className="h-4 w-4 text-[#1d9bf0]" />
                 {agentName}

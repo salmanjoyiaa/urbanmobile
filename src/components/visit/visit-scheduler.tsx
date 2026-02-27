@@ -132,10 +132,10 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
         <CardDescription>Book a time for {propertyTitle}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex items-center gap-2 text-sm">
-          <div className={`rounded-full px-3 py-1 ${step >= 1 ? "bg-primary text-primary-foreground" : "bg-muted"}`}>1. Date</div>
-          <div className={`rounded-full px-3 py-1 ${step >= 2 ? "bg-primary text-primary-foreground" : "bg-muted"}`}>2. Slot</div>
-          <div className={`rounded-full px-3 py-1 ${step >= 3 ? "bg-primary text-primary-foreground" : "bg-muted"}`}>3. Contact</div>
+        <div className="flex items-center gap-2 text-[13px]">
+          <div className={`rounded-full px-3 py-1 font-medium transition-colors ${step >= 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>1. Date</div>
+          <div className={`rounded-full px-3 py-1 font-medium transition-colors ${step >= 2 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>2. Slot</div>
+          <div className={`rounded-full px-3 py-1 font-medium transition-colors ${step >= 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>3. Contact</div>
         </div>
 
         {step === 1 && (
@@ -151,7 +151,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
               fromDate={new Date()}
               toDate={addDays(new Date(), 45)}
             />
-            <Button disabled={!date} onClick={() => setStep(2)}>
+            <Button disabled={!date} onClick={() => setStep(2)} className="h-10 px-5 rounded-xl">
               Continue to slots
             </Button>
           </div>
@@ -182,10 +182,10 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
             )}
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(1)}>
+              <Button variant="outline" onClick={() => setStep(1)} className="h-10 rounded-xl">
                 Back
               </Button>
-              <Button disabled={!slot} onClick={() => setStep(3)}>
+              <Button disabled={!slot} onClick={() => setStep(3)} className="h-10 px-5 rounded-xl">
                 Continue to details
               </Button>
             </div>
@@ -233,10 +233,10 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
             </div>
 
             <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={() => setStep(2)}>
+              <Button type="button" variant="outline" onClick={() => setStep(2)} className="h-10 rounded-xl">
                 Back
               </Button>
-              <Button type="submit" disabled={createVisit.isPending}>
+              <Button type="submit" disabled={createVisit.isPending} className="h-10 px-5 rounded-xl">
                 {createVisit.isPending ? "Submitting..." : "Submit visit request"}
               </Button>
             </div>

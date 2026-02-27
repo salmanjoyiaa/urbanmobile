@@ -3,7 +3,6 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -16,7 +15,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 function LoginContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
 
@@ -56,11 +54,8 @@ function LoginContent() {
       .eq("id", data.user.id)
       .single() as { data: { role: string } | null };
 
-    // Refresh server-side session before navigating so middleware sees the new auth cookies
-    router.refresh();
-
     if (profile?.role === "admin") {
-      router.push("/admin");
+      window.location.href = "/admin";
       return;
     }
 
@@ -72,15 +67,15 @@ function LoginContent() {
         .single() as { data: { status: string } | null };
 
       if (agent?.status !== "approved") {
-        router.push("/pending-approval");
+        window.location.href = "/pending-approval";
         return;
       }
 
-      router.push(redirect || "/agent");
+      window.location.href = redirect || "/agent";
       return;
     }
 
-    router.push(redirect || "/");
+    window.location.href = redirect || "/";
   };
 
   return (
