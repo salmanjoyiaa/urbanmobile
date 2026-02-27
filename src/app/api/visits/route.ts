@@ -90,7 +90,8 @@ export async function GET(request: NextRequest) {
         const { data: blockedData } = (await supabase
           .from("blocked_slots")
           .select("time")
-          .eq("date", date)) as {
+          .eq("date", date)
+          .eq("property_id", propertyId)) as {
             data: Array<{ time: string }> | null;
           };
 
