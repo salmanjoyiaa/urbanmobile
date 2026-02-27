@@ -110,9 +110,9 @@ export default async function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
             <div className="max-w-xl flex flex-col">
-              <div className="animate-fade-in-up inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm mb-8 animate-soft-glow">
-                <Star className="h-4 w-4 text-yellow-400" />
-                Trusted by 500+ tenants worldwide
+              <div className="animate-fade-in-up inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-[13px] mb-6 animate-soft-glow">
+                <Star className="h-3.5 w-3.5 text-yellow-400 shrink-0" />
+                Trusted by 500+ tenants
               </div>
 
               <h1 className="animate-fade-in-up font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6" style={{ animationDelay: "0.1s" }}>
