@@ -23,7 +23,38 @@ function isHeif(file: File): boolean {
   return ext === "heic" || ext === "heif" || ext === "hif";
 }
 
+function convertViaCanvas(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { URL.revokeObjectURL(url); reject(new Error("Canvas not supported")); return; }
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(
+        (blob) => {
+          URL.revokeObjectURL(url);
+          if (!blob) { reject(new Error("Canvas export failed")); return; }
+          const name = file.name.replace(/\.(heic|heif|hif)$/i, ".jpg");
+          resolve(new File([blob], name, { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        0.85,
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Browser cannot render HEIF")); };
+    img.src = url;
+  });
+}
+
 async function convertHeifToJpeg(file: File): Promise<File> {
+  try {
+    return await convertViaCanvas(file);
+  } catch { /* browser lacks native HEIF — fall back to heic2any */ }
+
   const heic2any = (await import("heic2any")).default;
   const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
   const blob = Array.isArray(result) ? result[0] : result;
@@ -47,8 +78,12 @@ export function ImageUploader({ bucket, values, onChange }: ImageUploaderProps) 
           try {
             file = await convertHeifToJpeg(file);
           } catch (convErr) {
-            console.error("HEIF conversion failed:", convErr);
-            toast.error(`Could not convert ${file.name} — try converting to JPEG first`);
+            const msg =
+              convErr instanceof Error ? convErr.message :
+              typeof convErr === "object" && convErr && "message" in convErr ? String((convErr as { message: unknown }).message) :
+              "Unknown error";
+            console.error("HEIF conversion failed:", msg, convErr);
+            toast.error(`Could not convert ${file.name} — ${msg}`);
             continue;
           }
         }
