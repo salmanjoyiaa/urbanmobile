@@ -6,6 +6,7 @@ type Property = {
   id: string;
   title: string;
   city: string;
+  district?: string | null;
   price: number;
   type: string;
   purpose: string;
@@ -76,7 +77,7 @@ export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = fals
           </p>
           <div className="mt-2 flex items-center gap-3 text-[13px] text-muted-foreground">
             <span className="flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5" /> {property.city}
+              <MapPin className="h-3.5 w-3.5" /> {property.city}{property.district ? `, ${property.district}` : ""}
             </span>
             {property.bedrooms != null && (
               <span className="flex items-center gap-1">

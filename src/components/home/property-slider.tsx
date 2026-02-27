@@ -9,6 +9,7 @@ type Property = {
   id: string;
   title: string;
   city: string;
+  district?: string | null;
   price: number;
   type: string;
   purpose: string;

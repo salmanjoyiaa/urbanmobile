@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Building2, MapPin, ExternalLink, Tag, Banknote } from "lucide-react";
+import { Building2, MapPin, Tag, Banknote } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatPhone, formatSAR } from "@/lib/format";
 import { PropertyGallery } from "@/components/property/property-gallery";
@@ -34,6 +34,8 @@ type PropertyDetail = {
   water_bill_included: string | null;
   security_deposit: string | null;
   payment_methods_accepted: string | null;
+  rental_period: string | null;
+  nearby_places: string[];
   blocked_dates: string[];
   cover_image_index: number;
   created_at: string;
@@ -63,7 +65,8 @@ async function getProperty(id: string) {
       price, bedrooms, bathrooms, kitchens, living_rooms, drawing_rooms,
       area_sqm, year_built, amenities, building_features, images,
       property_ref, location_url, office_fee, broker_fee, water_bill_included,
-      security_deposit, payment_methods_accepted, blocked_dates, cover_image_index, created_at,
+      security_deposit, payment_methods_accepted, rental_period, nearby_places,
+      blocked_dates, cover_image_index, created_at,
       agents:agent_id (
         company_name,
         profiles:profile_id (full_name, phone)
@@ -114,11 +117,11 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   const propertyId = property.property_ref || property.id.slice(0, 8).toUpperCase();
 
   const roomCounts = [
-    { label: "Bedrooms", value: property.bedrooms },
-    { label: "Bathrooms", value: property.bathrooms },
-    { label: "Kitchens", value: property.kitchens },
-    { label: "Living rooms", value: property.living_rooms },
-    { label: "Drawing rooms", value: property.drawing_rooms },
+    { label: "Bedroom", value: property.bedrooms },
+    { label: "Bathroom", value: property.bathrooms },
+    { label: "Kitchen", value: property.kitchens },
+    { label: "Living room", value: property.living_rooms },
+    { label: "Drawing room", value: property.drawing_rooms },
   ].filter((entry): entry is { label: string; value: number } => entry.value != null);
 
   return (
@@ -141,10 +144,14 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           <a
             href={property.location_url}
             target="_blank"
-            rel="noreferrer"
-            className="mt-1 inline-flex items-center gap-1 text-[13px] text-primary hover:underline ml-3"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center gap-2 rounded-lg border-2 border-[#1d9bf0] bg-[#1d9bf0]/10 px-4 py-2.5 text-[14px] font-semibold text-[#1d9bf0] transition-colors hover:bg-[#1d9bf0] hover:text-white"
           >
-            <ExternalLink className="h-3.5 w-3.5" /> View on Google Maps
+            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            View on Google Maps
           </a>
         )}
       </div>
@@ -210,7 +217,21 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 </>
               )}
 
-              {(property.payment_methods_accepted || property.office_fee || property.broker_fee || property.security_deposit) && (
+              {(property.nearby_places?.length ?? 0) > 0 && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <div>
+                    <p className="mb-2 font-bold text-[#0f1419]">Nearby</p>
+                    <div className="flex flex-wrap gap-2">
+                      {property.nearby_places.map((item) => (
+                        <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {(property.payment_methods_accepted || property.office_fee || property.broker_fee || property.security_deposit || property.rental_period) && (
                 <>
                   <hr className="border-[#eff3f4]" />
                   <div>
@@ -218,6 +239,9 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                       <Banknote className="h-4 w-4 text-[#1d9bf0]" /> Fees & Costs
                     </p>
                     <div className="grid gap-2 text-[14px] sm:grid-cols-2">
+                      {property.rental_period && (
+                        <p className="sm:col-span-2"><span className="font-medium text-[#0f1419]">Rental period:</span> <span className="text-[#536471]">{property.rental_period}</span></p>
+                      )}
                       {property.payment_methods_accepted && (
                         <p className="sm:col-span-2"><span className="font-medium text-[#0f1419]">Payment methods accepted:</span> <span className="text-[#536471]">{property.payment_methods_accepted}</span></p>
                       )}
