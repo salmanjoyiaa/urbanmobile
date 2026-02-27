@@ -52,12 +52,12 @@ export const PRODUCT_CONDITIONS = [
 ] as const;
 
 export const SLOT_CONFIG = {
-  startHour: 9,
-  endHour: 17,
-  breakStartHour: 13,
-  breakEndHour: 14,
+  startHour: 10,
+  endHour: 24,
+  breakStartHour: 0,
+  breakEndHour: 0,
   slotDurationMinutes: 20,
-  workDays: [1, 2, 3, 4, 5] as number[], // Mon-Fri
+  workDays: [0, 1, 2, 3, 4, 5, 6] as number[],
 } as const;
 
 export const AMENITIES = [

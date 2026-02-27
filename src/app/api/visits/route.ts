@@ -4,7 +4,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyAdmins } from "@/lib/admin";
 import { cacheAside, cacheDel } from "@/lib/redis";
-import { buildAvailabilitySlots, isFutureDate, isWeekday } from "@/lib/slots";
+import { buildAvailabilitySlots, isFutureDate } from "@/lib/slots";
 import { visitRequestSchema } from "@/lib/validators";
 
 const redisEnabled =
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 
   const parsedDate = new Date(`${date}T00:00:00`);
 
-  if (!isFutureDate(parsedDate) || !isWeekday(parsedDate)) {
+  if (!isFutureDate(parsedDate)) {
     return NextResponse.json({ slots: [] });
   }
 

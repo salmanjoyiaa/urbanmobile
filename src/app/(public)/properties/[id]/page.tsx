@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Building2, MapPin, Tag, Banknote } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatPhone, formatSAR } from "@/lib/format";
+import { Badge } from "@/components/ui/badge";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { VisitScheduler } from "@/components/visit/visit-scheduler";
 import { AvailabilityCalendar } from "@/components/property/availability-calendar";
@@ -16,6 +17,7 @@ type PropertyDetail = {
   address: string | null;
   type: string;
   purpose: string;
+  status: string;
   price: number;
   bedrooms: number | null;
   bathrooms: number | null;
@@ -49,6 +51,11 @@ type PropertyDetail = {
   } | null;
 };
 
+const STATUS_BADGE: Record<string, { label: string; className: string }> = {
+  rented: { label: "Rented", className: "bg-blue-100 text-blue-800 border-blue-300" },
+  reserved: { label: "Reserved", className: "bg-orange-100 text-orange-800 border-orange-300" },
+};
+
 const PRICE_SUFFIX: Record<string, string> = {
   short_term: "/night",
   long_term: "/yr",
@@ -62,7 +69,7 @@ async function getProperty(id: string) {
     .from("properties")
     .select(
       `
-      id, title, description, city, district, address, type, purpose,
+      id, title, description, city, district, address, type, purpose, status,
       price, bedrooms, bathrooms, kitchens, living_rooms, drawing_rooms,
       area_sqm, year_built, amenities, building_features, images,
       property_ref, location_url, office_fee, broker_fee, water_bill_included,
@@ -76,7 +83,7 @@ async function getProperty(id: string) {
     `
     )
     .eq("id", id)
-    .eq("status", "available")
+    .in("status", ["available", "rented", "reserved"])
     .single()) as { data: PropertyDetail | null };
 
   return data;
@@ -117,6 +124,8 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     : "Not provided";
   const priceSuffix = PRICE_SUFFIX[property.purpose] || "";
   const propertyId = property.property_ref || property.id.slice(0, 8).toUpperCase();
+  const isAvailable = property.status === "available";
+  const statusBadge = STATUS_BADGE[property.status];
 
   const roomCounts = [
     { label: "Bedroom", value: property.bedrooms },
@@ -135,6 +144,11 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             <Tag className="h-3 w-3" />
             {propertyId}
           </span>
+          {statusBadge && (
+            <Badge className={`capitalize border ${statusBadge.className}`}>
+              {statusBadge.label}
+            </Badge>
+          )}
         </div>
         <p className="mt-1.5 inline-flex items-center gap-1.5 text-[14px] text-[#536471]">
           <MapPin className="h-4 w-4 shrink-0" />
@@ -297,11 +311,19 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div id="visit-scheduler">
-            <VisitScheduler propertyId={property.id} propertyTitle={property.title} />
-          </div>
-
-          <AvailabilityCalendar blockedDates={property.blocked_dates || []} />
+          {isAvailable ? (
+            <>
+              <div id="visit-scheduler">
+                <VisitScheduler propertyId={property.id} propertyTitle={property.title} />
+              </div>
+              <AvailabilityCalendar blockedDates={property.blocked_dates || []} />
+            </>
+          ) : (
+            <div className="rounded-2xl border border-[#eff3f4] p-5 text-center">
+              <p className="text-[15px] font-bold text-[#0f1419]">This property is currently {property.status}</p>
+              <p className="mt-1 text-[13px] text-[#536471]">Visit scheduling is not available for {property.status} properties.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

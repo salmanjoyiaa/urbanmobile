@@ -6,5 +6,6 @@ export const siteConfig = {
   ogImage: "/og-image.jpg",
   links: {
     whatsapp: "https://wa.me/966549586498",
+    phone: "+966549586498",
   },
 } as const;
