@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
+// @ts-ignore - heic-convert lacks typescript definitions
+import heicConvert from "heic-convert";
 
 export async function POST(req: NextRequest) {
     try {
@@ -14,10 +15,12 @@ export async function POST(req: NextRequest) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Process using sharp to generate a high-quality JPEG
-        const jpegBuffer = await sharp(buffer)
-            .jpeg({ quality: 85 })
-            .toBuffer();
+        // Process using heic-convert to generate a high-quality JPEG
+        const jpegBuffer = await heicConvert({
+            buffer: buffer, // the HEIC file buffer
+            format: 'JPEG',      // output format
+            quality: 0.85         // the jpeg quality (0 to 1)
+        });
 
         // Determine the new filename
         const newFilename = file.name.replace(/\.(heic|heif|hif)$/i, ".jpg") || "converted.jpg";
