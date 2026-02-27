@@ -80,11 +80,26 @@ async function convertHeifToJpeg(file: File): Promise<File> {
 
   try {
     return await convertViaImageBitmap(file);
-  } catch { /* try heic2any */ }
+  } catch { /* try server-side API */ }
 
-  const heic2any = (await import("heic2any")).default;
-  const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
-  const blob = Array.isArray(result) ? result[0] : result;
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await fetch("/api/convert-heic", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorMsg = "Server-side HEIC conversion failed.";
+    try {
+      const data = await response.json();
+      errorMsg = data.error || errorMsg;
+    } catch { /* ignore JSON parsing error */ }
+    throw new Error(errorMsg);
+  }
+
+  const blob = await response.blob();
   const name = file.name.replace(/\.(heic|heif|hif)$/i, ".jpg");
   return new File([blob], name, { type: "image/jpeg" });
 }
@@ -107,8 +122,8 @@ export function ImageUploader({ bucket, values, onChange }: ImageUploaderProps) 
           } catch (convErr) {
             const msg =
               convErr instanceof Error ? convErr.message :
-              typeof convErr === "object" && convErr && "message" in convErr ? String((convErr as { message: unknown }).message) :
-              "Unknown error";
+                typeof convErr === "object" && convErr && "message" in convErr ? String((convErr as { message: unknown }).message) :
+                  "Unknown error";
             console.error("HEIF conversion failed:", msg, convErr);
             const isUnsupported =
               /format not supported|ERR_LIBHEIF/i.test(msg);
