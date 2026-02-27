@@ -65,6 +65,7 @@ export default async function AdminPropertiesPage({
       <DataTable
         rows={rows}
         columns={[
+          { key: "id", title: "Property ID", render: (row) => <span className="font-mono text-xs">{row.id}</span> },
           { key: "title", title: "Title" },
           { key: "agent", title: "Listed By", render: (row) => row.agents?.profiles?.full_name || "—" },
           { key: "city", title: "City" },
