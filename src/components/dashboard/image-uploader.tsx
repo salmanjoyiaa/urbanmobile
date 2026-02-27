@@ -18,15 +18,16 @@ function sanitizeName(name: string) {
 
 function isHeif(file: File): boolean {
   const type = file.type.toLowerCase();
-  if (type === "image/heic" || type === "image/heif") return true;
+  if (type === "image/heic" || type === "image/heif" || type === "image/heic-sequence" || type === "image/heif-sequence") return true;
   const ext = file.name.split(".").pop()?.toLowerCase();
-  return ext === "heic" || ext === "heif";
+  return ext === "heic" || ext === "heif" || ext === "hif";
 }
 
 async function convertHeifToJpeg(file: File): Promise<File> {
   const heic2any = (await import("heic2any")).default;
-  const blob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 }) as Blob;
-  const name = file.name.replace(/\.(heic|heif)$/i, ".jpg");
+  const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
+  const blob = Array.isArray(result) ? result[0] : result;
+  const name = file.name.replace(/\.(heic|heif|hif)$/i, ".jpg");
   return new File([blob], name, { type: "image/jpeg" });
 }
 
@@ -43,13 +44,20 @@ export function ImageUploader({ bucket, values, onChange }: ImageUploaderProps) 
 
       for (let file of Array.from(files)) {
         if (isHeif(file)) {
-          file = await convertHeifToJpeg(file);
+          try {
+            file = await convertHeifToJpeg(file);
+          } catch (convErr) {
+            console.error("HEIF conversion failed:", convErr);
+            toast.error(`Could not convert ${file.name} — try converting to JPEG first`);
+            continue;
+          }
         }
 
         const path = `${Date.now()}-${sanitizeName(file.name)}`;
         const { error } = await supabase.storage.from(bucket).upload(path, file, {
           cacheControl: "3600",
           upsert: false,
+          contentType: file.type || "image/jpeg",
         });
 
         if (error) {
@@ -79,7 +87,7 @@ export function ImageUploader({ bucket, values, onChange }: ImageUploaderProps) 
       <label className="block cursor-pointer rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground hover:bg-muted/40">
         <input
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,.hif"
           multiple
           className="hidden"
           onChange={(event) => upload(event.target.files)}
