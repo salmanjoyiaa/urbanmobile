@@ -87,6 +87,7 @@ export function useProperty(id: string) {
   return useQuery({
     queryKey: ["property", id],
     enabled: Boolean(id),
+    staleTime: 5 * 60 * 1000, // 5 minutes
     queryFn: async () => {
       const response = await fetch(`/api/properties/${id}`);
       const result = (await response.json()) as {
