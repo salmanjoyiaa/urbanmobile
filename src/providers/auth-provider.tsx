@@ -1,18 +1,34 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import type { Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthStore } from "@/stores/auth-store";
 import type { Agent, Profile } from "@/types/database";
 
+const AUTH_ROUTES = ["/login", "/signup"];
+
+function isAuthRoute(pathname: string) {
+  return AUTH_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
   const { setUser, setProfile, setAgent, setLoading, reset } = useAuthStore();
 
+  const onAuthPage = isAuthRoute(pathname);
+
   useEffect(() => {
+    // On auth pages (login/signup) skip session hydration to avoid
+    // lock contention with signInWithPassword on iOS/Safari.
+    if (onAuthPage) {
+      reset();
+      return;
+    }
+
     let mounted = true;
 
     const hydrateSession = async (session: Session | null) => {
@@ -41,7 +57,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq("profile_id", session.user.id)
           .single()) as { data: Agent | null };
 
-        // Auto-create agent row if it doesn't exist yet (after email confirmation)
         if (!agent && session.user.user_metadata?.company_name) {
           try {
             const companyName = session.user.user_metadata.company_name;
@@ -86,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [reset, router, setAgent, setLoading, setProfile, setUser, supabase]);
+  }, [onAuthPage, reset, router, setAgent, setLoading, setProfile, setUser, supabase]);
 
   return <>{children}</>;
 }

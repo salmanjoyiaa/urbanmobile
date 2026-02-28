@@ -13,5 +13,9 @@ export function createClient() {
     );
   }
 
-  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
+  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      lockAcquireTimeout: 30_000,
+    } as Record<string, unknown>,
+  });
 }

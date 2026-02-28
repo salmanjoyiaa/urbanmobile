@@ -36,7 +36,29 @@ function LoginContent() {
   const onSubmit = async (values: LoginInput) => {
     const redirect = searchParams.get("redirect");
 
-    const { data, error } = await supabase.auth.signInWithPassword(values);
+    let data;
+    let error;
+
+    try {
+      const result = await supabase.auth.signInWithPassword(values);
+      data = result.data;
+      error = result.error;
+    } catch (err: unknown) {
+      const isLockTimeout =
+        err instanceof Error &&
+        (/timed out/i.test(err.message) || /LockManager/i.test(err.message) ||
+          (err as { isAcquireTimeout?: boolean }).isAcquireTimeout === true);
+
+      if (isLockTimeout) {
+        toast.error(
+          "Login is taking longer than usual. Please close other tabs with this site and try again.",
+          { duration: 8000 },
+        );
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+      return;
+    }
 
     if (error) {
       toast.error(error.message || "Login failed");
