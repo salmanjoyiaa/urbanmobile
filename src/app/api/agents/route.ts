@@ -103,6 +103,41 @@ export async function POST(request: NextRequest) {
   const admin = createAdminClient();
 
   try {
+    // If an agent row already exists with a moderator-set status (approved/rejected/suspended),
+    // only update profile fields and do NOT overwrite status. This prevents the agent from
+    // going back to "pending" when they resubmit the signup form or when AuthProvider
+    // auto-creates the row after approval.
+    const { data: existing } = (await admin
+      .from("agents")
+      .select("id, status")
+      .eq("profile_id", user.id)
+      .maybeSingle()) as { data: { id: string; status: string } | null };
+
+    const preservedStatuses = ["approved", "rejected", "suspended"];
+    if (existing && preservedStatuses.includes(existing.status)) {
+      const { data: updated, error: updateError } = await admin
+        .from("agents")
+        .update({
+          agent_type: parsed.data.agent_type,
+          company_name: parsed.data.company_name,
+          license_number: parsed.data.license_number ?? null,
+          document_url: parsed.data.document_url ?? null,
+          bio: parsed.data.bio ?? null,
+        } as never)
+        .eq("id", existing.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error("[api/agents] update error:", updateError);
+        Sentry.captureException(new Error(updateError.message), {
+          contexts: { database: { table: "agents", error: updateError.message } },
+        });
+        return NextResponse.json({ error: "Failed to update agent" }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, agent: updated }, { status: 200 });
+    }
+
     const { data, error } = await admin
       .from("agents")
       .upsert({
@@ -125,7 +160,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to create agent application" }, { status: 500 });
     }
 
-    // Notify admins of new agent registration
+    // Notify admins of new agent registration (only when we created or reset a pending row)
     const agentLabel = parsed.data.agent_type === "visiting" ? "Visiting Team" : "Property";
     await notifyAdmins({
       title: `New ${agentLabel} Agent Application`,
