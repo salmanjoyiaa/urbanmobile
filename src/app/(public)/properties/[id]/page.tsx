@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Building2, MapPin, Tag, Banknote } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatPhone, formatSAR } from "@/lib/format";
+import { KITCHEN_FEATURES, UTILITIES_AND_SERVICES } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { VisitScheduler } from "@/components/visit/visit-scheduler";
@@ -24,6 +25,7 @@ type PropertyDetail = {
   kitchens: number | null;
   living_rooms: number | null;
   drawing_rooms: number | null;
+  dining_areas: number | null;
   area_sqm: number | null;
   year_built: number | null;
   amenities: string[];
@@ -70,7 +72,7 @@ async function getProperty(id: string) {
     .select(
       `
       id, title, description, city, district, address, type, purpose, status,
-      price, bedrooms, bathrooms, kitchens, living_rooms, drawing_rooms,
+      price, bedrooms, bathrooms, kitchens, living_rooms, drawing_rooms, dining_areas,
       area_sqm, year_built, amenities, building_features, images,
       property_ref, location_url, office_fee, broker_fee, water_bill_included,
       security_deposit, payment_methods_accepted, rental_period,
@@ -131,9 +133,16 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     { label: "Bedroom", value: property.bedrooms },
     { label: "Bathroom", value: property.bathrooms },
     { label: "Kitchen", value: property.kitchens },
-    { label: "Living room", value: property.living_rooms },
-    { label: "Drawing room", value: property.drawing_rooms },
+    { label: "Living Room", value: property.living_rooms },
+    { label: "Dining Area", value: property.dining_areas },
+    { label: "Drawing Room", value: property.drawing_rooms },
   ].filter((entry): entry is { label: string; value: number } => entry.value != null);
+
+  const kitchenFeaturesSet = new Set<string>(KITCHEN_FEATURES as unknown as string[]);
+  const utilitiesSet = new Set<string>(UTILITIES_AND_SERVICES as unknown as string[]);
+  const kitchenFeatures = (property.amenities || []).filter((a) => kitchenFeaturesSet.has(a));
+  const utilitiesFeatures = (property.amenities || []).filter((a) => utilitiesSet.has(a));
+  const otherAmenities = (property.amenities || []).filter((a) => !kitchenFeaturesSet.has(a) && !utilitiesSet.has(a));
 
   return (
     <div className="container mx-auto space-y-6 px-4 py-6 sm:py-8 max-w-7xl">
@@ -189,13 +198,41 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 </div>
               )}
 
-              {property.amenities?.length > 0 && (
+              {kitchenFeatures.length > 0 && (
                 <>
                   <hr className="border-[#eff3f4]" />
                   <div>
-                    <p className="mb-2 font-bold text-[#0f1419]">Amenities</p>
+                    <p className="mb-2 font-bold text-[#0f1419]">Kitchen Features</p>
                     <div className="flex flex-wrap gap-2">
-                      {property.amenities.map((item) => (
+                      {kitchenFeatures.map((item) => (
+                        <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium text-[#536471]">{item}</span>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {utilitiesFeatures.length > 0 && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <div>
+                    <p className="mb-2 font-bold text-[#0f1419]">Utilities & Services</p>
+                    <div className="flex flex-wrap gap-2">
+                      {utilitiesFeatures.map((item) => (
+                        <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium text-[#536471]">{item}</span>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {otherAmenities.length > 0 && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <div>
+                    <p className="mb-2 font-bold text-[#0f1419]">Other Amenities</p>
+                    <div className="flex flex-wrap gap-2">
+                      {otherAmenities.map((item) => (
                         <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
                       ))}
                     </div>
@@ -235,7 +272,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 <>
                   <hr className="border-[#eff3f4]" />
                   <div>
-                    <p className="mb-2 font-bold text-[#0f1419]">Nearby</p>
+                    <p className="mb-2 font-bold text-[#0f1419]">Surroundings & Location Benefits</p>
                     <div className="flex flex-wrap gap-2">
                       {property.nearby_places.map((item) => (
                         <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>

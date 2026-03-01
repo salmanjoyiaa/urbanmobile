@@ -16,15 +16,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  AMENITIES,
   LISTING_PURPOSES,
   PROPERTY_TYPES,
   SAUDI_CITIES,
   BUILDING_FEATURES,
   APARTMENT_FEATURES,
+  KITCHEN_FEATURES,
+  UTILITIES_AND_SERVICES,
   RENTAL_PERIODS,
   SECURITY_DEPOSITS,
   NEARBY_PLACES,
+  ROOM_COUNT_OPTIONS,
 } from "@/lib/constants";
 import type { Property } from "@/types/database";
 import { ImageUploader } from "@/components/dashboard/image-uploader";
@@ -65,6 +67,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [kitchens, setKitchens] = useState(String(initialData?.kitchens ?? ""));
   const [livingRooms, setLivingRooms] = useState(String(initialData?.living_rooms ?? ""));
   const [drawingRooms, setDrawingRooms] = useState(String(initialData?.drawing_rooms ?? ""));
+  const [diningAreas, setDiningAreas] = useState(String(initialData?.dining_areas ?? ""));
   const [area, setArea] = useState(String(initialData?.area_sqm ?? ""));
   const [yearBuilt, setYearBuilt] = useState(String(initialData?.year_built ?? ""));
   const [amenities, setAmenities] = useState<string[]>(initialData?.amenities || []);
@@ -93,7 +96,6 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         : [...current, value]
     );
   };
-  const toggleAmenity = (value: string) => toggleArrayItem(setAmenities, value);
 
   const submit = async () => {
     setSubmitting(true);
@@ -114,6 +116,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         kitchens: kitchens ? Number(kitchens) : undefined,
         living_rooms: livingRooms ? Number(livingRooms) : undefined,
         drawing_rooms: drawingRooms ? Number(drawingRooms) : undefined,
+        dining_areas: diningAreas ? Number(diningAreas) : undefined,
         area_sqm: area ? Number(area) : undefined,
         year_built: yearBuilt ? Number(yearBuilt) : undefined,
         amenities,
@@ -359,92 +362,71 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         )}
 
         {step === 3 && (
-          <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Bedrooms</Label>
-                <Input
-                  type="number"
-                  value={bedrooms}
-                  onChange={(event) => setBedrooms(event.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="0"
-                />
+          <div className="space-y-6">
+            {/* ── Basic Features ── */}
+            <div>
+              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Basic Features</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {([
+                  { label: "Bedroom", value: bedrooms, setter: setBedrooms },
+                  { label: "Bathroom", value: bathrooms, setter: setBathrooms },
+                  { label: "Kitchen", value: kitchens, setter: setKitchens },
+                  { label: "Living Room", value: livingRooms, setter: setLivingRooms },
+                  { label: "Dining Area", value: diningAreas, setter: setDiningAreas },
+                  { label: "Drawing Room", value: drawingRooms, setter: setDrawingRooms },
+                ] as const).map((field) => (
+                  <div key={field.label} className="space-y-1.5">
+                    <Label className="text-[13px]">{field.label}</Label>
+                    <Select value={field.value || ""} onValueChange={(v) => field.setter(v === "5+" ? "5" : v)} disabled={isSubmitting}>
+                      <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent>
+                        {ROOM_COUNT_OPTIONS.map((opt) => (
+                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
               </div>
-              <div className="space-y-2">
-                <Label>Bathrooms</Label>
-                <Input
-                  type="number"
-                  value={bathrooms}
-                  onChange={(event) => setBathrooms(event.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="0"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Kitchens</Label>
-                <Input
-                  type="number"
-                  value={kitchens}
-                  onChange={(event) => setKitchens(event.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="0"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Living rooms</Label>
-                <Input
-                  type="number"
-                  value={livingRooms}
-                  onChange={(event) => setLivingRooms(event.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="0"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Drawing rooms</Label>
-                <Input
-                  type="number"
-                  value={drawingRooms}
-                  onChange={(event) => setDrawingRooms(event.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="0"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Area (sqm)</Label>
-                <Input
-                  type="number"
-                  value={area}
-                  onChange={(event) => setArea(event.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="0"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Year built</Label>
-                <Input
-                  type="number"
-                  value={yearBuilt}
-                  onChange={(event) => setYearBuilt(event.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="2020"
-                />
+              <div className="grid gap-4 sm:grid-cols-2 mt-4">
+                <div className="space-y-1.5">
+                  <Label className="text-[13px]">Area (sqm)</Label>
+                  <Input
+                    type="number"
+                    value={area}
+                    onChange={(event) => setArea(event.target.value)}
+                    disabled={isSubmitting}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[13px]">Year Built</Label>
+                  <Input
+                    type="number"
+                    value={yearBuilt}
+                    onChange={(event) => setYearBuilt(event.target.value)}
+                    disabled={isSubmitting}
+                    placeholder="2020"
+                  />
+                </div>
               </div>
             </div>
 
+            <hr className="border-[#eff3f4]" />
+
+            {/* ── Kitchen Features ── */}
             <div>
-              <Label>Amenities</Label>
-              <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {AMENITIES.map((item) => (
+              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Kitchen Features</h3>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {KITCHEN_FEATURES.map((item) => (
                   <button
                     key={item}
                     type="button"
-                    onClick={() => toggleAmenity(item)}
+                    onClick={() => toggleArrayItem(setAmenities, item)}
                     disabled={isSubmitting}
-                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors ${amenities.includes(item)
-                      ? "border-primary bg-primary/10"
-                      : "hover:bg-muted"
+                    className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${amenities.includes(item)
+                      ? "border-primary bg-primary/10 font-medium shadow-sm"
+                      : "border-[#cfd9de] hover:bg-muted hover:border-muted-foreground/30"
                       } disabled:opacity-50`}
                   >
                     {item}
@@ -453,38 +435,21 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
               </div>
             </div>
 
-            <div>
-              <Label>Building Features</Label>
-              <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {BUILDING_FEATURES.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => toggleArrayItem(setBuildingFeatures, item)}
-                    disabled={isSubmitting}
-                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors ${buildingFeatures.includes(item)
-                      ? "border-primary bg-primary/10"
-                      : "hover:bg-muted"
-                      } disabled:opacity-50`}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <hr className="border-[#eff3f4]" />
 
+            {/* ── Apartment Features ── */}
             <div>
-              <Label>Apartment Features</Label>
-              <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Apartment Features</h3>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {APARTMENT_FEATURES.map((item) => (
                   <button
                     key={item}
                     type="button"
                     onClick={() => toggleArrayItem(setApartmentFeatures, item)}
                     disabled={isSubmitting}
-                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors ${apartmentFeatures.includes(item)
-                      ? "border-primary bg-primary/10"
-                      : "hover:bg-muted"
+                    className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${apartmentFeatures.includes(item)
+                      ? "border-primary bg-primary/10 font-medium shadow-sm"
+                      : "border-[#cfd9de] hover:bg-muted hover:border-muted-foreground/30"
                       } disabled:opacity-50`}
                   >
                     {item}
@@ -493,18 +458,67 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
               </div>
             </div>
 
+            <hr className="border-[#eff3f4]" />
+
+            {/* ── Building Features ── */}
             <div>
-              <Label>Nearby Places</Label>
-              <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Building Features</h3>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {BUILDING_FEATURES.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => toggleArrayItem(setBuildingFeatures, item)}
+                    disabled={isSubmitting}
+                    className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${buildingFeatures.includes(item)
+                      ? "border-primary bg-primary/10 font-medium shadow-sm"
+                      : "border-[#cfd9de] hover:bg-muted hover:border-muted-foreground/30"
+                      } disabled:opacity-50`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <hr className="border-[#eff3f4]" />
+
+            {/* ── Utilities & Services ── */}
+            <div>
+              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Utilities & Services</h3>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {UTILITIES_AND_SERVICES.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => toggleArrayItem(setAmenities, item)}
+                    disabled={isSubmitting}
+                    className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${amenities.includes(item)
+                      ? "border-primary bg-primary/10 font-medium shadow-sm"
+                      : "border-[#cfd9de] hover:bg-muted hover:border-muted-foreground/30"
+                      } disabled:opacity-50`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <hr className="border-[#eff3f4]" />
+
+            {/* ── Surroundings & Location Benefits ── */}
+            <div>
+              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Surroundings & Location Benefits</h3>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {NEARBY_PLACES.map((item) => (
                   <button
                     key={item}
                     type="button"
                     onClick={() => toggleArrayItem(setNearbyPlaces, item)}
                     disabled={isSubmitting}
-                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors ${nearbyPlaces.includes(item)
-                      ? "border-primary bg-primary/10"
-                      : "hover:bg-muted"
+                    className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${nearbyPlaces.includes(item)
+                      ? "border-primary bg-primary/10 font-medium shadow-sm"
+                      : "border-[#cfd9de] hover:bg-muted hover:border-muted-foreground/30"
                       } disabled:opacity-50`}
                   >
                     {item}

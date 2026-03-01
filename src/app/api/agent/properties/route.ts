@@ -74,6 +74,7 @@ export async function POST(request: Request) {
     kitchens: parsed.data.kitchens ?? null,
     living_rooms: parsed.data.living_rooms ?? null,
     drawing_rooms: parsed.data.drawing_rooms ?? null,
+    dining_areas: parsed.data.dining_areas ?? undefined,
     area_sqm: parsed.data.area_sqm ?? null,
     year_built: parsed.data.year_built ?? null,
     amenities: parsed.data.amenities || [],

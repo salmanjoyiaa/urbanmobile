@@ -60,49 +60,60 @@ export const SLOT_CONFIG = {
   workDays: [0, 1, 2, 3, 4, 5, 6] as number[],
 } as const;
 
-export const AMENITIES = [
-  "Parking",
-  "Swimming Pool",
-  "Gym",
-  "Security",
-  "Elevator",
+export const ROOM_COUNT_OPTIONS = ["0", "1", "2", "3", "4", "5+"] as const;
+
+export const KITCHEN_FEATURES = [
+  "Separate Kitchen",
+  "American Kitchen (Open Kitchen)",
+  "Modern Kitchen Design",
+] as const;
+
+export const APARTMENT_FEATURES = [
+  "Internal Apartment",
+  "External Apartment",
+  "External Corner Unit",
+  "Good Ventilation",
+  "Natural Light",
+  "Water Heater Installed",
+  "Window AC Installed",
+  "Split AC Installed",
+  "Central AC Installed",
+  "Ground Floor",
+  "First Floor",
+  "Second Floor",
+  "Third Floor",
+  "Fourth Floor",
+  "Terrace",
   "Balcony",
-  "Garden",
-  "Central AC",
-  "Maid's Room",
-  "Driver's Room",
-  "Storage",
-  "Kitchen Appliances",
-  "Furnished",
-  "Pet Friendly",
+  "Rooftop",
 ] as const;
 
 export const BUILDING_FEATURES = [
   "Family Building",
-  "New Family Building",
-  "Elevator",
+  "Bachelor Building",
+  "Family & Bachelor Building",
+  "Ground Floor Private Parking",
+  "Ground Floor Parking (First Come First Serve)",
   "Street Parking",
-  "Private Parking",
-  "Parking (First come first serve)",
-  "Cameras External",
-  "Swimming Pool",
+  "Basement Parking",
+  "Elevator",
+  "CCTV Security System",
+  "24/7 Security",
+  "Fire Safety System",
+  "Easy Access to Main Road",
+  "Intercom System",
 ] as const;
 
-export const APARTMENT_FEATURES = [
-  "Two enterences",
-  "Internal",
-  "External",
-  "Corner External",
-  "Hot Water",
-  "AC installed",
-  "Ground floor",
-  "1st Floor",
-  "2nd Floor",
-  "3rd Floor",
-  "4th Floor",
-  "Roof top",
-  "Terrace",
-  "Balcony",
+export const UTILITIES_AND_SERVICES = [
+  "Independent Electricity Meter",
+  "Shared Electricity Meter",
+  "Independent Water Meter",
+  "Water Included in Rent",
+] as const;
+
+export const AMENITIES = [
+  ...KITCHEN_FEATURES,
+  ...UTILITIES_AND_SERVICES,
 ] as const;
 
 export const RENTAL_PERIODS = [
@@ -131,10 +142,21 @@ export const SECURITY_DEPOSITS = [
 ] as const;
 
 export const NEARBY_PLACES = [
-  "School",
-  "Hospital",
-  "Mosque",
-  "Supermarket",
-  "Park",
-  "Gym",
+  "Near Hypermarket",
+  "Near Park",
+  "Near Grocery Shop",
+  "Near School",
+  "Near Hospital",
+  "Near Gym",
+  "Near Mosque",
+  "Family-Friendly Area",
+  "Quiet Neighborhood",
+  "Wide Roads",
+  "Near Main Road",
+  "Close to Highway",
+  "Near Pakistani Restaurant",
+  "Near Indian Restaurant",
+  "Near Kerala Restaurant",
+  "Near Hyderabad Restaurant",
+  "Near Filipino Restaurant",
 ] as const;

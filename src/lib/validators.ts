@@ -104,6 +104,7 @@ export const propertySchema = z.object({
   kitchens: z.coerce.number().int().min(0).max(100).optional(),
   living_rooms: z.coerce.number().int().min(0).max(100).optional(),
   drawing_rooms: z.coerce.number().int().min(0).max(100).optional(),
+  dining_areas: z.coerce.number().int().min(0).max(100).optional(),
   area_sqm: z.coerce.number().positive().max(1000000).optional(),
   year_built: z.coerce.number().int().min(1900).max(2100).optional(),
   amenities: z.array(z.string().max(100)).max(50).default([]),
