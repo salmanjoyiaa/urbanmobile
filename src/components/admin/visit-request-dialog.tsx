@@ -185,7 +185,7 @@ export function VisitRequestDialog({ visit, visitingAgents, triggerNode }: Visit
             <DialogTrigger asChild>
                 {triggerNode || <Button variant="secondary" size="sm">Manage</Button>}
             </DialogTrigger>
-            <DialogContent className="max-w-xl">
+            <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full rounded-xl">
                 <DialogHeader>
                     <div className="flex justify-between items-start pr-4">
                         <div>

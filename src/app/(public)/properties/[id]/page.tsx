@@ -124,7 +124,17 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   const maskedPhone = property.agents?.profiles?.phone
     ? formatPhone(property.agents.profiles.phone)
     : "Not provided";
-  const priceSuffix = PRICE_SUFFIX[property.purpose] || "";
+
+  let priceSuffix = PRICE_SUFFIX[property.purpose] || "";
+  if (property.rental_period) {
+    const period = property.rental_period.toLowerCase();
+    if (period === "daily") priceSuffix = "/night";
+    else if (period === "weekly") priceSuffix = "/week";
+    else if (period === "monthly") priceSuffix = "/mo";
+    else if (period === "yearly") priceSuffix = "/yr";
+    else priceSuffix = `/${period}`;
+  }
+
   const propertyId = property.property_ref || property.id.slice(0, 8).toUpperCase();
   const isAvailable = property.status === "available";
   const statusBadge = STATUS_BADGE[property.status];
@@ -238,7 +248,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 <>
                   <hr className="border-[#eff3f4]" />
                   <div>
-                    <p className="mb-2 font-bold text-[#0f1419]">Amenities</p>
+                    <p className="mb-2 font-bold text-[#0f1419]">Building Features</p>
                     <div className="flex flex-wrap gap-2">
                       {[...(property.building_features || []), ...otherAmenities].map((item) => (
                         <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>

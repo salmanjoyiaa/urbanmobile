@@ -86,6 +86,8 @@ export const APARTMENT_FEATURES = [
   "Terrace",
   "Balcony",
   "Rooftop",
+  "Semi-Furnished",
+  "Fully-Furnished",
 ] as const;
 
 export const BUILDING_FEATURES = [

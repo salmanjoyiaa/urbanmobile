@@ -458,9 +458,9 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
 
             <hr className="border-[#eff3f4]" />
 
-            {/* ── Amenities ── */}
+            {/* ── Building Features ── */}
             <div>
-              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Amenities</h3>
+              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Building Features</h3>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {BUILDING_FEATURES.map((item) => (
                   <button

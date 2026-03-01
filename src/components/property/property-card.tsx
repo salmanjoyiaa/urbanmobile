@@ -23,6 +23,7 @@ type Property = {
   water_bill_included?: string | null;
   cover_image_index?: number;
   location_url?: string | null;
+  rental_period?: string | null;
 };
 
 const RENTAL_LABELS: Record<string, string> = {
@@ -41,7 +42,17 @@ export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = fals
   const coverIdx = property.cover_image_index ?? 0;
   const imgSrc = property.images?.[coverIdx] || property.images?.[0] || null;
   const rentalLabel = RENTAL_LABELS[property.purpose] || property.purpose;
-  const priceSuffix = PRICE_SUFFIX[property.purpose] || "";
+
+  let priceSuffix = PRICE_SUFFIX[property.purpose] || "";
+  if (property.rental_period) {
+    const period = property.rental_period.toLowerCase();
+    if (period === "daily") priceSuffix = "/night";
+    else if (period === "weekly") priceSuffix = "/week";
+    else if (period === "monthly") priceSuffix = "/mo";
+    else if (period === "yearly") priceSuffix = "/yr";
+    else priceSuffix = `/${period}`;
+  }
+
   const propertyId = property.property_ref || property.id.slice(0, 8).toUpperCase();
 
   return (
