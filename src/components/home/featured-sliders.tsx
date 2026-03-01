@@ -66,7 +66,7 @@ export async function FeaturedSliders() {
       title: p.title,
       image: p.images[0],
       href: `/properties/${p.id}`,
-      badge: p.purpose === "short_term" ? "Short-term" : p.purpose === "long_term" ? "Long-term" : p.purpose === "contract" ? "Contract" : "Rental",
+      badge: p.purpose === "short_term" ? "Short-term" : p.purpose === "mid_term" ? "Mid-term" : p.purpose === "long_term" ? "Long-term" : "Rental",
       price: formatPrice(p.price),
     }));
 

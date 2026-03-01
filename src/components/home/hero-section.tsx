@@ -36,7 +36,7 @@ export function HeroSection() {
           </motion.h1>
 
           <motion.p {...fadeUp(0.2, reduceMotion ?? false)} className="text-white/85 dark:text-muted-foreground max-w-[340px] sm:max-w-lg text-base sm:text-[17px] lg:text-lg leading-relaxed mb-8 font-medium">
-            Short-term, long-term, or contract rentals — find verified properties, quality products, and 24/7 maintenance services across Saudi Arabia.
+            Short-term, mid-term, or long-term rentals — find verified properties, quality products, and 24/7 maintenance services across Saudi Arabia.
           </motion.p>
 
           <motion.div {...fadeUp(0.3, reduceMotion ?? false)} className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 sm:gap-4 mb-8">

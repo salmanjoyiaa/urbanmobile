@@ -30,8 +30,8 @@ export const PROPERTY_TYPES = [
 
 export const LISTING_PURPOSES = [
   { value: "short_term", label: "Short-term" },
+  { value: "mid_term", label: "Mid-term" },
   { value: "long_term", label: "Long-term" },
-  { value: "contract", label: "Contract" },
 ] as const;
 
 export const PRODUCT_CATEGORIES = [
@@ -118,15 +118,11 @@ export const AMENITIES = [
   ...UTILITIES_AND_SERVICES,
 ] as const;
 
-export const RENTAL_PERIODS = [
-  "Daily",
-  "Weekly",
-  "Monthly",
-  "3 Months",
-  "6 Months",
-  "12 Months",
-  "Yearly"
-] as const;
+export const RENTAL_PERIODS: Record<string, string[]> = {
+  short_term: ["Daily/Night", "Weekly"],
+  mid_term: ["Monthly", "3 Months", "6 Months"],
+  long_term: ["Yearly"],
+};
 
 export const FEE_OPTIONS = [
   "500",

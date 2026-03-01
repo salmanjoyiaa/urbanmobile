@@ -17,7 +17,7 @@ export type PropertyType =
 
 export type ListingStatus = "pending" | "available" | "sold" | "rented" | "reserved";
 
-export type ListingPurpose = "short_term" | "long_term" | "contract";
+export type ListingPurpose = "short_term" | "mid_term" | "long_term";
 
 export type ProductCondition = "new" | "like_new" | "good" | "fair";
 

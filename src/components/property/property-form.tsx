@@ -225,7 +225,19 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
             </div>
             <div className="space-y-2">
               <Label>Rental Type</Label>
-              <Select value={purpose} onValueChange={(value) => setPurpose(value as typeof purpose)} disabled={isSubmitting}>
+              <Select
+                value={purpose}
+                onValueChange={(value) => {
+                  setPurpose(value as typeof purpose);
+                  const periods = RENTAL_PERIODS[value] || [];
+                  if (periods.length === 1) {
+                    setRentalPeriod(periods[0]);
+                  } else if (!periods.includes(rentalPeriod)) {
+                    setRentalPeriod("");
+                  }
+                }}
+                disabled={isSubmitting}
+              >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {LISTING_PURPOSES.map((item) => (
@@ -239,7 +251,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
               <Select value={rentalPeriod} onValueChange={setRentalPeriod} disabled={isSubmitting}>
                 <SelectTrigger><SelectValue placeholder="Select period" /></SelectTrigger>
                 <SelectContent>
-                  {RENTAL_PERIODS.map((item) => (
+                  {(RENTAL_PERIODS[purpose] || []).map((item) => (
                     <SelectItem key={item} value={item}>{item}</SelectItem>
                   ))}
                 </SelectContent>

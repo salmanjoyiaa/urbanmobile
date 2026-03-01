@@ -58,10 +58,19 @@ const STATUS_BADGE: Record<string, { label: string; className: string }> = {
   reserved: { label: "Reserved", className: "bg-orange-100 text-orange-800 border-orange-300" },
 };
 
-const PRICE_SUFFIX: Record<string, string> = {
+const PERIOD_SUFFIX: Record<string, string> = {
+  "daily/night": "/night",
+  "weekly": "/week",
+  "monthly": "/mo",
+  "3 months": "/3 months",
+  "6 months": "/6 months",
+  "yearly": "/yr",
+};
+
+const PURPOSE_DEFAULT_SUFFIX: Record<string, string> = {
   short_term: "/night",
+  mid_term: "/mo",
   long_term: "/yr",
-  contract: "/yr",
 };
 
 async function getProperty(id: string) {
@@ -125,15 +134,9 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     ? formatPhone(property.agents.profiles.phone)
     : "Not provided";
 
-  let priceSuffix = PRICE_SUFFIX[property.purpose] || "";
-  if (property.rental_period) {
-    const period = property.rental_period.toLowerCase();
-    if (period === "daily") priceSuffix = "/night";
-    else if (period === "weekly") priceSuffix = "/week";
-    else if (period === "monthly") priceSuffix = "/mo";
-    else if (period === "yearly") priceSuffix = "/yr";
-    else priceSuffix = `/${period}`;
-  }
+  const priceSuffix = property.rental_period
+    ? (PERIOD_SUFFIX[property.rental_period.toLowerCase()] || `/${property.rental_period.toLowerCase()}`)
+    : (PURPOSE_DEFAULT_SUFFIX[property.purpose] || "");
 
   const propertyId = property.property_ref || property.id.slice(0, 8).toUpperCase();
   const isAvailable = property.status === "available";
@@ -185,7 +188,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-[#cfd9de] px-3 py-1 text-[13px] font-medium capitalize text-[#0f1419]">{property.type}</span>
                 <span className="rounded-full border border-[#cfd9de] px-3 py-1 text-[13px] font-medium text-[#0f1419]">
-                  {property.purpose === "short_term" ? "Short-term" : property.purpose === "long_term" ? "Long-term" : property.purpose === "contract" ? "Contract" : property.purpose}
+                  {property.purpose === "short_term" ? "Short-term" : property.purpose === "mid_term" ? "Mid-term" : property.purpose === "long_term" ? "Long-term" : property.purpose}
                 </span>
                 <span className="rounded-full bg-[#1d9bf0] px-3 py-1 text-[13px] font-bold text-white">
                   {formatSAR(property.price)}{priceSuffix}

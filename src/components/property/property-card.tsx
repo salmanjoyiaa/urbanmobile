@@ -28,14 +28,23 @@ type Property = {
 
 const RENTAL_LABELS: Record<string, string> = {
   short_term: "Short-term",
+  mid_term: "Mid-term",
   long_term: "Long-term",
-  contract: "Contract",
 };
 
-const PRICE_SUFFIX: Record<string, string> = {
+const PERIOD_SUFFIX: Record<string, string> = {
+  "daily/night": "/night",
+  "weekly": "/week",
+  "monthly": "/mo",
+  "3 months": "/3 months",
+  "6 months": "/6 months",
+  "yearly": "/yr",
+};
+
+const PURPOSE_DEFAULT_SUFFIX: Record<string, string> = {
   short_term: "/night",
+  mid_term: "/mo",
   long_term: "/yr",
-  contract: "/yr",
 };
 
 export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = false }: { property: Property; showAmenitiesAndBuildingFeatures?: boolean }) {
@@ -43,15 +52,9 @@ export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = fals
   const imgSrc = property.images?.[coverIdx] || property.images?.[0] || null;
   const rentalLabel = RENTAL_LABELS[property.purpose] || property.purpose;
 
-  let priceSuffix = PRICE_SUFFIX[property.purpose] || "";
-  if (property.rental_period) {
-    const period = property.rental_period.toLowerCase();
-    if (period === "daily") priceSuffix = "/night";
-    else if (period === "weekly") priceSuffix = "/week";
-    else if (period === "monthly") priceSuffix = "/mo";
-    else if (period === "yearly") priceSuffix = "/yr";
-    else priceSuffix = `/${period}`;
-  }
+  const priceSuffix = property.rental_period
+    ? (PERIOD_SUFFIX[property.rental_period.toLowerCase()] || `/${property.rental_period.toLowerCase()}`)
+    : (PURPOSE_DEFAULT_SUFFIX[property.purpose] || "");
 
   const propertyId = property.property_ref || property.id.slice(0, 8).toUpperCase();
 
