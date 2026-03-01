@@ -190,12 +190,20 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
               <p className="text-[14px]"><span className="font-bold text-[#0f1419]">Property ID:</span> <span className="text-[#536471]">{propertyId}</span></p>
 
-              {roomCounts.length > 0 && (
-                <div className="grid gap-3 text-[14px] sm:grid-cols-2">
-                  {roomCounts.map(({ label, value }) => (
-                    <p key={label}><span className="font-bold text-[#0f1419]">{label}:</span> <span className="text-[#536471]">{value}</span></p>
-                  ))}
-                </div>
+              {(roomCounts.length > 0 || property.area_sqm != null || property.year_built != null) && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <div>
+                    <p className="mb-2 font-bold text-[#0f1419]">Basic Features</p>
+                    <div className="grid gap-3 text-[14px] sm:grid-cols-2">
+                      {roomCounts.map(({ label, value }) => (
+                        <p key={label}><span className="font-bold text-[#0f1419]">{label}:</span> <span className="text-[#536471]">{value}</span></p>
+                      ))}
+                      {property.area_sqm != null && <p><span className="font-bold text-[#0f1419]">Area:</span> <span className="text-[#536471]">{property.area_sqm} sqm</span></p>}
+                      {property.year_built != null && <p><span className="font-bold text-[#0f1419]">Year Built:</span> <span className="text-[#536471]">{property.year_built}</span></p>}
+                    </div>
+                  </div>
+                </>
               )}
 
               {kitchenFeatures.length > 0 && (
@@ -212,48 +220,6 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 </>
               )}
 
-              {utilitiesFeatures.length > 0 && (
-                <>
-                  <hr className="border-[#eff3f4]" />
-                  <div>
-                    <p className="mb-2 font-bold text-[#0f1419]">Utilities & Services</p>
-                    <div className="flex flex-wrap gap-2">
-                      {utilitiesFeatures.map((item) => (
-                        <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium text-[#536471]">{item}</span>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {otherAmenities.length > 0 && (
-                <>
-                  <hr className="border-[#eff3f4]" />
-                  <div>
-                    <p className="mb-2 font-bold text-[#0f1419]">Other Amenities</p>
-                    <div className="flex flex-wrap gap-2">
-                      {otherAmenities.map((item) => (
-                        <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {((property.building_features || []).length > 0) && (
-                <>
-                  <hr className="border-[#eff3f4]" />
-                  <div>
-                    <p className="mb-2 font-bold text-[#0f1419]">Building Features</p>
-                    <div className="flex flex-wrap gap-2">
-                      {(property.building_features || []).map((item) => (
-                        <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
               {(property.apartment_features?.length ?? 0) > 0 && (
                 <>
                   <hr className="border-[#eff3f4]" />
@@ -262,6 +228,34 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                     <div className="flex flex-wrap gap-2">
                       {property.apartment_features.map((item) => (
                         <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {(((property.building_features || []).length > 0) || otherAmenities.length > 0) && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <div>
+                    <p className="mb-2 font-bold text-[#0f1419]">Amenities</p>
+                    <div className="flex flex-wrap gap-2">
+                      {[...(property.building_features || []), ...otherAmenities].map((item) => (
+                        <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium capitalize text-[#536471]">{item.replace(/_/g, " ")}</span>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {utilitiesFeatures.length > 0 && (
+                <>
+                  <hr className="border-[#eff3f4]" />
+                  <div>
+                    <p className="mb-2 font-bold text-[#0f1419]">Utilities & Services</p>
+                    <div className="flex flex-wrap gap-2">
+                      {utilitiesFeatures.map((item) => (
+                        <span key={item} className="rounded-full bg-[#eff3f4] px-3 py-1 text-[13px] font-medium text-[#536471]">{item}</span>
                       ))}
                     </div>
                   </div>

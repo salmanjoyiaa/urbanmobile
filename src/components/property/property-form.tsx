@@ -25,7 +25,6 @@ import {
   UTILITIES_AND_SERVICES,
   RENTAL_PERIODS,
   NEARBY_PLACES,
-  ROOM_COUNT_OPTIONS,
 } from "@/lib/constants";
 import type { Property } from "@/types/database";
 import { ImageUploader } from "@/components/dashboard/image-uploader";
@@ -377,14 +376,13 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                 ] as const).map((field) => (
                   <div key={field.label} className="space-y-1.5">
                     <Label className="text-[13px]">{field.label}</Label>
-                    <Select value={field.value || ""} onValueChange={(v) => field.setter(v === "5+" ? "5" : v)} disabled={isSubmitting}>
-                      <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                      <SelectContent>
-                        {ROOM_COUNT_OPTIONS.map((opt) => (
-                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      type="number"
+                      value={field.value}
+                      onChange={(event) => field.setter(event.target.value)}
+                      disabled={isSubmitting}
+                      placeholder="0"
+                    />
                   </div>
                 ))}
               </div>
