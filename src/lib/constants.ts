@@ -117,10 +117,13 @@ export const AMENITIES = [
 ] as const;
 
 export const RENTAL_PERIODS = [
+  "Daily",
+  "Weekly",
   "Monthly",
   "3 Months",
   "6 Months",
   "12 Months",
+  "Yearly"
 ] as const;
 
 export const FEE_OPTIONS = [

@@ -78,6 +78,22 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
+  if (parsed.data.images !== undefined) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).from("property_photos").delete().eq("property_id", context.params.id);
+    if (parsed.data.images.length > 0) {
+      const photoRows = parsed.data.images.map((url, i) => ({
+        property_id: context.params.id,
+        url,
+        ordering_index: i,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        alt_text: (body as any)?.photo_alt_texts?.[url] || null
+      }));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from("property_photos").insert(photoRows);
+    }
+  }
+
   return NextResponse.json({ success: true });
 }
 

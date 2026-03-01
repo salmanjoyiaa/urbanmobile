@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, BedDouble, Maximize, Package, Tag } from "lucide-react";
+import { MapPin, BedDouble, Maximize, Package, Tag, Bath } from "lucide-react";
 
 type Property = {
   id: string;
@@ -11,6 +11,7 @@ type Property = {
   type: string;
   purpose: string;
   bedrooms: number | null;
+  bathrooms?: number | null;
   area_sqm: number | null;
   images: string[] | null;
   property_ref?: string | null;
@@ -82,6 +83,11 @@ export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = fals
             {property.bedrooms != null && (
               <span className="flex items-center gap-1">
                 <BedDouble className="h-3.5 w-3.5" /> {property.bedrooms}
+              </span>
+            )}
+            {property.bathrooms != null && (
+              <span className="flex items-center gap-1">
+                <Bath className="h-3.5 w-3.5" /> {property.bathrooms}
               </span>
             )}
             {property.area_sqm != null && (

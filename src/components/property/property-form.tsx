@@ -24,7 +24,6 @@ import {
   KITCHEN_FEATURES,
   UTILITIES_AND_SERVICES,
   RENTAL_PERIODS,
-  SECURITY_DEPOSITS,
   NEARBY_PLACES,
   ROOM_COUNT_OPTIONS,
 } from "@/lib/constants";
@@ -72,6 +71,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [yearBuilt, setYearBuilt] = useState(String(initialData?.year_built ?? ""));
   const [amenities, setAmenities] = useState<string[]>(initialData?.amenities || []);
   const [images, setImages] = useState<string[]>(initialData?.images || []);
+  const [photoAltTexts, setPhotoAltTexts] = useState<Record<string, string>>({});
 
   const [propertyRef, setPropertyRef] = useState(initialData?.property_ref || "");
   const [buildingFeatures, setBuildingFeatures] = useState<string[]>(initialData?.building_features || []);
@@ -138,6 +138,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         blocked_dates: initialData?.blocked_dates || [],
         visiting_agent_instructions: visitingAgentInstructions || undefined,
         visiting_agent_image: visitingAgentImage[0] || undefined,
+        photo_alt_texts: photoAltTexts,
       };
 
       const defaultEndpoint = mode === "create" ? "/api/agent/properties" : `/api/agent/properties/${initialData?.id}`;
@@ -255,15 +256,14 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
               />
             </div>
             <div className="space-y-2">
-              <Label>Security Deposit</Label>
-              <Select value={securityDeposit} onValueChange={setSecurityDeposit} disabled={isSubmitting}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>
-                  {SECURITY_DEPOSITS.map((item) => (
-                    <SelectItem key={item} value={item}>{item}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Security Deposit (SAR)</Label>
+              <Input
+                type="number"
+                value={securityDeposit}
+                onChange={(event) => setSecurityDeposit(event.target.value)}
+                disabled={isSubmitting}
+                placeholder="e.g., 5000"
+              />
             </div>
             <div className="space-y-2">
               <Label>Service Fee (SAR)</Label>
@@ -293,7 +293,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
               />
             </div>
             <div className="space-y-2">
-              <Label>Price (SAR / Year)</Label>
+              <Label>Price (SAR{rentalPeriod ? ` / ${rentalPeriod}` : ''})</Label>
               <Input
                 type="number"
                 value={price}
@@ -460,9 +460,9 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
 
             <hr className="border-[#eff3f4]" />
 
-            {/* ── Building Features ── */}
+            {/* ── Amenities ── */}
             <div>
-              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Building Features</h3>
+              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Amenities</h3>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {BUILDING_FEATURES.map((item) => (
                   <button
@@ -539,23 +539,29 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                 <p className="text-xs text-muted-foreground">Click an image to set it as the cover photo shown on the homepage.</p>
                 <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
                   {images.map((img, idx) => (
-                    <button
-                      key={img}
-                      type="button"
-                      onClick={() => setCoverImageIndex(idx)}
-                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                        coverImageIndex === idx
+                    <div key={img} className="space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => setCoverImageIndex(idx)}
+                        className={`relative aspect-square w-full rounded-lg overflow-hidden border-2 transition-all ${coverImageIndex === idx
                           ? "border-primary ring-2 ring-primary/30"
                           : "border-transparent hover:border-muted-foreground/30"
-                      }`}
-                    >
-                      <Image src={img} alt={`Photo ${idx + 1}`} fill className="object-cover" sizes="120px" />
-                      {coverImageIndex === idx && (
-                        <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                          <CheckCircle2 className="h-6 w-6 text-primary drop-shadow" />
-                        </div>
-                      )}
-                    </button>
+                          }`}
+                      >
+                        <Image src={img} alt={`Photo ${idx + 1}`} fill className="object-cover" sizes="120px" />
+                        {coverImageIndex === idx && (
+                          <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                            <CheckCircle2 className="h-6 w-6 text-primary drop-shadow" />
+                          </div>
+                        )}
+                      </button>
+                      <Input
+                        placeholder="Alt text (optional)"
+                        value={photoAltTexts[img] || ""}
+                        onChange={(e) => setPhotoAltTexts({ ...photoAltTexts, [img]: e.target.value })}
+                        className="h-8 text-[11px]"
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -622,6 +628,10 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
             <Button
               type="button"
               onClick={() => {
+                if (images.length < 3) {
+                  toast.error("At least 3 photos are required to publish.");
+                  return;
+                }
                 if (!visitingAgentInstructions) {
                   toast.error("Visiting Agent Instructions are compulsory.");
                   return;
