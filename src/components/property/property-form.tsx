@@ -390,7 +390,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                   { label: "Living Room", value: livingRooms, setter: setLivingRooms },
                   { label: "Dining Area", value: diningAreas, setter: setDiningAreas },
                   { label: "Drawing Room", value: drawingRooms, setter: setDrawingRooms },
-                  { label: "Two Entrance", value: twoEntrance, setter: setTwoEntrance },
+                  { label: "Entrance", value: twoEntrance, setter: setTwoEntrance },
                 ] as const).map((field) => (
                   <div key={field.label} className="space-y-1.5">
                     <Label className="text-[13px]">{field.label}</Label>
