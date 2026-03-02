@@ -25,6 +25,8 @@ type PropertyDetail = {
   living_rooms: number | null;
   drawing_rooms: number | null;
   dining_areas: number | null;
+  two_entrance: number | null;
+  building_condition: string | null;
   area_sqm: number | null;
   year_built: number | null;
   amenities: string[];
@@ -80,7 +82,7 @@ async function getProperty(id: string) {
     .select(
       `
       id, title, description, city, district, address, type, purpose, status,
-      price, bedrooms, bathrooms, kitchens, living_rooms, drawing_rooms, dining_areas,
+      price, bedrooms, bathrooms, kitchens, living_rooms, drawing_rooms, dining_areas, two_entrance, building_condition,
       area_sqm, year_built, amenities, building_features, images,
       property_ref, location_url, office_fee, broker_fee, water_bill_included,
       security_deposit, payment_methods_accepted, rental_period,
@@ -148,6 +150,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     { label: "Living Room", value: property.living_rooms },
     { label: "Dining Area", value: property.dining_areas },
     { label: "Drawing Room", value: property.drawing_rooms },
+    { label: "Entrance", value: property.two_entrance },
   ].filter((entry): entry is { label: string; value: number } => entry.value != null);
 
   const kitchenFeaturesSet = new Set<string>(KITCHEN_FEATURES as unknown as string[]);
@@ -213,6 +216,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                       ))}
                       {property.area_sqm != null && <p><span className="font-bold text-[#0f1419]">Area:</span> <span className="text-[#536471]">{property.area_sqm} sqm</span></p>}
                       {property.year_built != null && <p><span className="font-bold text-[#0f1419]">Year Built:</span> <span className="text-[#536471]">{property.year_built}</span></p>}
+                      {property.building_condition && <p><span className="font-bold text-[#0f1419]">Building Condition:</span> <span className="text-[#536471]">{property.building_condition}</span></p>}
                     </div>
                   </div>
                 </>
