@@ -8,7 +8,7 @@ import { MessageCircle } from "lucide-react";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 import { createAdminClient } from "@/lib/supabase/admin";
-import { formatDate, formatTime } from "@/lib/format";
+import { formatDate, formatTime, formatMessageDate, formatMessageTime } from "@/lib/format";
 
 type VisitRow = {
   id: string;
@@ -23,16 +23,114 @@ type VisitRow = {
   admin_notes?: string | null;
   properties: {
     title: string;
+    property_ref: string | null;
+    location_url: string | null;
+    visiting_agent_image: string | null;
+    visiting_agent_instructions: string | null;
     agents: {
       profiles: {
         full_name: string;
+        phone: string | null;
       } | null;
     } | null;
   } | null;
   visiting_agent: {
     full_name: string;
+    phone: string | null;
   } | null;
 };
+
+function buildCustomerMessage(row: VisitRow): string {
+  const property = row.properties?.title || "the property";
+  const date = formatMessageDate(row.visit_date);
+  const time = formatMessageTime(row.visit_time);
+  const vaName = row.visiting_agent?.full_name || "your assigned agent";
+  const vaPhone = row.visiting_agent?.phone || "Not provided";
+  const mapLink = row.properties?.location_url || "";
+
+  return [
+    `Hello ${row.visitor_name},`,
+    "",
+    `Thank you for choosing TheUrbanRealEstateSaudi! We are pleased to inform you that your upcoming property visit for "${property}" has been officially confirmed.`,
+    "",
+    `Your visit is scheduled on ${date} at exactly ${time}.`,
+    "",
+    `For your convenience, your assigned Visiting Agent for this tour is ${vaName}. If you have any questions or need directions, you can contact him directly at ${vaPhone}.`,
+    mapLink ? `The location of the property on Google Maps is: ${mapLink}` : "",
+    "",
+    "We look forward to showing you the property!",
+  ].filter(Boolean).join("\n");
+}
+
+function buildPropertyAgentMessage(row: VisitRow): string {
+  const agentName = row.properties?.agents?.profiles?.full_name || "Agent";
+  const propId = row.properties?.property_ref || "N/A";
+  const vaName = row.visiting_agent?.full_name || "Not assigned";
+  const vaPhone = row.visiting_agent?.phone || "Not provided";
+  const mapLink = row.properties?.location_url || "Not provided";
+
+  return [
+    `Hello ${agentName},`,
+    "",
+    "Great news! We have successfully scheduled a confirmed visit booking for your listed property.",
+    "",
+    "Here are the details for the upcoming viewing:",
+    `Property ID: ${propId}`,
+    `Customer Name: ${row.visitor_name}`,
+    `Assigned Visiting Agent: ${vaName}`,
+    `Visiting Agent Contact: ${vaPhone}`,
+    `Property Map: ${mapLink}`,
+    "",
+    "The designated visiting agent will handle the tour on your behalf.",
+  ].join("\n");
+}
+
+function buildVisitingAgentMessage(row: VisitRow): string {
+  const vaName = row.visiting_agent?.full_name || "Agent";
+  const property = row.properties?.title || "the property";
+  const propId = row.properties?.property_ref || "N/A";
+  const date = formatMessageDate(row.visit_date);
+  const time = formatMessageTime(row.visit_time);
+  const paName = row.properties?.agents?.profiles?.full_name || "Not provided";
+  const paPhone = row.properties?.agents?.profiles?.phone || "Not provided";
+  const mapLink = row.properties?.location_url || "Not provided";
+  const instructions = row.properties?.visiting_agent_instructions || "None";
+  const frontDoor = row.properties?.visiting_agent_image || "";
+
+  return [
+    `Hello ${vaName},`,
+    "",
+    "This is a notification from TheUrbanRealEstateSaudi to let you know that you have been assigned to a new property visit. Please review the details below.",
+    "",
+    `Property Name: "${property}"`,
+    `Property ID: ${propId}`,
+    `Date of Visit: ${date}`,
+    `Time of Visit: ${time}`,
+    "",
+    "Client Details:",
+    `Customer Name: ${row.visitor_name}`,
+    `Customer Phone: ${row.visitor_phone || "Not provided"}`,
+    "",
+    "Listing Agent Details:",
+    `Property Agent: ${paName}`,
+    `Agent Phone: ${paPhone}`,
+    "",
+    `Google Map Link: ${mapLink}`,
+    "",
+    `Confidential Property Instructions:`,
+    instructions,
+    frontDoor ? `Property Front Door Photo: ${frontDoor}` : "",
+    "",
+    "Please ensure you arrive early and contact the customer if necessary.",
+  ].filter(Boolean).join("\n");
+}
+
+function waLink(phone: string | null | undefined, message: string): string | null {
+  if (!phone) return null;
+  const clean = phone.replace(/\D/g, "");
+  if (!clean) return null;
+  return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
+}
 
 export default async function AdminVisitsPage() {
   const supabase = createAdminClient();
@@ -41,11 +139,11 @@ export default async function AdminVisitsPage() {
     .select(
       `
       id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status, visiting_status, customer_remarks, admin_notes,
-      visiting_agent:visiting_agent_id(full_name),
+      visiting_agent:visiting_agent_id(full_name, phone),
       properties:property_id (
-        title,
+        title, property_ref, location_url, visiting_agent_image, visiting_agent_instructions,
         agents:agent_id (
-          profiles:profile_id (full_name)
+          profiles:profile_id (full_name, phone)
         )
       )
     `
@@ -54,7 +152,6 @@ export default async function AdminVisitsPage() {
 
   const rows = data || [];
 
-  // Fetch visiting agents for dropdown routing
   const { data: agentsData } = await supabase
     .from("agents")
     .select("profile_id, profiles:profile_id(full_name)")
@@ -92,6 +189,7 @@ export default async function AdminVisitsPage() {
         rows={rows}
         columns={[
           { key: "property", title: "Property", render: (row) => row.properties?.title || "—" },
+          { key: "property_id", title: "Property ID", render: (row) => row.properties?.property_ref || "—" },
           { key: "property_agent", title: "Property Agent", render: (row) => row.properties?.agents?.profiles?.full_name || "—" },
           {
             key: "visiting_agent",
@@ -104,32 +202,9 @@ export default async function AdminVisitsPage() {
           {
             key: "visitor_phone",
             title: "Phone",
-            render: (row) => {
-              const buildVisitMessage = () => {
-                const property = row.properties?.title || "the property";
-                const date = formatDate(row.visit_date);
-                const time = formatTime(row.visit_time);
-                const agentLine = row.visiting_agent?.full_name
-                  ? `\nVisiting Agent: ${row.visiting_agent.full_name}`
-                  : "";
-                return `Hello ${row.visitor_name}!\n\nYour visit has been scheduled.\n\nProperty: ${property}\nDate: ${date}\nTime: ${time}${agentLine}\n\nPlease be on time. Contact us if you need to reschedule.\n\nUrbanSaudi Team`;
-              };
-              return (
-                <div className="flex items-center gap-2">
-                  {row.visitor_phone || "—"}
-                  {row.visitor_phone && (
-                    <a
-                      href={`https://wa.me/${row.visitor_phone.replace(/\D/g, '')}?text=${encodeURIComponent(buildVisitMessage())}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Send WhatsApp message"
-                    >
-                      <MessageCircle className="h-4 w-4 text-green-500 hover:text-green-600 transition-colors" />
-                    </a>
-                  )}
-                </div>
-              );
-            }
+            render: (row) => (
+              <span className="text-sm">{row.visitor_phone || "—"}</span>
+            )
           },
           {
             key: "schedule",
@@ -137,6 +212,47 @@ export default async function AdminVisitsPage() {
             render: (row) => `${formatDate(row.visit_date)} · ${formatTime(row.visit_time)}`,
           },
           { key: "status", title: "Status", render: (row) => <Badge className="capitalize">{row.status}</Badge> },
+          {
+            key: "whatsapp",
+            title: "WhatsApp",
+            render: (row) => {
+              const customerLink = waLink(row.visitor_phone, buildCustomerMessage(row));
+              const paLink = waLink(row.properties?.agents?.profiles?.phone, buildPropertyAgentMessage(row));
+              const vaLink = waLink(row.visiting_agent?.phone, buildVisitingAgentMessage(row));
+
+              return (
+                <div className="flex items-center gap-1.5">
+                  {customerLink ? (
+                    <a href={customerLink} target="_blank" rel="noopener noreferrer" title="Send to Customer" aria-label="Send template to Customer" className="inline-flex items-center justify-center h-7 w-7 rounded-md bg-green-50 hover:bg-green-100 transition-colors">
+                      <MessageCircle className="h-3.5 w-3.5 text-green-600" />
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center justify-center h-7 w-7 rounded-md bg-muted opacity-40" title="Customer phone missing">
+                      <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                    </span>
+                  )}
+                  {paLink ? (
+                    <a href={paLink} target="_blank" rel="noopener noreferrer" title="Send to Property Agent" aria-label="Send template to Property Agent" className="inline-flex items-center justify-center h-7 w-7 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors">
+                      <MessageCircle className="h-3.5 w-3.5 text-blue-600" />
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center justify-center h-7 w-7 rounded-md bg-muted opacity-40" title="Property Agent phone missing">
+                      <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                    </span>
+                  )}
+                  {vaLink ? (
+                    <a href={vaLink} target="_blank" rel="noopener noreferrer" title="Send to Visiting Agent" aria-label="Send template to Visiting Agent" className="inline-flex items-center justify-center h-7 w-7 rounded-md bg-purple-50 hover:bg-purple-100 transition-colors">
+                      <MessageCircle className="h-3.5 w-3.5 text-purple-600" />
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center justify-center h-7 w-7 rounded-md bg-muted opacity-40" title="Visiting Agent phone missing">
+                      <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                    </span>
+                  )}
+                </div>
+              );
+            },
+          },
           {
             key: "actions",
             title: "Actions",
