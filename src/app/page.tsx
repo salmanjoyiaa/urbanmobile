@@ -26,6 +26,7 @@ type Property = {
   purpose: string;
   bedrooms: number | null;
   bathrooms?: number | null;
+  kitchens?: number | null;
   area_sqm: number | null;
   images: string[] | null;
   property_ref: string | null;
@@ -62,7 +63,7 @@ export default async function HomePage() {
 
     const { data: propData, error: propError } = await supabase
       .from("properties")
-      .select("id, title, city, district, price, type, purpose, bedrooms, bathrooms, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period")
+      .select("id, title, city, district, price, type, purpose, bedrooms, bathrooms, kitchens, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period")
       .eq("status", "available")
       .order("created_at", { ascending: false })
       .limit(12);

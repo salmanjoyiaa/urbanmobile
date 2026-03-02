@@ -7,7 +7,6 @@ import { KITCHEN_FEATURES, UTILITIES_AND_SERVICES } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { VisitScheduler } from "@/components/visit/visit-scheduler";
-import { AvailabilityCalendar } from "@/components/property/availability-calendar";
 
 type PropertyDetail = {
   id: string;
@@ -360,7 +359,6 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               <div id="visit-scheduler">
                 <VisitScheduler propertyId={property.id} propertyTitle={property.title} />
               </div>
-              <AvailabilityCalendar blockedDates={property.blocked_dates || []} />
             </>
           ) : (
             <div className="rounded-2xl border border-[#eff3f4] p-5 text-center">

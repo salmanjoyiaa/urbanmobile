@@ -60,6 +60,7 @@ export interface Property {
   living_rooms: number | null;
   drawing_rooms: number | null;
   dining_areas: number | null;
+  two_entrance: number | null;
   area_sqm: number | null;
   year_built: number | null;
   amenities: string[];
@@ -77,6 +78,7 @@ export interface Property {
   security_deposit: string | null;
   nearby_places: string[];
   drive_link: string | null;
+  building_condition: string | null;
   broker_fee: string | null;
   payment_methods_accepted: string | null;
   cover_image_index: number;
@@ -247,7 +249,7 @@ export interface Database {
       };
       properties: {
         Row: Property;
-        Insert: Omit<Property, "id" | "created_at" | "updated_at" | "views_count" | "featured" | "building_features" | "apartment_features" | "nearby_places" | "cover_image_index" | "blocked_dates" | "dining_areas"> & { id?: string; featured?: boolean; building_features?: string[]; apartment_features?: string[]; nearby_places?: string[]; cover_image_index?: number; blocked_dates?: string[]; dining_areas?: number };
+        Insert: Omit<Property, "id" | "created_at" | "updated_at" | "views_count" | "featured" | "building_features" | "apartment_features" | "nearby_places" | "cover_image_index" | "blocked_dates" | "dining_areas" | "two_entrance" | "building_condition"> & { id?: string; featured?: boolean; building_features?: string[]; apartment_features?: string[]; nearby_places?: string[]; cover_image_index?: number; blocked_dates?: string[]; dining_areas?: number; two_entrance?: number; building_condition?: string };
         Update: Partial<Omit<Property, "id" | "created_at">>;
       };
       products: {

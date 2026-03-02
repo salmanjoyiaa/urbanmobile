@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, BedDouble, Maximize, Package, Tag, Bath } from "lucide-react";
+import { MapPin, BedDouble, Maximize, Package, Tag, Bath, UtensilsCrossed } from "lucide-react";
 
 type Property = {
   id: string;
@@ -12,6 +12,7 @@ type Property = {
   purpose: string;
   bedrooms: number | null;
   bathrooms?: number | null;
+  kitchens?: number | null;
   area_sqm: number | null;
   images: string[] | null;
   property_ref?: string | null;
@@ -104,6 +105,11 @@ export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = fals
                 <Bath className="h-3.5 w-3.5" /> {property.bathrooms}
               </span>
             )}
+            {property.kitchens != null && (
+              <span className="flex items-center gap-1">
+                <UtensilsCrossed className="h-3.5 w-3.5" /> {property.kitchens}
+              </span>
+            )}
             {property.area_sqm != null && (
               <span className="flex items-center gap-1">
                 <Maximize className="h-3.5 w-3.5" /> {property.area_sqm}m²
@@ -135,7 +141,6 @@ export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = fals
 
           {showAmenitiesAndBuildingFeatures && property.building_features && property.building_features.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
-              <span className="w-full text-[11px] font-semibold text-muted-foreground mb-0.5">Building:</span>
               {property.building_features.slice(0, 4).map((item) => (
                 <span key={item} className="rounded-full bg-secondary/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                   {item.replace(/_/g, " ")}

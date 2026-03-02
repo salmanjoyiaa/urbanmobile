@@ -23,6 +23,7 @@ import {
   APARTMENT_FEATURES,
   KITCHEN_FEATURES,
   UTILITIES_AND_SERVICES,
+  BUILDING_CONDITION_OPTIONS,
   RENTAL_PERIODS,
   NEARBY_PLACES,
 } from "@/lib/constants";
@@ -66,6 +67,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [livingRooms, setLivingRooms] = useState(String(initialData?.living_rooms ?? ""));
   const [drawingRooms, setDrawingRooms] = useState(String(initialData?.drawing_rooms ?? ""));
   const [diningAreas, setDiningAreas] = useState(String(initialData?.dining_areas ?? ""));
+  const [twoEntrance, setTwoEntrance] = useState(String(initialData?.two_entrance ?? ""));
   const [area, setArea] = useState(String(initialData?.area_sqm ?? ""));
   const [yearBuilt, setYearBuilt] = useState(String(initialData?.year_built ?? ""));
   const [amenities, setAmenities] = useState<string[]>(initialData?.amenities || []);
@@ -84,6 +86,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [officeFee, setOfficeFee] = useState(initialData?.office_fee || "");
   const [paymentMethodsAccepted, setPaymentMethodsAccepted] = useState(initialData?.payment_methods_accepted || "");
   const [coverImageIndex, setCoverImageIndex] = useState(initialData?.cover_image_index ?? 0);
+  const [buildingCondition, setBuildingCondition] = useState(initialData?.building_condition || "");
 
   const toggleArrayItem = (
     setter: React.Dispatch<React.SetStateAction<string[]>>,
@@ -116,6 +119,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         living_rooms: livingRooms ? Number(livingRooms) : undefined,
         drawing_rooms: drawingRooms ? Number(drawingRooms) : undefined,
         dining_areas: diningAreas ? Number(diningAreas) : undefined,
+        two_entrance: twoEntrance ? Number(twoEntrance) : undefined,
         area_sqm: area ? Number(area) : undefined,
         year_built: yearBuilt ? Number(yearBuilt) : undefined,
         amenities,
@@ -131,6 +135,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         security_deposit: securityDeposit || undefined,
         nearby_places: nearbyPlaces,
         drive_link: driveLink || undefined,
+        building_condition: buildingCondition || undefined,
         broker_fee: brokerFee || undefined,
         payment_methods_accepted: paymentMethodsAccepted || undefined,
         cover_image_index: coverImageIndex,
@@ -385,6 +390,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                   { label: "Living Room", value: livingRooms, setter: setLivingRooms },
                   { label: "Dining Area", value: diningAreas, setter: setDiningAreas },
                   { label: "Drawing Room", value: drawingRooms, setter: setDrawingRooms },
+                  { label: "Two Entrance", value: twoEntrance, setter: setTwoEntrance },
                 ] as const).map((field) => (
                   <div key={field.label} className="space-y-1.5">
                     <Label className="text-[13px]">{field.label}</Label>
@@ -442,6 +448,17 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                     {item}
                   </button>
                 ))}
+              </div>
+              <div className="mt-4">
+                <Label className="text-[13px] font-semibold text-[#0f1419] mb-2 block">Building Condition</Label>
+                <Select value={buildingCondition} onValueChange={setBuildingCondition} disabled={isSubmitting}>
+                  <SelectTrigger className="w-full max-w-xs"><SelectValue placeholder="Select condition" /></SelectTrigger>
+                  <SelectContent>
+                    {BUILDING_CONDITION_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

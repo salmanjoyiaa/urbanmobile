@@ -14,6 +14,8 @@ type Property = {
   type: string;
   purpose: string;
   bedrooms: number | null;
+  bathrooms?: number | null;
+  kitchens?: number | null;
   area_sqm: number | null;
   images: string[] | null;
   property_ref?: string | null;

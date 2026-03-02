@@ -66,6 +66,8 @@ export const KITCHEN_FEATURES = [
   "Separate Kitchen",
   "American Kitchen (Open Kitchen)",
   "Modern Kitchen Design",
+  "Window Available",
+  "Good Ventilation",
 ] as const;
 
 export const APARTMENT_FEATURES = [
@@ -111,6 +113,13 @@ export const UTILITIES_AND_SERVICES = [
   "Shared Electricity Meter",
   "Independent Water Meter",
   "Water Included in Rent",
+] as const;
+
+export const BUILDING_CONDITION_OPTIONS = [
+  { value: "Brand New Building", label: "Brand New Building" },
+  { value: "New Building", label: "New Building" },
+  { value: "Newly Renovated", label: "Newly Renovated" },
+  { value: "Well Maintained", label: "Well Maintained" },
 ] as const;
 
 export const AMENITIES = [
