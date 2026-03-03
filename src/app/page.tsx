@@ -109,7 +109,7 @@ export default async function HomePage() {
     propertiesCount: 0,
     propertyAgentsCount: 0,
     visitTeamCount: 0,
-    testimonialsCount: 0,
+    rentedCount: 0,
   };
 
   try {
@@ -130,41 +130,24 @@ export default async function HomePage() {
     }
 
     const featuredList = (featuredData || []) as Property[];
-    const featuredIds = new Set(featuredList.map((p) => p.id));
-    let rawProps = featuredList;
-
-    if (rawProps.length < 12) {
-      const { data: extraData, error: propError } = await supabase
-        .from("properties")
-        .select("id, title, city, district, price, type, purpose, status, bedrooms, bathrooms, kitchens, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period, installments")
-        .in("status", ["available", "rented", "reserved"])
-        .order("created_at", { ascending: false })
-        .limit(24);
-
-      if (!propError && extraData) {
-        const extra = (extraData as Property[]).filter((p) => !featuredIds.has(p.id));
-        rawProps = [...rawProps, ...shuffle(extra)].slice(0, 12);
-      }
-    }
-
-    featuredProperties = [...rawProps].sort((a, b) => (b.images?.length ?? 0) - (a.images?.length ?? 0));
+    featuredProperties = [...featuredList].sort((a, b) => (b.images?.length ?? 0) - (a.images?.length ?? 0));
 
     const [
       { count: propertiesCount },
       { count: propertyAgentsCount },
       { count: visitTeamCount },
-      { count: testimonialsCount },
+      { count: rentedCount },
     ] = await Promise.all([
       supabase.from("properties").select("id", { count: "exact", head: true }).in("status", ["available", "rented", "reserved"]),
       supabase.from("agents").select("id", { count: "exact", head: true }).eq("agent_type", "property").eq("status", "approved"),
       supabase.from("agents").select("id", { count: "exact", head: true }).eq("agent_type", "visiting").eq("status", "approved"),
-      supabase.from("testimonials").select("id", { count: "exact", head: true }).eq("is_active", true),
+      supabase.from("properties").select("id", { count: "exact", head: true }).eq("status", "rented"),
     ]);
     heroStats = {
       propertiesCount: propertiesCount ?? 0,
       propertyAgentsCount: propertyAgentsCount ?? 0,
       visitTeamCount: visitTeamCount ?? 0,
-      testimonialsCount: testimonialsCount ?? 0,
+      rentedCount: rentedCount ?? 0,
     };
 
     const { data: prodData, error: prodError } = await supabase
@@ -229,9 +212,9 @@ export default async function HomePage() {
                         { label: "Properties Listed", value: heroStats.propertiesCount.toLocaleString(), icon: Building2 },
                         { label: "Property Agents", value: heroStats.propertyAgentsCount.toLocaleString(), icon: Shield },
                         { label: "Visit Team Agents", value: heroStats.visitTeamCount.toLocaleString(), icon: MessageCircle },
-                        { label: "Testimonials", value: heroStats.testimonialsCount.toLocaleString(), icon: Star },
+                        { label: "Properties Rent Out", value: (712 + heroStats.rentedCount).toLocaleString(), icon: Star },
                       ].map((stat) => (
-                        <div key={`mobile-${stat.label}`} className="hero-stat-cell bg-white/10 rounded-2xl p-4 text-center">
+                        <div key={stat.label} className="hero-stat-cell bg-white/10 rounded-2xl p-4 text-center">
                           <stat.icon className="h-6 w-6 text-white/70 mx-auto mb-2" />
                           <div className="text-2xl font-bold text-white">{stat.value}</div>
                           <div className="text-xs text-white/60">{stat.label}</div>
@@ -265,7 +248,7 @@ export default async function HomePage() {
                       { label: "Properties Listed", value: heroStats.propertiesCount.toLocaleString(), icon: Building2 },
                       { label: "Property Agents", value: heroStats.propertyAgentsCount.toLocaleString(), icon: Shield },
                       { label: "Visit Team Agents", value: heroStats.visitTeamCount.toLocaleString(), icon: MessageCircle },
-                      { label: "Testimonials", value: heroStats.testimonialsCount.toLocaleString(), icon: Star },
+                      { label: "Properties Rent Out", value: (712 + heroStats.rentedCount).toLocaleString(), icon: Star },
                     ].map((stat) => (
                       <div key={stat.label} className="hero-stat-cell bg-white/10 rounded-2xl p-4 text-center transition-transform duration-300 hover:bg-white/15 hover:scale-[1.03]">
                         <stat.icon className="h-6 w-6 text-white/70 mx-auto mb-2" />

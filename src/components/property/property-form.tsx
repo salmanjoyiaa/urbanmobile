@@ -26,6 +26,7 @@ import {
   BUILDING_CONDITION_OPTIONS,
   RENTAL_PERIODS,
   NEARBY_PLACES,
+  INSTALLMENT_OPTIONS,
 } from "@/lib/constants";
 import type { Property } from "@/types/database";
 import { ImageUploader } from "@/components/dashboard/image-uploader";
@@ -312,12 +313,15 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label>Installments</Label>
-              <Input
-                value={installments}
-                onChange={(event) => setInstallments(event.target.value)}
-                disabled={isSubmitting}
-                placeholder="e.g., 12 months, 6 installments, or leave blank"
-              />
+              <Select value={installments || "none"} onValueChange={(value) => setInstallments(value === "none" ? "" : value)} disabled={isSubmitting}>
+                <SelectTrigger><SelectValue placeholder="Select installment period" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {INSTALLMENT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>Price (SAR{rentalPeriod ? ` / ${rentalPeriod}` : ''})</Label>
@@ -475,17 +479,17 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
 
             <hr className="border-[#eff3f4]" />
 
-            {/* ── Apartment Features ── */}
+            {/* ── Building Features ── */}
             <div>
-              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Apartment Features</h3>
+              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Building Features</h3>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {APARTMENT_FEATURES.map((item) => (
+                {BUILDING_FEATURES.map((item) => (
                   <button
                     key={item}
                     type="button"
-                    onClick={() => toggleArrayItem(setApartmentFeatures, item)}
+                    onClick={() => toggleArrayItem(setBuildingFeatures, item)}
                     disabled={isSubmitting}
-                    className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${apartmentFeatures.includes(item)
+                    className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${buildingFeatures.includes(item)
                       ? "border-primary bg-primary/10 font-medium shadow-sm"
                       : "border-[#cfd9de] hover:bg-muted hover:border-muted-foreground/30"
                       } disabled:opacity-50`}
@@ -498,17 +502,17 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
 
             <hr className="border-[#eff3f4]" />
 
-            {/* ── Building Features ── */}
+            {/* ── Apartment Features ── */}
             <div>
-              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Building Features</h3>
+              <h3 className="text-sm font-semibold text-[#0f1419] uppercase tracking-wide mb-3">Apartment Features</h3>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {BUILDING_FEATURES.map((item) => (
+                {APARTMENT_FEATURES.map((item) => (
                   <button
                     key={item}
                     type="button"
-                    onClick={() => toggleArrayItem(setBuildingFeatures, item)}
+                    onClick={() => toggleArrayItem(setApartmentFeatures, item)}
                     disabled={isSubmitting}
-                    className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${buildingFeatures.includes(item)
+                    className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${apartmentFeatures.includes(item)
                       ? "border-primary bg-primary/10 font-medium shadow-sm"
                       : "border-[#cfd9de] hover:bg-muted hover:border-muted-foreground/30"
                       } disabled:opacity-50`}

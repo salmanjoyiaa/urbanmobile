@@ -14,6 +14,7 @@ type SearchParams = {
   minPrice?: string;
   maxPrice?: string;
   bedrooms?: string;
+  status?: string;
 };
 
 type PropertiesPageProps = {
@@ -68,10 +69,14 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
 
   const maxForModal = 100;
 
+  const statusFilter = searchParams.status && ["available", "rented", "reserved"].includes(searchParams.status)
+    ? searchParams.status
+    : null;
+
   const [available, rented, reserved] = await Promise.all([
-    fetchByStatus(supabase, "available", searchParams, maxForModal),
-    fetchByStatus(supabase, "rented", searchParams, maxForModal),
-    fetchByStatus(supabase, "reserved", searchParams, maxForModal),
+    (!statusFilter || statusFilter === "available") ? fetchByStatus(supabase, "available", searchParams, maxForModal) : Promise.resolve({ data: [] as Property[], count: 0 }),
+    (!statusFilter || statusFilter === "rented") ? fetchByStatus(supabase, "rented", searchParams, maxForModal) : Promise.resolve({ data: [] as Property[], count: 0 }),
+    (!statusFilter || statusFilter === "reserved") ? fetchByStatus(supabase, "reserved", searchParams, maxForModal) : Promise.resolve({ data: [] as Property[], count: 0 }),
   ]);
 
   const hasAny = available.data.length > 0 || rented.data.length > 0 || reserved.data.length > 0;
@@ -97,27 +102,33 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
         </div>
       ) : (
         <div className="space-y-10">
-          <PropertySection
-            title="Available for Rent"
-            status="available"
-            preview={available.data.slice(0, 10)}
-            all={available.data}
-            totalCount={available.count}
-          />
-          <PropertySection
-            title="Rented"
-            status="rented"
-            preview={rented.data.slice(0, 10)}
-            all={rented.data}
-            totalCount={rented.count}
-          />
-          <PropertySection
-            title="Reserved"
-            status="reserved"
-            preview={reserved.data.slice(0, 10)}
-            all={reserved.data}
-            totalCount={reserved.count}
-          />
+          {(!statusFilter || statusFilter === "available") && available.data.length > 0 && (
+            <PropertySection
+              title="Available for Rent"
+              status="available"
+              preview={available.data.slice(0, 10)}
+              all={available.data}
+              totalCount={available.count}
+            />
+          )}
+          {(!statusFilter || statusFilter === "rented") && rented.data.length > 0 && (
+            <PropertySection
+              title="Rented"
+              status="rented"
+              preview={rented.data.slice(0, 10)}
+              all={rented.data}
+              totalCount={rented.count}
+            />
+          )}
+          {(!statusFilter || statusFilter === "reserved") && reserved.data.length > 0 && (
+            <PropertySection
+              title="Reserved"
+              status="reserved"
+              preview={reserved.data.slice(0, 10)}
+              all={reserved.data}
+              totalCount={reserved.count}
+            />
+          )}
         </div>
       )}
     </div>

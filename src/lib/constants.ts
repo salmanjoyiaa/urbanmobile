@@ -62,6 +62,14 @@ export const SLOT_CONFIG = {
 
 export const ROOM_COUNT_OPTIONS = ["0", "1", "2", "3", "4", "5+"] as const;
 
+export const INSTALLMENT_OPTIONS = [
+  "Daily",
+  "Weekly",
+  "Monthly",
+  "3 Months",
+  "6 Months",
+] as const;
+
 export const KITCHEN_FEATURES = [
   "Separate Kitchen",
   "American Kitchen (Open Kitchen)",
@@ -101,6 +109,7 @@ export const BUILDING_FEATURES = [
   "Street Parking",
   "Basement Parking",
   "Elevator",
+  "Elevator Not Available",
   "CCTV Security System",
   "24/7 Security",
   "Fire Safety System",

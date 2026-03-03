@@ -21,6 +21,7 @@ type PropertyFiltersProps = {
     minPrice?: string;
     maxPrice?: string;
     bedrooms?: string;
+    status?: string;
   };
 };
 
@@ -67,7 +68,7 @@ export function PropertyFilters({ initialValues }: PropertyFiltersProps) {
         </span>
         {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </button>
-      <div className={`${open ? "mt-4 grid" : "hidden"} grid-cols-2 gap-4 lg:grid lg:grid-cols-6`} key={filterKey}>
+      <div className={`${open ? "mt-4 grid" : "hidden"} grid-cols-2 gap-4 lg:grid lg:grid-cols-7`} key={filterKey}>
         <div className="space-y-1.5">
           <label className="text-[13px] font-bold text-[#0f1419]">City</label>
           <Select
@@ -118,6 +119,24 @@ export function PropertyFilters({ initialValues }: PropertyFiltersProps) {
               {LISTING_PURPOSES.map((item) => (
                 <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-[13px] font-bold text-[#0f1419]">Status</label>
+          <Select
+            defaultValue={initialValues.status || "all"}
+            onValueChange={(value) => applyFilter({ status: value })}
+          >
+            <SelectTrigger className="rounded-lg border-[#cfd9de]">
+              <SelectValue placeholder="All statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="available">Available</SelectItem>
+              <SelectItem value="rented">Rented</SelectItem>
+              <SelectItem value="reserved">Reserved</SelectItem>
             </SelectContent>
           </Select>
         </div>
