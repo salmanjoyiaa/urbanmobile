@@ -26,6 +26,7 @@ type Property = {
   cover_image_index?: number;
   location_url?: string | null;
   rental_period?: string | null;
+  installments?: string | null;
 };
 
 const RENTAL_LABELS: Record<string, string> = {
@@ -78,10 +79,16 @@ export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = fals
             </div>
           )}
           {property.status === "rented" && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
-              <span className="rounded-lg border-2 border-white/90 bg-primary px-4 py-2 text-lg font-bold uppercase tracking-wider text-white shadow-lg">
-                Rented
-              </span>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div
+                className="flex items-center justify-center w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white/90 bg-red-600/85 shadow-lg -rotate-12"
+                style={{ boxShadow: "0 0 0 2px rgba(255,255,255,0.5), inset 0 1px 0 rgba(255,255,255,0.2)" }}
+                aria-hidden
+              >
+                <span className="text-white font-black text-sm sm:text-base uppercase tracking-widest drop-shadow-sm">
+                  Rented
+                </span>
+              </div>
             </div>
           )}
           <div className="absolute left-3 top-3 rounded-full bg-background/90 dark:bg-card/90 px-2.5 py-0.5 text-[12px] font-bold text-foreground backdrop-blur-sm">
@@ -99,6 +106,11 @@ export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = fals
           <p className="mt-1 text-[15px] font-bold text-blue-600 dark:text-blue-400">
             SAR {property.price.toLocaleString()}<span className="text-[12px] font-medium text-muted-foreground">{priceSuffix}</span>
           </p>
+          {property.installments && (
+            <p className="mt-0.5 text-[12px] text-muted-foreground">
+              Installments: {property.installments}
+            </p>
+          )}
           <div className="mt-2 flex items-center gap-3 text-[13px] text-muted-foreground">
             <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" /> {property.city}{property.district ? `, ${property.district}` : ""}

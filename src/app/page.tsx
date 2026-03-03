@@ -88,6 +88,7 @@ type Property = {
   location_url: string | null;
   blocked_dates: string[];
   rental_period?: string | null;
+  installments?: string | null;
 };
 
 type Product = {
@@ -118,7 +119,7 @@ export default async function HomePage() {
     // Prefer admin-selected featured properties for homepage; fill with random available if needed
     const { data: featuredData, error: featuredError } = await supabase
       .from("properties")
-      .select("id, title, city, district, price, type, purpose, status, bedrooms, bathrooms, kitchens, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period")
+      .select("id, title, city, district, price, type, purpose, status, bedrooms, bathrooms, kitchens, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period, installments")
       .eq("featured", true)
       .in("status", ["available", "rented", "reserved"])
       .order("created_at", { ascending: false })
@@ -135,7 +136,7 @@ export default async function HomePage() {
     if (rawProps.length < 12) {
       const { data: extraData, error: propError } = await supabase
         .from("properties")
-        .select("id, title, city, district, price, type, purpose, status, bedrooms, bathrooms, kitchens, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period")
+        .select("id, title, city, district, price, type, purpose, status, bedrooms, bathrooms, kitchens, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period, installments")
         .in("status", ["available", "rented", "reserved"])
         .order("created_at", { ascending: false })
         .limit(24);
@@ -146,10 +147,7 @@ export default async function HomePage() {
       }
     }
 
-    featuredProperties = [
-      ...shuffle(rawProps.filter((p) => (p.images?.length ?? 0) > 0)),
-      ...shuffle(rawProps.filter((p) => (p.images?.length ?? 0) === 0)),
-    ];
+    featuredProperties = [...rawProps].sort((a, b) => (b.images?.length ?? 0) - (a.images?.length ?? 0));
 
     const [
       { count: propertiesCount },

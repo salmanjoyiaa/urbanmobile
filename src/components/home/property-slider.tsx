@@ -29,6 +29,7 @@ type Property = {
   cover_image_index?: number;
   location_url?: string | null;
   rental_period?: string | null;
+  installments?: string | null;
 };
 
 export function PropertySlider({ properties, showAmenitiesAndBuildingFeatures = false }: { properties: Property[]; showAmenitiesAndBuildingFeatures?: boolean }) {
