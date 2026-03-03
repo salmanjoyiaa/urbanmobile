@@ -87,6 +87,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [paymentMethodsAccepted, setPaymentMethodsAccepted] = useState(initialData?.payment_methods_accepted || "");
   const [coverImageIndex, setCoverImageIndex] = useState(initialData?.cover_image_index ?? 0);
   const [buildingCondition, setBuildingCondition] = useState(initialData?.building_condition || "");
+  const [installments, setInstallments] = useState(initialData?.installments || "");
 
   const toggleArrayItem = (
     setter: React.Dispatch<React.SetStateAction<string[]>>,
@@ -139,6 +140,7 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         broker_fee: brokerFee || undefined,
         payment_methods_accepted: paymentMethodsAccepted || undefined,
         cover_image_index: coverImageIndex,
+        installments: installments || undefined,
         blocked_dates: initialData?.blocked_dates || [],
         visiting_agent_instructions: visitingAgentInstructions || undefined,
         visiting_agent_image: visitingAgentImage[0] || undefined,
@@ -306,6 +308,15 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                 onChange={(event) => setPaymentMethodsAccepted(event.target.value)}
                 disabled={isSubmitting}
                 placeholder="e.g., Bank transfer, Cash, Check"
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label>Installments</Label>
+              <Input
+                value={installments}
+                onChange={(event) => setInstallments(event.target.value)}
+                disabled={isSubmitting}
+                placeholder="e.g., 12 months, 6 installments, or leave blank"
               />
             </div>
             <div className="space-y-2">

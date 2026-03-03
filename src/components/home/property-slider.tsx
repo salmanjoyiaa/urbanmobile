@@ -13,6 +13,7 @@ type Property = {
   price: number;
   type: string;
   purpose: string;
+  status?: string;
   bedrooms: number | null;
   bathrooms?: number | null;
   kitchens?: number | null;
@@ -27,6 +28,7 @@ type Property = {
   water_bill_included?: string | null;
   cover_image_index?: number;
   location_url?: string | null;
+  rental_period?: string | null;
 };
 
 export function PropertySlider({ properties, showAmenitiesAndBuildingFeatures = false }: { properties: Property[]; showAmenitiesAndBuildingFeatures?: boolean }) {

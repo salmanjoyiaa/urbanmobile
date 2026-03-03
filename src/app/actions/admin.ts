@@ -144,6 +144,28 @@ export async function updatePropertyStatus(id: string, status: string) {
     }
 }
 
+export async function updatePropertyFeatured(id: string, featured: boolean) {
+    try {
+        await checkAdmin();
+        const adminDb = createAdminClient();
+
+        const { error } = await adminDb
+            .from("properties")
+            .update({ featured } as never)
+            .eq("id", id);
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        revalidatePath("/admin/properties");
+        revalidatePath("/");
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : "Failed to update featured" };
+    }
+}
+
 export async function deleteProduct(id: string) {
     try {
         const { userId } = await checkAdmin();

@@ -125,6 +125,7 @@ export const propertySchema = z.object({
   broker_fee: z.string().max(50).optional().or(z.literal("")),
   payment_methods_accepted: z.string().max(255).optional().or(z.literal("")),
   cover_image_index: z.coerce.number().int().min(0).max(19).default(0),
+  installments: z.string().max(200).optional().or(z.literal("")),
   blocked_dates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format")).default([]),
   visiting_agent_instructions: z.string().max(5000, "Instructions must not exceed 5000 characters").optional(),
   visiting_agent_image: z.string().url("Must be a valid URL").optional().or(z.literal("")),

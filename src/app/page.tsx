@@ -5,7 +5,6 @@ import {
   Shield,
   MessageCircle,
   Star,
-  MapPin,
   Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -72,6 +71,7 @@ type Property = {
   price: number;
   type: string;
   purpose: string;
+  status?: string;
   bedrooms: number | null;
   bathrooms?: number | null;
   kitchens?: number | null;
@@ -104,27 +104,70 @@ export const revalidate = 0;
 export default async function HomePage() {
   let featuredProperties: Property[] = [];
   let featuredProducts: Product[] = [];
+  let heroStats = {
+    propertiesCount: 0,
+    propertyAgentsCount: 0,
+    visitTeamCount: 0,
+    testimonialsCount: 0,
+  };
 
   try {
     const supabase = await createClient();
     const shuffle = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
-    const { data: propData, error: propError } = await supabase
+    // Prefer admin-selected featured properties for homepage; fill with random available if needed
+    const { data: featuredData, error: featuredError } = await supabase
       .from("properties")
-      .select("id, title, city, district, price, type, purpose, bedrooms, bathrooms, kitchens, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period")
-      .eq("status", "available")
+      .select("id, title, city, district, price, type, purpose, status, bedrooms, bathrooms, kitchens, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period")
+      .eq("featured", true)
+      .in("status", ["available", "rented", "reserved"])
       .order("created_at", { ascending: false })
       .limit(12);
 
-    if (propError) {
-      console.error("[HomePage] properties query error:", propError.message);
+    if (featuredError) {
+      console.error("[HomePage] featured properties query error:", featuredError.message);
     }
 
-    const rawProps = (propData as Property[]) || [];
+    const featuredList = (featuredData || []) as Property[];
+    const featuredIds = new Set(featuredList.map((p) => p.id));
+    let rawProps = featuredList;
+
+    if (rawProps.length < 12) {
+      const { data: extraData, error: propError } = await supabase
+        .from("properties")
+        .select("id, title, city, district, price, type, purpose, status, bedrooms, bathrooms, kitchens, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period")
+        .in("status", ["available", "rented", "reserved"])
+        .order("created_at", { ascending: false })
+        .limit(24);
+
+      if (!propError && extraData) {
+        const extra = (extraData as Property[]).filter((p) => !featuredIds.has(p.id));
+        rawProps = [...rawProps, ...shuffle(extra)].slice(0, 12);
+      }
+    }
+
     featuredProperties = [
       ...shuffle(rawProps.filter((p) => (p.images?.length ?? 0) > 0)),
       ...shuffle(rawProps.filter((p) => (p.images?.length ?? 0) === 0)),
     ];
+
+    const [
+      { count: propertiesCount },
+      { count: propertyAgentsCount },
+      { count: visitTeamCount },
+      { count: testimonialsCount },
+    ] = await Promise.all([
+      supabase.from("properties").select("id", { count: "exact", head: true }).in("status", ["available", "rented", "reserved"]),
+      supabase.from("agents").select("id", { count: "exact", head: true }).eq("agent_type", "property").eq("status", "approved"),
+      supabase.from("agents").select("id", { count: "exact", head: true }).eq("agent_type", "visiting").eq("status", "approved"),
+      supabase.from("testimonials").select("id", { count: "exact", head: true }).eq("is_active", true),
+    ]);
+    heroStats = {
+      propertiesCount: propertiesCount ?? 0,
+      propertyAgentsCount: propertyAgentsCount ?? 0,
+      visitTeamCount: visitTeamCount ?? 0,
+      testimonialsCount: testimonialsCount ?? 0,
+    };
 
     const { data: prodData, error: prodError } = await supabase
       .from("products")
@@ -185,10 +228,10 @@ export default async function HomePage() {
                   <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-xl animate-hero-card-glow">
                     <div className="grid grid-cols-2 gap-4">
                       {[
-                        { label: "Properties Listed", value: "500+", icon: Building2 },
-                        { label: "Trusted Agents", value: "50+", icon: Shield },
-                        { label: "Happy Tenants", value: "1,200+", icon: Star },
-                        { label: "Cities Covered", value: "10+", icon: MapPin },
+                        { label: "Properties Listed", value: heroStats.propertiesCount.toLocaleString(), icon: Building2 },
+                        { label: "Property Agents", value: heroStats.propertyAgentsCount.toLocaleString(), icon: Shield },
+                        { label: "Visit Team Agents", value: heroStats.visitTeamCount.toLocaleString(), icon: MessageCircle },
+                        { label: "Testimonials", value: heroStats.testimonialsCount.toLocaleString(), icon: Star },
                       ].map((stat) => (
                         <div key={`mobile-${stat.label}`} className="hero-stat-cell bg-white/10 rounded-2xl p-4 text-center">
                           <stat.icon className="h-6 w-6 text-white/70 mx-auto mb-2" />
@@ -221,10 +264,10 @@ export default async function HomePage() {
                 <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-xl transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:border-white/30 animate-hero-card-glow">
                   <div className="grid grid-cols-2 gap-4">
                     {[
-                      { label: "Properties Listed", value: "500+", icon: Building2 },
-                      { label: "Trusted Agents", value: "50+", icon: Shield },
-                      { label: "Happy Tenants", value: "1,200+", icon: Star },
-                      { label: "Cities Covered", value: "10+", icon: MapPin },
+                      { label: "Properties Listed", value: heroStats.propertiesCount.toLocaleString(), icon: Building2 },
+                      { label: "Property Agents", value: heroStats.propertyAgentsCount.toLocaleString(), icon: Shield },
+                      { label: "Visit Team Agents", value: heroStats.visitTeamCount.toLocaleString(), icon: MessageCircle },
+                      { label: "Testimonials", value: heroStats.testimonialsCount.toLocaleString(), icon: Star },
                     ].map((stat) => (
                       <div key={stat.label} className="hero-stat-cell bg-white/10 rounded-2xl p-4 text-center transition-transform duration-300 hover:bg-white/15 hover:scale-[1.03]">
                         <stat.icon className="h-6 w-6 text-white/70 mx-auto mb-2" />

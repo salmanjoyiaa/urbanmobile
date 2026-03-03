@@ -23,6 +23,7 @@ type VisitRow = {
   admin_notes?: string | null;
   properties: {
     title: string;
+    id: string;
     property_ref: string | null;
     location_url: string | null;
     visiting_agent_image: string | null;
@@ -128,7 +129,7 @@ export default async function AdminVisitsPage() {
       id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status, visiting_status, customer_remarks, admin_notes,
       visiting_agent:visiting_agent_id(full_name, phone),
       properties:property_id (
-        title, property_ref, location_url, visiting_agent_image, visiting_agent_instructions,
+        id, title, property_ref, location_url, visiting_agent_image, visiting_agent_instructions,
         agents:agent_id (
           profiles:profile_id (full_name, phone)
         )
@@ -176,7 +177,16 @@ export default async function AdminVisitsPage() {
         rows={rows}
         columns={[
           { key: "property", title: "Property", render: (row) => row.properties?.title || "—" },
-          { key: "property_id", title: "Property ID", render: (row) => row.properties?.property_ref || "—" },
+          { key: "property_id", title: "Property ID", render: (row) => (
+            <span className="font-mono text-xs">
+              {row.properties?.property_ref || "—"}
+              {row.properties?.id && (
+                <span className="block text-muted-foreground" title={row.properties.id}>
+                  UUID: {row.properties.id.slice(0, 8)}…
+                </span>
+              )}
+            </span>
+          )},
           { key: "property_agent", title: "Property Agent", render: (row) => row.properties?.agents?.profiles?.full_name || "—" },
           {
             key: "visiting_agent",

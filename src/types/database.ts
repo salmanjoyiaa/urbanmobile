@@ -83,6 +83,7 @@ export interface Property {
   payment_methods_accepted: string | null;
   cover_image_index: number;
   blocked_dates: string[];
+  installments?: string | null;
   visiting_agent_instructions: string | null;
   visiting_agent_image: string | null;
   created_at: string;

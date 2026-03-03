@@ -10,6 +10,7 @@ type Property = {
   price: number;
   type: string;
   purpose: string;
+  status?: string;
   bedrooms: number | null;
   bathrooms?: number | null;
   kitchens?: number | null;
@@ -74,6 +75,13 @@ export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = fals
           ) : (
             <div className="flex h-full items-center justify-center">
               <Package className="h-12 w-12 text-muted-foreground/60" />
+            </div>
+          )}
+          {property.status === "rented" && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
+              <span className="rounded-lg border-2 border-white/90 bg-primary px-4 py-2 text-lg font-bold uppercase tracking-wider text-white shadow-lg">
+                Rented
+              </span>
             </div>
           )}
           <div className="absolute left-3 top-3 rounded-full bg-background/90 dark:bg-card/90 px-2.5 py-0.5 text-[12px] font-bold text-foreground backdrop-blur-sm">

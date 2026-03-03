@@ -4,6 +4,7 @@ import { DataTable } from "@/components/dashboard/data-table";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatSAR } from "@/lib/format";
 import { PropertyActions } from "@/components/admin/property-actions";
+import { FeaturedToggle } from "@/components/admin/featured-toggle";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -15,6 +16,7 @@ type Row = {
   status: string;
   price: number;
   property_ref: string | null;
+  featured: boolean;
   agents: {
     profiles: {
       full_name: string;
@@ -38,7 +40,7 @@ export default async function AdminPropertiesPage({
   const supabase = createAdminClient();
   let query = supabase
     .from("properties")
-    .select("id, title, city, status, price, property_ref, agents:agent_id(profiles:profile_id(full_name))")
+    .select("id, title, city, status, price, property_ref, featured, agents:agent_id(profiles:profile_id(full_name))")
     .order("created_at", { ascending: false });
 
   if (searchParams?.status) {
@@ -87,6 +89,13 @@ export default async function AdminPropertiesPage({
               <Badge className={`capitalize border ${STATUS_COLORS[row.status] || ""}`}>
                 {row.status}
               </Badge>
+            ),
+          },
+          {
+            key: "featured",
+            title: "On Homepage",
+            render: (row) => (
+              <FeaturedToggle id={row.id} featured={row.featured} />
             ),
           },
           {

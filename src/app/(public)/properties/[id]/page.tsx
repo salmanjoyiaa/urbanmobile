@@ -45,6 +45,7 @@ type PropertyDetail = {
   blocked_dates: string[];
   cover_image_index: number;
   created_at: string;
+  photoAltTexts?: Record<string, string>;
   agents: {
     company_name: string | null;
     profiles: {
@@ -98,7 +99,29 @@ async function getProperty(id: string) {
     .in("status", ["available", "rented", "reserved"])
     .single()) as { data: PropertyDetail | null };
 
-  return data;
+  if (!data) return null;
+
+  const { data: photos } = (await supabase
+    .from("property_photos")
+    .select("url, alt_text, ordering_index")
+    .eq("property_id", id)
+    .order("ordering_index", { ascending: true })) as {
+    data: Array<{ url: string; alt_text: string | null; ordering_index: number }> | null;
+  };
+
+  const photoAltTexts: Record<string, string> = {};
+  const orderedImages = (photos || []).length > 0
+    ? [...(photos || [])].sort((a, b) => a.ordering_index - b.ordering_index).map((p) => {
+        if (p.alt_text) photoAltTexts[p.url] = p.alt_text;
+        return p.url;
+      })
+    : data.images || [];
+
+  return {
+    ...data,
+    images: orderedImages.length > 0 ? orderedImages : data.images || [],
+    photoAltTexts,
+  };
 }
 
 type PageProps = {
@@ -182,7 +205,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-5">
-          <PropertyGallery images={property.images || []} title={property.title} coverImageIndex={property.cover_image_index} />
+          <PropertyGallery images={property.images || []} title={property.title} coverImageIndex={property.cover_image_index} imageAltTexts={property.photoAltTexts} />
 
           <div className="rounded-2xl border border-[#eff3f4] p-5 sm:p-6">
             <h2 className="text-[16px] font-bold text-[#0f1419]">Property details</h2>

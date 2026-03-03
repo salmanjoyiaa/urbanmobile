@@ -10,16 +10,21 @@ type PropertyGalleryProps = {
   images: string[];
   title: string;
   coverImageIndex?: number;
+  imageAltTexts?: Record<string, string>;
 };
 
 function Lightbox({
   images,
   initialIndex,
   onClose,
+  imageAltTexts,
+  title,
 }: {
   images: string[];
   initialIndex: number;
   onClose: () => void;
+  imageAltTexts?: Record<string, string>;
+  title: string;
 }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ startIndex: initialIndex, loop: true });
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -66,10 +71,10 @@ function Lightbox({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col bg-black/95 backdrop-blur-md transition-opacity"
+      className="fixed inset-0 z-50 flex flex-col md:flex-row bg-black/95 backdrop-blur-md transition-opacity"
       onClick={onClose}
     >
-      <div className="absolute top-0 z-50 flex w-full justify-between items-center p-4">
+      <div className="absolute top-0 left-0 right-0 md:right-auto md:w-[calc(100%-280px)] z-50 flex justify-between items-center p-4">
         <div className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/90">
           {currentIndex + 1} / {images.length}
         </div>
@@ -82,66 +87,98 @@ function Lightbox({
         </button>
       </div>
 
-      {images.length > 1 && (
-        <>
-          <button
-            onClick={scrollPrev}
-            className="absolute left-3 top-1/2 z-50 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 sm:left-6"
-            aria-label="Previous image"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-          <button
-            onClick={scrollNext}
-            className="absolute right-3 top-1/2 z-50 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 sm:right-6"
-            aria-label="Next image"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
-        </>
-      )}
+      {/* Main image area */}
+      <div className="flex-1 flex flex-col min-h-0 md:pt-14 pt-14">
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={scrollPrev}
+              className="absolute left-3 top-1/2 z-50 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 sm:left-6"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              onClick={scrollNext}
+              className="absolute right-3 md:right-[296px] top-1/2 z-50 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 sm:right-6 md:right-[296px]"
+              aria-label="Next image"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          </>
+        )}
 
-      <div className="flex-1 overflow-hidden" ref={emblaRef} onClick={(e) => e.stopPropagation()}>
-        <div className="flex h-full touch-pan-y">
-          {images.map((img, i) => (
-            <div className="relative min-w-0 flex-[0_0_100%] h-full flex items-center justify-center p-4 sm:p-12 md:p-16" key={`lb-${img}-${i}`}>
-              <div className="relative w-full h-full max-h-[85vh]">
-                <Image
-                  src={img}
-                  alt={`Gallery image ${i + 1}`}
-                  fill
-                  className="object-contain"
-                  sizes="100vw"
-                  quality={90}
-                  priority={i === initialIndex}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {images.length > 1 && (
-        <div className="absolute bottom-4 left-0 w-full z-50 flex justify-center pb-2 px-4" onClick={(e) => e.stopPropagation()}>
-          <div className="flex max-w-[90vw] gap-2 overflow-x-auto scrollbar-hide">
+        <div className="flex-1 overflow-hidden min-h-0" ref={emblaRef} onClick={(e) => e.stopPropagation()}>
+          <div className="flex h-full touch-pan-y">
             {images.map((img, i) => (
-              <button
-                key={`lb-thumb-${i}`}
-                onClick={(e) => scrollTo(i, e)}
-                className={`relative h-14 w-14 flex-none overflow-hidden rounded-md border-2 transition-all ${i === currentIndex ? "border-white opacity-100 ring-2 ring-white/50" : "border-transparent opacity-40 hover:opacity-80"
-                  }`}
-              >
-                <Image src={img} alt="Thumbnail" fill className="object-cover" sizes="56px" />
-              </button>
+              <div className="relative min-w-0 flex-[0_0_100%] h-full flex flex-col items-center justify-center p-4 sm:p-12 md:p-16" key={`lb-${img}-${i}`}>
+                <div className="relative w-full flex-1 min-h-0 max-h-[70vh]">
+                  <Image
+                    src={img}
+                    alt={imageAltTexts?.[img] || `${title} — Photo ${i + 1}`}
+                    fill
+                    className="object-contain"
+                    sizes="100vw"
+                    quality={90}
+                    priority={i === initialIndex}
+                  />
+                </div>
+                {(imageAltTexts?.[img]) && (
+                  <p className="mt-3 text-center text-sm text-white/90 max-w-xl mx-auto px-2">
+                    {imageAltTexts[img]}
+                  </p>
+                )}
+              </div>
             ))}
           </div>
         </div>
-      )}
+
+        {images.length > 1 && (
+          <div className="absolute bottom-4 left-0 right-0 md:right-[280px] z-50 flex justify-center pb-2 px-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex max-w-[90vw] gap-2 overflow-x-auto scrollbar-hide">
+              {images.map((img, i) => (
+                <button
+                  key={`lb-thumb-${i}`}
+                  onClick={(e) => scrollTo(i, e)}
+                  className={`relative h-14 w-14 flex-none overflow-hidden rounded-md border-2 transition-all ${i === currentIndex ? "border-white opacity-100 ring-2 ring-white/50" : "border-transparent opacity-40 hover:opacity-80"
+                    }`}
+                >
+                  <Image src={img} alt="Thumbnail" fill className="object-cover" sizes="56px" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Booklet-style photo menu (desktop: right panel) */}
+      <div
+        className="hidden md:flex flex-col w-[280px] border-l border-white/10 bg-black/50 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-3 border-b border-white/10">
+          <p className="text-xs font-semibold uppercase tracking-wider text-white/70">Photo catalog</p>
+        </div>
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          {images.map((img, i) => (
+            <button
+              key={`menu-${i}`}
+              onClick={(e) => scrollTo(i, e)}
+              className={`w-full text-left rounded-lg p-2 transition-colors ${i === currentIndex ? "bg-white/20 text-white" : "text-white/70 hover:bg-white/10 hover:text-white"}`}
+            >
+              <span className="text-xs font-medium">Photo {i + 1}</span>
+              {(imageAltTexts?.[img]) && (
+                <p className="text-[11px] mt-0.5 line-clamp-2 text-white/80">{imageAltTexts[img]}</p>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-export function PropertyGallery({ images, title, coverImageIndex = 0 }: PropertyGalleryProps) {
+export function PropertyGallery({ images, title, coverImageIndex = 0, imageAltTexts }: PropertyGalleryProps) {
   const safeImages = useMemo(() => images?.filter(Boolean) || [], [images]);
   const startIdx = safeImages.length > 0 ? Math.min(Math.max(0, coverImageIndex), safeImages.length - 1) : 0;
   const [index, setIndex] = useState(startIdx);
@@ -238,6 +275,8 @@ export function PropertyGallery({ images, title, coverImageIndex = 0 }: Property
           images={safeImages}
           initialIndex={index}
           onClose={() => setLightboxOpen(false)}
+          imageAltTexts={imageAltTexts}
+          title={title}
         />
       )}
     </>

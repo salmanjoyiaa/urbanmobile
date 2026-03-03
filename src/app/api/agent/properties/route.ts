@@ -96,6 +96,7 @@ export async function POST(request: Request) {
     payment_methods_accepted: parsed.data.payment_methods_accepted || null,
     cover_image_index: parsed.data.cover_image_index ?? 0,
     blocked_dates: parsed.data.blocked_dates || [],
+    installments: parsed.data.installments || null,
     visiting_agent_instructions: parsed.data.visiting_agent_instructions || null,
     visiting_agent_image: parsed.data.visiting_agent_image || null,
     agent_id: agentId,
