@@ -135,6 +135,67 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       locationUrl: visitDetails.properties.location_url,
     };
 
+    if (parsed.data.status === "assigned" && visitDetails.visiting_agent) {
+      const visitingAgentProfile = visitDetails.visiting_agent;
+      const ownerAgentProfile = visitDetails.properties.agents?.profiles;
+
+      const ownerName = ownerAgentProfile?.full_name || "Agent";
+      const ownerPhone = ownerAgentProfile?.phone || "N/A";
+
+      const custContent = visitConfirmationCustomerContent({
+        ...templateParams,
+        visitingAgentName: visitingAgentProfile.full_name,
+        visitingAgentPhone: visitingAgentProfile.phone ?? "",
+      });
+      notifyJobs.push(
+        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables)
+      );
+      if (visitDetails.visitor_email) {
+        const emailTpl = visitConfirmedCustomerEmail(templateParams);
+        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
+      }
+
+      const visitingAgentParams = {
+        visitingAgentName: visitingAgentProfile.full_name,
+        propertyTitle: visitDetails.properties.title,
+        visitDate: visitDetails.visit_date,
+        visitTime: visitDetails.visit_time,
+        visitorName: visitDetails.visitor_name,
+        visitorPhone: visitDetails.visitor_phone,
+        ownerName,
+        ownerPhone,
+        locationUrl: visitDetails.properties.location_url,
+        instructions: visitDetails.properties.visiting_agent_instructions,
+        image: visitDetails.properties.visiting_agent_image,
+      };
+
+      if (visitingAgentProfile.phone) {
+        const vaContent = visitAssignedVisitingAgentContent(visitingAgentParams);
+        notifyJobs.push(sendWhatsAppTemplate(visitingAgentProfile.phone, vaContent.contentSid, vaContent.contentVariables));
+      }
+      if (visitingAgentProfile.email) {
+        notifyJobs.push(sendEmail({ to: visitingAgentProfile.email, ...visitAssignedVisitingAgentEmail(visitingAgentParams) }));
+      }
+
+      const propertyAgentParams = {
+        ownerName,
+        propertyTitle: visitDetails.properties.title,
+        visitDate: visitDetails.visit_date,
+        visitTime: visitDetails.visit_time,
+        visitorName: visitDetails.visitor_name,
+        visitingAgentName: visitingAgentProfile.full_name,
+        visitingAgentPhone: visitingAgentProfile.phone || "N/A",
+      };
+
+      if (ownerAgentProfile?.phone) {
+        const paContent = visitAssignedPropertyAgentContent(propertyAgentParams);
+        notifyJobs.push(sendWhatsAppTemplate(ownerAgentProfile.phone, paContent.contentSid, paContent.contentVariables));
+      }
+      if (ownerAgentProfile?.email) {
+        notifyJobs.push(sendEmail({ to: ownerAgentProfile.email, ...visitAssignedPropertyAgentEmail(propertyAgentParams) }));
+      }
+    }
+
     if (parsed.data.status === "confirmed" && visitDetails.visiting_agent) {
       const visitingAgentProfile = visitDetails.visiting_agent;
       const ownerAgentProfile = visitDetails.properties.agents?.profiles;

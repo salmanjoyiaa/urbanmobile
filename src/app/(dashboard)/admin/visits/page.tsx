@@ -42,24 +42,27 @@ type VisitRow = {
 
 function buildCustomerMessage(row: VisitRow): string {
   const property = row.properties?.title || "the property";
+  const propId = row.properties?.property_ref || "N/A";
   const date = formatMessageDate(row.visit_date);
   const time = formatMessageTime(row.visit_time);
   const vaName = row.visiting_agent?.full_name || "your assigned agent";
   const vaPhone = row.visiting_agent?.phone || "Not provided";
   const mapLink = row.properties?.location_url || "";
 
-  return [
-    `Hello ${row.visitor_name},`,
-    "",
-    `Thank you for choosing TheUrbanRealEstateSaudi! We are pleased to inform you that your upcoming property visit for "${property}" has been officially confirmed.`,
-    "",
-    `Your visit is scheduled on ${date} at exactly ${time}.`,
-    "",
-    `For your convenience, your assigned Visiting Agent for this tour is ${vaName}. If you have any questions or need directions, you can contact him directly at ${vaPhone}.`,
-    mapLink ? `The location of the property on Google Maps is: ${mapLink}` : "",
-    "",
+  const blocks = [
+    `*Hello ${row.visitor_name},*`,
+    "Thank you for choosing TheUrbanRealEstateSaudi!",
+    `*We are pleased to inform you that your upcoming property visit for *${property}* has been officially confirmed.*`,
+    "Your visit is scheduled on",
+    `- *Property ID :* ${propId}`,
+    `- *Date :* ${date}`,
+    `- *Visiting Time :* ${time}`,
+    `- *Visiting Agent :* *${vaName}*  *Contact :* ${vaPhone}`,
+    mapLink ? `The location of the property on Google Maps is:\n${mapLink}` : "",
     "We look forward to showing you the property!",
-  ].filter(Boolean).join("\n");
+  ];
+
+  return blocks.filter(Boolean).join("\n\n");
 }
 
 function buildPropertyAgentMessage(row: VisitRow): string {
@@ -70,19 +73,11 @@ function buildPropertyAgentMessage(row: VisitRow): string {
   const mapLink = row.properties?.location_url || "Not provided";
 
   return [
-    `Hello ${agentName},`,
-    "",
+    `*Hello ${agentName},*`,
     "Great news! We have successfully scheduled a confirmed visit booking for your listed property.",
-    "",
-    "Here are the details for the upcoming viewing:",
-    `Property ID: ${propId}`,
-    `Customer Name: ${row.visitor_name}`,
-    `Assigned Visiting Agent: ${vaName}`,
-    `Visiting Agent Contact: ${vaPhone}`,
-    `Property Map: ${mapLink}`,
-    "",
+    `Here are the details for the upcoming viewing:\n- *Property ID:* ${propId}\n- *Customer Name:* ${row.visitor_name}\n- *Assigned Visiting Agent:* ${vaName}\n- *Visiting Agent Contact:* ${vaPhone}\n- *Property Map:* ${mapLink}`,
     "The designated visiting agent will handle the tour on your behalf.",
-  ].join("\n");
+  ].join("\n\n");
 }
 
 function buildVisitingAgentMessage(row: VisitRow): string {
@@ -97,32 +92,18 @@ function buildVisitingAgentMessage(row: VisitRow): string {
   const instructions = row.properties?.visiting_agent_instructions || "None";
   const frontDoor = row.properties?.visiting_agent_image || "";
 
-  return [
-    `Hello ${vaName},`,
-    "",
+  const blocks = [
+    `*Hello ${vaName},*`,
     "This is a notification from TheUrbanRealEstateSaudi to let you know that you have been assigned to a new property visit. Please review the details below.",
-    "",
-    `Property Name: "${property}"`,
-    `Property ID: ${propId}`,
-    `Date of Visit: ${date}`,
-    `Time of Visit: ${time}`,
-    "",
-    "Client Details:",
-    `Customer Name: ${row.visitor_name}`,
-    `Customer Phone: ${row.visitor_phone || "Not provided"}`,
-    "",
-    "Listing Agent Details:",
-    `Property Agent: ${paName}`,
-    `Agent Phone: ${paPhone}`,
-    "",
-    `Google Map Link: ${mapLink}`,
-    "",
-    `Confidential Property Instructions:`,
-    instructions,
-    frontDoor ? `Property Front Door Photo: ${frontDoor}` : "",
-    "",
+    `- *Property Name:* "${property}"\n- *Property ID:* ${propId}\n- *Date of Visit:* ${date}\n- *Time of Visit:* ${time}`,
+    `*Client Details:*\n- *Customer Name:* ${row.visitor_name}\n- *Customer Phone:* ${row.visitor_phone || "Not provided"}`,
+    `*Listing Agent Details:*\n- *Property Agent:* ${paName}\n- *Agent Phone:* ${paPhone}`,
+    `*Google Map Link:* ${mapLink}`,
+    `*Confidential Property Instructions:*\n${instructions}${frontDoor ? `\nProperty Front Door Photo: ${frontDoor}` : ""}`,
     "Please ensure you arrive early and contact the customer if necessary.",
-  ].filter(Boolean).join("\n");
+  ];
+
+  return blocks.join("\n\n");
 }
 
 function waLink(phone: string | null | undefined, message: string): string | null {
