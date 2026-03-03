@@ -111,7 +111,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, visiting_agent_id,
       visiting_agent:visiting_agent_id (full_name, phone, email),
       properties:property_id (
-        id, title, location_url, visiting_agent_instructions, visiting_agent_image,
+        id, property_ref, title, location_url, visiting_agent_instructions, visiting_agent_image,
         agents:agent_id (
           profile_id,
           profiles:profile_id (full_name, phone, email)
@@ -150,8 +150,15 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       notifyJobs.push(
         sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables)
       );
+      const propertyId = visitDetails.properties.property_ref || String(visitDetails.properties.id);
+
       if (visitDetails.visitor_email) {
-        const emailTpl = visitConfirmedCustomerEmail(templateParams);
+        const emailTpl = visitConfirmedCustomerEmail({
+          ...templateParams,
+          propertyId,
+          visitingAgentName: visitingAgentProfile.full_name,
+          visitingAgentPhone: visitingAgentProfile.phone ?? "",
+        });
         notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
       }
 
@@ -167,6 +174,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         locationUrl: visitDetails.properties.location_url,
         instructions: visitDetails.properties.visiting_agent_instructions,
         image: visitDetails.properties.visiting_agent_image,
+        propertyId,
       };
 
       if (visitingAgentProfile.phone) {
@@ -185,6 +193,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         visitorName: visitDetails.visitor_name,
         visitingAgentName: visitingAgentProfile.full_name,
         visitingAgentPhone: visitingAgentProfile.phone || "N/A",
+        locationUrl: visitDetails.properties.location_url,
+        propertyId,
       };
 
       if (ownerAgentProfile?.phone) {
@@ -202,6 +212,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
       const ownerName = ownerAgentProfile?.full_name || "Agent";
       const ownerPhone = ownerAgentProfile?.phone || "N/A";
+      const propertyId = visitDetails.properties.property_ref || String(visitDetails.properties.id);
 
       // 1. WhatsApp + Email to Customer
       const custContent = visitConfirmationCustomerContent({
@@ -213,7 +224,12 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables)
       );
       if (visitDetails.visitor_email) {
-        const emailTpl = visitConfirmedCustomerEmail(templateParams);
+        const emailTpl = visitConfirmedCustomerEmail({
+          ...templateParams,
+          propertyId,
+          visitingAgentName: visitingAgentProfile.full_name,
+          visitingAgentPhone: visitingAgentProfile.phone ?? "",
+        });
         notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
       }
 
@@ -230,6 +246,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         locationUrl: visitDetails.properties.location_url,
         instructions: visitDetails.properties.visiting_agent_instructions,
         image: visitDetails.properties.visiting_agent_image,
+        propertyId,
       };
 
       if (visitingAgentProfile.phone) {
@@ -249,6 +266,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         visitorName: visitDetails.visitor_name,
         visitingAgentName: visitingAgentProfile.full_name,
         visitingAgentPhone: visitingAgentProfile.phone || "N/A",
+        locationUrl: visitDetails.properties.location_url,
+        propertyId,
       };
 
       if (ownerAgentProfile?.phone) {

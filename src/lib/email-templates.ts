@@ -48,27 +48,31 @@ export function visitConfirmedCustomerEmail(params: {
   locationUrl?: string | null;
   visitingAgentName?: string | null;
   visitingAgentPhone?: string | null;
+  propertyId?: string | null;
 }) {
   const mapHtml = params.locationUrl
-    ? detail("Location", `<a href="${params.locationUrl}" style="color:${BRAND_COLOR}">View on Map</a>`)
+    ? detail("Google Maps", `<a href="${params.locationUrl}" style="color:${BRAND_COLOR}">${params.locationUrl}</a>`)
     : "";
   const agentHtml = params.visitingAgentName
-    ? detail("Your Visiting Agent", `${params.visitingAgentName}${params.visitingAgentPhone ? ` (${params.visitingAgentPhone})` : ""}`)
+    ? detail("Visiting Agent", `${params.visitingAgentName}${params.visitingAgentPhone ? `&nbsp;&nbsp;<strong>Contact:</strong> ${params.visitingAgentPhone}` : ""}`)
     : "";
+  const propIdHtml = params.propertyId ? detail("Property ID", params.propertyId) : "";
   return {
     subject: `Visit Confirmed — ${params.propertyTitle}`,
     html: layout(`
       ${heading("Your visit has been confirmed")}
       ${paragraph(`Hello ${params.visitorName},`)}
-      ${paragraph("Your property visit request has been approved by our team.")}
+      ${paragraph("Thank you for choosing TheUrbanRealEstateSaudi!")}
+      ${paragraph(`We are pleased to inform you that your upcoming property visit for <strong>"${params.propertyTitle}"</strong> has been officially confirmed.`)}
       ${divider()}
-      ${detail("Property", params.propertyTitle)}
+      ${paragraph("Your visit is scheduled on")}
+      ${propIdHtml}
       ${detail("Date", params.visitDate)}
-      ${detail("Time", params.visitTime)}
-      ${mapHtml}
+      ${detail("Visiting Time", params.visitTime)}
       ${agentHtml}
+      ${mapHtml ? `${paragraph("The location of the property on Google Maps is:")}${mapHtml}` : ""}
       ${divider()}
-      ${paragraph("Please arrive on time. If you need to reschedule, contact us.")}
+      ${paragraph("We look forward to showing you the property!")}
     `),
   };
 }
@@ -115,34 +119,43 @@ export function visitAssignedVisitingAgentEmail(params: {
   locationUrl?: string | null;
   instructions?: string | null;
   image?: string | null;
+  propertyId?: string | null;
 }) {
   const mapHtml = params.locationUrl
-    ? detail("Property Map", `<a href="${params.locationUrl}" style="color:${BRAND_COLOR}">${params.locationUrl}</a>`)
+    ? detail("Google Map Link", `<a href="${params.locationUrl}" style="color:${BRAND_COLOR}">${params.locationUrl}</a>`)
     : "";
   const instHtml = params.instructions
-    ? detail("Confidential Instructions", `<div style="white-space: pre-wrap; margin-top: 4px; border-left: 2px solid ${BRAND_COLOR}; padding-left: 8px;">${params.instructions}</div>`)
+    ? detail("Confidential Property Instructions", `<div style="white-space: pre-wrap; margin-top: 4px; border-left: 2px solid ${BRAND_COLOR}; padding-left: 8px;">${params.instructions}</div>`)
     : "";
   const imgHtml = params.image
-    ? detail("Image/Layout", `<a href="${params.image}" style="color:${BRAND_COLOR}">View Schema</a>`)
+    ? detail("Property Front Door Photo", `<a href="${params.image}" style="color:${BRAND_COLOR}">${params.image}</a>`)
     : "";
+  const propIdHtml = params.propertyId ? detail("Property ID", params.propertyId) : "";
 
   return {
     subject: `New Visit Assigned — ${params.propertyTitle}`,
     html: layout(`
-      ${heading("You have a new visit assignment")}
+      ${heading("New property visit assigned to you")}
       ${paragraph(`Hello ${params.visitingAgentName},`)}
-      ${paragraph("The Admin has assigned you to a new property tour.")}
+      ${paragraph("This is a notification from TheUrbanRealEstateSaudi to let you know that you have been assigned to a new property visit. Please review the details below.")}
       ${divider()}
-      ${detail("Property", params.propertyTitle)}
-      ${detail("Customer", `${params.visitorName} (${params.visitorPhone})`)}
-      ${detail("Property Agent", `${params.ownerName} (${params.ownerPhone})`)}
-      ${detail("Date", params.visitDate)}
-      ${detail("Time", params.visitTime)}
+      ${detail("Property Name", `"${params.propertyTitle}"`)}
+      ${propIdHtml}
+      ${detail("Date of Visit", params.visitDate)}
+      ${detail("Time of Visit", params.visitTime)}
+      ${divider()}
+      ${paragraph("<strong>Client Details:</strong>")}
+      ${detail("Customer Name", params.visitorName)}
+      ${detail("Customer Phone", params.visitorPhone)}
+      ${divider()}
+      ${paragraph("<strong>Listing Agent Details:</strong>")}
+      ${detail("Property Agent", params.ownerName)}
+      ${detail("Agent Phone", params.ownerPhone)}
       ${mapHtml}
       ${instHtml}
       ${imgHtml}
       ${divider()}
-      ${paragraph("Please contact the customer to confirm their arrival.")}
+      ${paragraph("Please ensure you arrive early and contact the customer if necessary.")}
     `),
   };
 }
@@ -154,20 +167,30 @@ export function visitAssignedPropertyAgentEmail(params: {
   visitTime: string;
   visitorName: string;
   visitingAgentName: string;
+  visitingAgentPhone?: string | null;
+  locationUrl?: string | null;
+  propertyId?: string | null;
 }) {
+  const mapHtml = params.locationUrl
+    ? detail("Property Map", `<a href="${params.locationUrl}" style="color:${BRAND_COLOR}">${params.locationUrl}</a>`)
+    : "";
+  const propIdHtml = params.propertyId ? detail("Property ID", params.propertyId) : "";
+  const vaPhoneHtml = params.visitingAgentPhone ? detail("Visiting Agent Contact", params.visitingAgentPhone) : "";
   return {
     subject: `Visit Confirmed & Assigned — ${params.propertyTitle}`,
     html: layout(`
-      ${heading("Your property has a confirmed visit")}
+      ${heading("Visit confirmed for your property")}
       ${paragraph(`Hello ${params.ownerName},`)}
-      ${paragraph("A visit request for your property has been confirmed and a visiting agent is dispatched.")}
+      ${paragraph("Great news! We have successfully scheduled a confirmed visit booking for your listed property.")}
+      ${paragraph("Here are the details for the upcoming viewing:")}
       ${divider()}
-      ${detail("Property", params.propertyTitle)}
-      ${detail("Customer", params.visitorName)}
-      ${detail("Assigned Visiting Team", params.visitingAgentName)}
-      ${detail("Date", params.visitDate)}
-      ${detail("Time", params.visitTime)}
+      ${propIdHtml}
+      ${detail("Customer Name", params.visitorName)}
+      ${detail("Assigned Visiting Agent", params.visitingAgentName)}
+      ${vaPhoneHtml}
+      ${mapHtml}
       ${divider()}
+      ${paragraph("The designated visiting agent will handle the tour on your behalf.")}
     `),
   };
 }
