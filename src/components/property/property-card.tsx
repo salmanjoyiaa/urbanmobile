@@ -101,14 +101,16 @@ export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = fals
           <h3 className="line-clamp-2 text-[15px] font-bold leading-snug text-foreground">
             {property.title}
           </h3>
-          <p className="mt-1 text-[15px] font-bold text-blue-600 dark:text-blue-400">
-            SAR {property.price.toLocaleString()}<span className="text-[12px] font-medium text-muted-foreground">{priceSuffix}</span>
-          </p>
-          {property.installments && (
-            <p className="mt-0.5 text-[12px] font-medium text-primary">
-              Installments: {property.installments}
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <p className="text-[15px] font-bold text-blue-600 dark:text-blue-400">
+              SAR {property.price.toLocaleString()}<span className="text-[12px] font-medium text-muted-foreground">{priceSuffix}</span>
             </p>
-          )}
+            {property.installments && (
+              <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[12px] font-medium text-primary">
+                Installments: {property.installments}
+              </span>
+            )}
+          </div>
           <div className="mt-2 flex items-center gap-3 text-[13px] text-muted-foreground">
             <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" /> {property.city}{property.district ? `, ${property.district}` : ""}

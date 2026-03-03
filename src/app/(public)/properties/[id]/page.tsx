@@ -42,6 +42,7 @@ type PropertyDetail = {
   rental_period: string | null;
   apartment_features: string[];
   nearby_places: string[];
+  installments: string | null;
   blocked_dates: string[];
   cover_image_index: number;
   created_at: string;
@@ -86,7 +87,7 @@ async function getProperty(id: string) {
       price, bedrooms, bathrooms, kitchens, living_rooms, drawing_rooms, dining_areas, two_entrance, building_condition,
       area_sqm, year_built, amenities, building_features, images,
       property_ref, location_url, office_fee, broker_fee, water_bill_included,
-      security_deposit, payment_methods_accepted, rental_period,
+      security_deposit, payment_methods_accepted, rental_period, installments,
       apartment_features, nearby_places,
       blocked_dates, cover_image_index, created_at,
       agents:agent_id (
@@ -106,15 +107,15 @@ async function getProperty(id: string) {
     .select("url, alt_text, ordering_index")
     .eq("property_id", id)
     .order("ordering_index", { ascending: true })) as {
-    data: Array<{ url: string; alt_text: string | null; ordering_index: number }> | null;
-  };
+      data: Array<{ url: string; alt_text: string | null; ordering_index: number }> | null;
+    };
 
   const photoAltTexts: Record<string, string> = {};
   const orderedImages = (photos || []).length > 0
     ? [...(photos || [])].sort((a, b) => a.ordering_index - b.ordering_index).map((p) => {
-        if (p.alt_text) photoAltTexts[p.url] = p.alt_text;
-        return p.url;
-      })
+      if (p.alt_text) photoAltTexts[p.url] = p.alt_text;
+      return p.url;
+    })
     : data.images || [];
 
   return {
@@ -315,7 +316,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 </>
               )}
 
-              {(property.payment_methods_accepted || property.office_fee || property.broker_fee || property.security_deposit || property.rental_period) && (
+              {(property.payment_methods_accepted || property.office_fee || property.broker_fee || property.security_deposit || property.rental_period || property.installments) && (
                 <>
                   <hr className="border-[#eff3f4]" />
                   <div>
@@ -337,6 +338,9 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                       )}
                       {property.security_deposit && (
                         <p><span className="font-medium text-[#0f1419]">Security Deposit:</span> <span className="text-[#536471]">SAR {property.security_deposit}</span></p>
+                      )}
+                      {property.installments && (
+                        <p><span className="font-medium text-[#0f1419]">Installments:</span> <span className="text-[#536471]">{property.installments}</span></p>
                       )}
                     </div>
                   </div>
