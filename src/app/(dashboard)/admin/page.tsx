@@ -16,6 +16,15 @@ type ActivityRow = {
   } | null;
 };
 
+type SiteTrafficSummary = {
+  today_views: number | string | null;
+  week_views: number | string | null;
+  total_views: number | string | null;
+  today_unique: number | string | null;
+  week_unique: number | string | null;
+  total_unique: number | string | null;
+};
+
 export default async function AdminOverviewPage() {
   const supabase = createAdminClient();
 
@@ -54,7 +63,7 @@ export default async function AdminOverviewPage() {
   const activityRows = (activity as ActivityRow[] | null) || [];
 
   const { data: trafficSummary } = await supabase.rpc("get_site_traffic_summary");
-  const traffic = Array.isArray(trafficSummary) ? trafficSummary[0] : trafficSummary;
+  const traffic = (Array.isArray(trafficSummary) ? trafficSummary[0] : trafficSummary) as SiteTrafficSummary | null;
 
   const todayViews = Number(traffic?.today_views || 0);
   const weekViews = Number(traffic?.week_views || 0);
