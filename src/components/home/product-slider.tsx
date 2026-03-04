@@ -80,7 +80,7 @@ export function ProductSlider({ products }: { products: Product[] }) {
                 className="flex-none w-[85%] sm:w-[45%] lg:w-[calc(33.333%-14px)]"
                 style={{ scrollSnapAlign: "start" }}
               >
-                <ProductCard product={product} />
+                <ProductCard product={product} optimizeImage={false} />
               </div>
             ))}
           </div>

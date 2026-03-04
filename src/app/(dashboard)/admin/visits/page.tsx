@@ -177,16 +177,18 @@ export default async function AdminVisitsPage() {
         rows={rows}
         columns={[
           { key: "property", title: "Property", render: (row) => row.properties?.title || "—" },
-          { key: "property_id", title: "Property ID", render: (row) => (
-            <span className="font-mono text-xs">
-              {row.properties?.property_ref || "—"}
-              {row.properties?.id && (
-                <span className="block text-muted-foreground" title={row.properties.id}>
-                  UUID: {row.properties.id.slice(0, 8)}…
-                </span>
-              )}
-            </span>
-          )},
+          {
+            key: "property_id", title: "Property ID", render: (row) => (
+              <span className="font-mono text-xs">
+                {row.properties?.property_ref || "—"}
+                {row.properties?.id && (
+                  <span className="block text-muted-foreground" title={row.properties.id}>
+                    UUID: {row.properties.id.slice(0, 8)}…
+                  </span>
+                )}
+              </span>
+            )
+          },
           { key: "property_agent", title: "Property Agent", render: (row) => row.properties?.agents?.profiles?.full_name || "—" },
           {
             key: "visiting_agent",
@@ -206,7 +208,16 @@ export default async function AdminVisitsPage() {
           {
             key: "schedule",
             title: "Schedule",
-            render: (row) => `${formatDate(row.visit_date)} · ${formatTime(row.visit_time)}`,
+            render: (row) => (
+              <div className="text-sm">
+                <span>{formatDate(row.visit_date)} · {formatTime(row.visit_time)}</span>
+                {row.properties?.property_ref && (
+                  <span className="block text-xs font-mono text-muted-foreground mt-0.5">
+                    ID: {row.properties.property_ref}
+                  </span>
+                )}
+              </div>
+            ),
           },
           { key: "status", title: "Status", render: (row) => <Badge className="capitalize">{row.status}</Badge> },
           {

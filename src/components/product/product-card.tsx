@@ -11,7 +11,7 @@ type Product = {
   images: string[] | null;
 };
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, optimizeImage = true }: { product: Product; optimizeImage?: boolean }) {
   const imgSrc = product.images?.[0] || null;
 
   return (
@@ -24,7 +24,8 @@ export function ProductCard({ product }: { product: Product }) {
               alt={product.title}
               fill
               className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 360px"
+              unoptimized={!optimizeImage}
             />
           ) : (
             <div className="flex h-full items-center justify-center">

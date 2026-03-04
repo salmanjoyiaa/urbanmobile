@@ -80,7 +80,7 @@ export function PropertySection({
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         {preview.map((property) => (
-          <PropertyCard key={property.id} property={property} />
+          <PropertyCard key={property.id} property={property} optimizeImage={false} />
         ))}
       </div>
 
@@ -91,7 +91,7 @@ export function PropertySection({
           </DialogHeader>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pt-2">
             {all.map((property) => (
-              <PropertyCard key={property.id} property={property} />
+              <PropertyCard key={property.id} property={property} optimizeImage={false} />
             ))}
           </div>
         </DialogContent>

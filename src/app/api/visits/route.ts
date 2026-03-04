@@ -99,18 +99,11 @@ export async function GET(request: NextRequest) {
           (blockedData || []).map((s: { time: string }) => s.time.slice(0, 5))
         );
 
-        const now = new Date();
         const bookedTimes = (data || [])
           .map((entry) => {
             const raw = entry.visit_time ?? "";
-            const normalized = raw.length > 5 ? raw.slice(0, 5) : raw;
-            return { normalized, raw };
-          })
-          .filter(({ normalized }) => {
-            const slotAt = new Date(`${date}T${normalized}`);
-            return slotAt > now;
-          })
-          .map(({ normalized }) => normalized);
+            return raw.length > 5 ? raw.slice(0, 5) : raw;
+          });
 
         const slots = buildAvailabilitySlots(bookedTimes)
           .map((s) => adminBlockedTimes.has(s.time) ? { ...s, available: false } : s);

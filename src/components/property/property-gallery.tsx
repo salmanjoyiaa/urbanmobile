@@ -118,9 +118,8 @@ function Lightbox({
                     alt={imageAltTexts?.[img] || `${title} — Photo ${i + 1}`}
                     fill
                     className="object-contain"
-                    sizes="100vw"
-                    quality={90}
-                    priority={i === initialIndex}
+                    sizes="(max-width: 1024px) 100vw, calc(100vw - 280px)"
+                    unoptimized
                   />
                 </div>
                 {(imageAltTexts?.[img]) && (
@@ -143,7 +142,7 @@ function Lightbox({
                   className={`relative h-14 w-14 flex-none overflow-hidden rounded-md border-2 transition-all ${i === currentIndex ? "border-white opacity-100 ring-2 ring-white/50" : "border-transparent opacity-40 hover:opacity-80"
                     }`}
                 >
-                  <Image src={img} alt="Thumbnail" fill className="object-cover" sizes="56px" />
+                  <Image src={img} alt="Thumbnail" fill className="object-cover" sizes="56px" unoptimized />
                 </button>
               ))}
             </div>
@@ -211,7 +210,7 @@ export function PropertyGallery({ images, title, coverImageIndex = 0, imageAltTe
               fill
               priority
               className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 75vw, 960px"
             />
           </div>
 
@@ -262,7 +261,8 @@ export function PropertyGallery({ images, title, coverImageIndex = 0, imageAltTe
                   alt={`${title} thumbnail ${thumbIndex + 1}`}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 768px) 20vw, 10vw"
+                  sizes="(max-width: 768px) 20vw, 120px"
+                  unoptimized
                 />
               </button>
             ))}

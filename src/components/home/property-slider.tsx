@@ -110,7 +110,11 @@ export function PropertySlider({ properties, showAmenitiesAndBuildingFeatures = 
                 className="flex-none w-[85%] sm:w-[45%] lg:w-[calc(33.333%-14px)]"
                 style={{ scrollSnapAlign: "start" }}
               >
-                <PropertyCard property={property} showAmenitiesAndBuildingFeatures={showAmenitiesAndBuildingFeatures} />
+                <PropertyCard
+                  property={property}
+                  showAmenitiesAndBuildingFeatures={showAmenitiesAndBuildingFeatures}
+                  optimizeImage={false}
+                />
               </div>
             ))}
           </div>

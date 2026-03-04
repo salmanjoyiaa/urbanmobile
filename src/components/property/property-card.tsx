@@ -50,7 +50,15 @@ const PURPOSE_DEFAULT_SUFFIX: Record<string, string> = {
   long_term: "/yr",
 };
 
-export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = false }: { property: Property; showAmenitiesAndBuildingFeatures?: boolean }) {
+export function PropertyCard({
+  property,
+  showAmenitiesAndBuildingFeatures = false,
+  optimizeImage = true,
+}: {
+  property: Property;
+  showAmenitiesAndBuildingFeatures?: boolean;
+  optimizeImage?: boolean;
+}) {
   const coverIdx = property.cover_image_index ?? 0;
   const imgSrc = property.images?.[coverIdx] || property.images?.[0] || null;
   const rentalLabel = RENTAL_LABELS[property.purpose] || property.purpose;
@@ -71,7 +79,8 @@ export function PropertyCard({ property, showAmenitiesAndBuildingFeatures = fals
               alt={property.title}
               fill
               className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 360px"
+              unoptimized={!optimizeImage}
             />
           ) : (
             <div className="flex h-full items-center justify-center">
