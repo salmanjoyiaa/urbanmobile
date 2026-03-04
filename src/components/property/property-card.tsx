@@ -94,7 +94,7 @@ export function PropertyCard({
                 alt="Rented"
                 width={140}
                 height={140}
-                className="opacity-90 -rotate-12 drop-shadow-lg"
+                className="opacity-90 -rotate-12 drop-shadow-lg mix-blend-multiply"
               />
             </div>
           )}

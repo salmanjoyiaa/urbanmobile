@@ -34,6 +34,7 @@ export default function AdminSlotsPage() {
         const { data } = await supabase
           .from("properties")
           .select("id, title")
+          .eq("status", "available")
           .order("title");
         setProperties(data || []);
       } catch {
@@ -173,15 +174,13 @@ export default function AdminSlotsPage() {
                       key={p.id}
                       type="button"
                       onClick={() => toggleProperty(p.id)}
-                      className={`flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors ${
-                        checked
+                      className={`flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors ${checked
                           ? "bg-primary/10 border border-primary text-foreground"
                           : "border border-transparent hover:bg-muted"
-                      }`}
+                        }`}
                     >
-                      <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                        checked ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30"
-                      }`}>
+                      <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${checked ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30"
+                        }`}>
                         {checked && <Check className="h-3 w-3" />}
                       </span>
                       <span className="truncate">{p.title}</span>

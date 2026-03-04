@@ -2,6 +2,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 
 export const revalidate = 0;
 
@@ -52,6 +53,20 @@ export default async function AdminOverviewPage() {
 
   const activityRows = (activity as ActivityRow[] | null) || [];
 
+  // Page view stats
+  const today = new Date().toISOString().split("T")[0];
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
+
+  const [
+    { count: todayViews },
+    { count: weekViews },
+    { count: totalViews },
+  ] = await Promise.all([
+    supabase.from("page_views").select("id", { count: "exact", head: true }).gte("created_at", `${today}T00:00:00`),
+    supabase.from("page_views").select("id", { count: "exact", head: true }).gte("created_at", `${sevenDaysAgo}T00:00:00`),
+    supabase.from("page_views").select("id", { count: "exact", head: true }),
+  ]);
+
   return (
     <div className="space-y-8">
       <div>
@@ -86,6 +101,19 @@ export default async function AdminOverviewPage() {
       </div>
 
       <ActivityFeed entries={activityRows} />
+
+      {/* Site Traffic */}
+      <div>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+          <Eye className="h-4 w-4" />
+          Site Traffic
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <StatCard title="Today" value={todayViews || 0} description="Page views" />
+          <StatCard title="Last 7 Days" value={weekViews || 0} description="Page views" />
+          <StatCard title="All Time" value={totalViews || 0} description="Total page views" />
+        </div>
+      </div>
     </div>
   );
 }
