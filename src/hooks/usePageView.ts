@@ -3,11 +3,12 @@
 import { useEffect, useRef } from "react";
 
 export function usePageView(page: string = "/") {
-    const sent = useRef(false);
+    const lastSentPage = useRef<string | null>(null);
 
     useEffect(() => {
-        if (sent.current) return;
-        sent.current = true;
+        if (!page) return;
+        if (lastSentPage.current === page) return;
+        lastSentPage.current = page;
 
         fetch("/api/analytics/pageview", {
             method: "POST",

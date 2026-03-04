@@ -53,19 +53,15 @@ export default async function AdminOverviewPage() {
 
   const activityRows = (activity as ActivityRow[] | null) || [];
 
-  // Page view stats
-  const today = new Date().toISOString().split("T")[0];
-  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
+  const { data: trafficSummary } = await supabase.rpc("get_site_traffic_summary");
+  const traffic = Array.isArray(trafficSummary) ? trafficSummary[0] : trafficSummary;
 
-  const [
-    { count: todayViews },
-    { count: weekViews },
-    { count: totalViews },
-  ] = await Promise.all([
-    supabase.from("page_views").select("id", { count: "exact", head: true }).gte("created_at", `${today}T00:00:00`),
-    supabase.from("page_views").select("id", { count: "exact", head: true }).gte("created_at", `${sevenDaysAgo}T00:00:00`),
-    supabase.from("page_views").select("id", { count: "exact", head: true }),
-  ]);
+  const todayViews = Number(traffic?.today_views || 0);
+  const weekViews = Number(traffic?.week_views || 0);
+  const totalViews = Number(traffic?.total_views || 0);
+  const todayUnique = Number(traffic?.today_unique || 0);
+  const weekUnique = Number(traffic?.week_unique || 0);
+  const totalUnique = Number(traffic?.total_unique || 0);
 
   return (
     <div className="space-y-8">
@@ -109,9 +105,9 @@ export default async function AdminOverviewPage() {
           Site Traffic
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <StatCard title="Today" value={todayViews || 0} description="Page views" />
-          <StatCard title="Last 7 Days" value={weekViews || 0} description="Page views" />
-          <StatCard title="All Time" value={totalViews || 0} description="Total page views" />
+          <StatCard title="Today" value={todayUnique || 0} description={`Unique visitors • ${todayViews.toLocaleString()} page views`} />
+          <StatCard title="Last 7 Days" value={weekUnique || 0} description={`Unique visitors • ${weekViews.toLocaleString()} page views`} />
+          <StatCard title="All Time" value={totalUnique || 0} description={`Unique visitors • ${totalViews.toLocaleString()} page views`} />
         </div>
       </div>
     </div>

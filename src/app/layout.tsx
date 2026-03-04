@@ -7,6 +7,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { ToastProvider } from "@/providers/toast-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import NextTopLoader from "nextjs-toploader";
+import { PageViewTracker } from "@/components/analytics/page-view-tracker";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -86,6 +87,7 @@ export default function RootLayout({
           <NextTopLoader color="hsl(224 76% 24%)" showSpinner={false} />
           <QueryProvider>
             <AuthProvider>
+              <PageViewTracker />
               {children}
               <ToastProvider />
               <Analytics />
