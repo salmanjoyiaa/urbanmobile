@@ -68,6 +68,7 @@ export function PropertyCard({
     : (PURPOSE_DEFAULT_SUFFIX[property.purpose] || "");
 
   const propertyId = property.property_ref || property.id.slice(0, 8).toUpperCase();
+  const isRented = (property.status || "").trim().toLowerCase() === "rented";
 
   return (
     <Link href={`/properties/${property.id}`}>
@@ -87,14 +88,14 @@ export function PropertyCard({
               <Package className="h-12 w-12 text-muted-foreground/60" />
             </div>
           )}
-          {property.status === "rented" && (
+          {isRented && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden>
               <Image
                 src="/images/rented-stamp.png"
                 alt="Rented"
                 width={140}
                 height={140}
-                className="opacity-90 -rotate-12 drop-shadow-lg mix-blend-multiply"
+                className="opacity-90 -rotate-12 drop-shadow-lg"
               />
             </div>
           )}
