@@ -13,6 +13,7 @@ import { PropertySlider } from "@/components/home/property-slider";
 import { ProductSlider } from "@/components/home/product-slider";
 import { MaintenanceSlider } from "@/components/home/maintenance-slider";
 import { AnimateSection, AnimateStagger, AnimateItem } from "@/components/home/animate-section";
+import { PageViewTracker } from "@/components/analytics/page-view-tracker";
 import { createClient } from "@/lib/supabase/server";
 
 const socialLinks = [
@@ -172,6 +173,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen">
+      <PageViewTracker page="/" />
       <HomepageNav />
 
       {/* ── Hero ── */}

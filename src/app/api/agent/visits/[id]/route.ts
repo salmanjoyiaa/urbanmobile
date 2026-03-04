@@ -56,6 +56,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updatePayload: any = {
         visiting_status: parsed.data.visiting_status,
+        // Auto-confirm when visiting agent marks visit as done
+        ...(parsed.data.visiting_status === "visit_done" ? { status: "confirmed" } : {}),
         ...(parsed.data.customer_remarks !== undefined ? { customer_remarks: parsed.data.customer_remarks } : {}),
     };
 
@@ -73,6 +75,25 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Block the new slot when rescheduling
+    if (parsed.data.visiting_status === "reschedule" && parsed.data.reschedule_date && parsed.data.reschedule_time) {
+        const { data: visit } = await supabase
+            .from("visit_requests")
+            .select("property_id")
+            .eq("id", context.params.id)
+            .single();
+
+        if (visit) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const v = visit as any;
+            await supabase.from("blocked_slots").upsert({
+                property_id: v.property_id,
+                date: parsed.data.reschedule_date,
+                time: parsed.data.reschedule_time,
+            } as never, { onConflict: "property_id,date,time" }).then(() => { });
+        }
     }
 
     return NextResponse.json({ success: true });

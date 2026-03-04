@@ -18,6 +18,7 @@ export async function sendEmail(params: {
   to: string;
   subject: string;
   html: string;
+  visitId?: string;
 }): Promise<SendEmailResult> {
   const supabase = createAdminClient();
 
@@ -42,6 +43,7 @@ export async function sendEmail(params: {
       status: "failed",
       error_message: "Resend is not configured",
       metadata: null,
+      visit_id: params.visitId || null,
     } as any);
     if (logError) console.error("[email:log:error]", logError);
 
@@ -78,6 +80,7 @@ export async function sendEmail(params: {
         status: "failed",
         error_message: error.message,
         metadata: null,
+        visit_id: params.visitId || null,
       } as any);
       if (logError) console.error("[email:log:error]", logError);
 
@@ -92,6 +95,7 @@ export async function sendEmail(params: {
       status: "sent",
       error_message: null,
       metadata: { resend_id: data?.id },
+      visit_id: params.visitId || null,
     } as any);
     if (logError) console.error("[email:log:error]", logError);
 
@@ -119,6 +123,7 @@ export async function sendEmail(params: {
       status: "failed",
       error_message: message,
       metadata: null,
+      visit_id: params.visitId || null,
     } as any);
     if (logError) console.error("[email:log:error]", logError);
 

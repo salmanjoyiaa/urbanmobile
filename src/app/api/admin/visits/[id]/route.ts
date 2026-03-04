@@ -70,13 +70,15 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   };
 
   let oldVisitingAgentId: string | null = null;
+  let alreadyNotified = false;
   if (parsed.data.status === "assigned" && parsed.data.visiting_agent_id) {
     const { data: current } = await admin.supabase
       .from("visit_requests")
-      .select("visiting_agent_id")
+      .select("visiting_agent_id, notification_sent_at")
       .eq("id", context.params.id)
       .single();
-    oldVisitingAgentId = (current as { visiting_agent_id: string | null } | null)?.visiting_agent_id ?? null;
+    oldVisitingAgentId = (current as { visiting_agent_id: string | null; notification_sent_at: string | null } | null)?.visiting_agent_id ?? null;
+    alreadyNotified = !!(current as { notification_sent_at: string | null } | null)?.notification_sent_at;
 
     payload.visiting_agent_id = parsed.data.visiting_agent_id;
     payload.visiting_status = "view";
@@ -126,7 +128,9 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   const visitDetails = rawData as any;
 
   const notifyJobs: Array<Promise<unknown>> = [];
-  if (visitDetails?.properties) {
+  // Skip notifications if already sent for this visit request (dedup)
+  if (visitDetails?.properties && !alreadyNotified) {
+    const visitId = context.params.id;
     const templateParams = {
       visitorName: visitDetails.visitor_name,
       propertyTitle: visitDetails.properties.title,
@@ -148,7 +152,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         visitingAgentPhone: visitingAgentProfile.phone ?? "",
       });
       notifyJobs.push(
-        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables)
+        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables, visitId)
       );
       const propertyId = visitDetails.properties.property_ref || String(visitDetails.properties.id);
 
@@ -159,7 +163,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
           visitingAgentName: visitingAgentProfile.full_name,
           visitingAgentPhone: visitingAgentProfile.phone ?? "",
         });
-        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
+        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl, visitId }));
       }
 
       const visitingAgentParams = {
@@ -179,10 +183,10 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
       if (visitingAgentProfile.phone) {
         const vaContent = visitAssignedVisitingAgentContent(visitingAgentParams);
-        notifyJobs.push(sendWhatsAppTemplate(visitingAgentProfile.phone, vaContent.contentSid, vaContent.contentVariables));
+        notifyJobs.push(sendWhatsAppTemplate(visitingAgentProfile.phone, vaContent.contentSid, vaContent.contentVariables, visitId));
       }
       if (visitingAgentProfile.email) {
-        notifyJobs.push(sendEmail({ to: visitingAgentProfile.email, ...visitAssignedVisitingAgentEmail(visitingAgentParams) }));
+        notifyJobs.push(sendEmail({ to: visitingAgentProfile.email, ...visitAssignedVisitingAgentEmail(visitingAgentParams), visitId }));
       }
 
       const propertyAgentParams = {
@@ -199,10 +203,10 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
       if (ownerAgentProfile?.phone) {
         const paContent = visitAssignedPropertyAgentContent(propertyAgentParams);
-        notifyJobs.push(sendWhatsAppTemplate(ownerAgentProfile.phone, paContent.contentSid, paContent.contentVariables));
+        notifyJobs.push(sendWhatsAppTemplate(ownerAgentProfile.phone, paContent.contentSid, paContent.contentVariables, visitId));
       }
       if (ownerAgentProfile?.email) {
-        notifyJobs.push(sendEmail({ to: ownerAgentProfile.email, ...visitAssignedPropertyAgentEmail(propertyAgentParams) }));
+        notifyJobs.push(sendEmail({ to: ownerAgentProfile.email, ...visitAssignedPropertyAgentEmail(propertyAgentParams), visitId }));
       }
     }
 
@@ -221,7 +225,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         visitingAgentPhone: visitingAgentProfile.phone ?? "",
       });
       notifyJobs.push(
-        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables)
+        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables, visitId)
       );
       if (visitDetails.visitor_email) {
         const emailTpl = visitConfirmedCustomerEmail({
@@ -230,7 +234,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
           visitingAgentName: visitingAgentProfile.full_name,
           visitingAgentPhone: visitingAgentProfile.phone ?? "",
         });
-        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
+        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl, visitId }));
       }
 
       // 2. WhatsApp + Email to Visiting Agent
@@ -251,10 +255,10 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
       if (visitingAgentProfile.phone) {
         const vaContent = visitAssignedVisitingAgentContent(visitingAgentParams);
-        notifyJobs.push(sendWhatsAppTemplate(visitingAgentProfile.phone, vaContent.contentSid, vaContent.contentVariables));
+        notifyJobs.push(sendWhatsAppTemplate(visitingAgentProfile.phone, vaContent.contentSid, vaContent.contentVariables, visitId));
       }
       if (visitingAgentProfile.email) {
-        notifyJobs.push(sendEmail({ to: visitingAgentProfile.email, ...visitAssignedVisitingAgentEmail(visitingAgentParams) }));
+        notifyJobs.push(sendEmail({ to: visitingAgentProfile.email, ...visitAssignedVisitingAgentEmail(visitingAgentParams), visitId }));
       }
 
       // 3. WhatsApp + Email to Property Agent Owner
@@ -272,21 +276,21 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
       if (ownerAgentProfile?.phone) {
         const paContent = visitAssignedPropertyAgentContent(propertyAgentParams);
-        notifyJobs.push(sendWhatsAppTemplate(ownerAgentProfile.phone, paContent.contentSid, paContent.contentVariables));
+        notifyJobs.push(sendWhatsAppTemplate(ownerAgentProfile.phone, paContent.contentSid, paContent.contentVariables, visitId));
       }
       if (ownerAgentProfile?.email) {
-        notifyJobs.push(sendEmail({ to: ownerAgentProfile.email, ...visitAssignedPropertyAgentEmail(propertyAgentParams) }));
+        notifyJobs.push(sendEmail({ to: ownerAgentProfile.email, ...visitAssignedPropertyAgentEmail(propertyAgentParams), visitId }));
       }
     }
 
     if (parsed.data.status === "confirmed" && !visitDetails.visiting_agent) {
       const custContent = visitConfirmationCustomerContent(templateParams);
       notifyJobs.push(
-        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables)
+        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables, visitId)
       );
       if (visitDetails.visitor_email) {
         const emailTpl = visitConfirmedCustomerEmail(templateParams);
-        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
+        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl, visitId }));
       }
 
       const agent = visitDetails.properties.agents;
@@ -298,18 +302,18 @@ export async function PATCH(request: Request, context: { params: { id: string } 
           visitDate: visitDetails.visit_date,
           visitTime: visitDetails.visit_time,
         });
-        notifyJobs.push(sendEmail({ to: agent.profiles.email, ...agentEmailTpl }));
+        notifyJobs.push(sendEmail({ to: agent.profiles.email, ...agentEmailTpl, visitId }));
       }
     }
 
     if (parsed.data.status === "cancelled") {
       // WhatsApp + Email to visitor
       notifyJobs.push(
-        sendWhatsApp(visitDetails.visitor_phone, visitCancelled(templateParams))
+        sendWhatsApp(visitDetails.visitor_phone, visitCancelled(templateParams), visitId)
       );
       if (visitDetails.visitor_email) {
         const emailTpl = visitCancelledCustomerEmail(templateParams);
-        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl }));
+        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl, visitId }));
       }
     }
 
@@ -326,6 +330,13 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
   if (notifyJobs.length > 0) {
     await Promise.allSettled(notifyJobs);
+    // Stamp notification_sent_at to prevent duplicate messages
+    if (!alreadyNotified && (parsed.data.status === "assigned" || parsed.data.status === "confirmed")) {
+      await admin.supabase
+        .from("visit_requests")
+        .update({ notification_sent_at: new Date().toISOString() } as never)
+        .eq("id", context.params.id);
+    }
   }
 
   await writeAuditLog({

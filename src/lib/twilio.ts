@@ -31,7 +31,7 @@ function normalizeWhatsAppTo(value: string) {
   return trimmed.startsWith("whatsapp:") ? trimmed : `whatsapp:${trimmed}`;
 }
 
-export async function sendWhatsApp(to: string, body: string): Promise<SendResult> {
+export async function sendWhatsApp(to: string, body: string, visitId?: string): Promise<SendResult> {
   const supabase = createAdminClient();
 
   if (!client || !from) {
@@ -54,6 +54,7 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
       status: "failed",
       error_message: msg,
       metadata: null,
+      visit_id: visitId || null,
     } as any);
     if (logError) console.error("[twilio:log:error]", logError);
 
@@ -82,6 +83,7 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
       status: "failed",
       error_message: msg,
       metadata: null,
+      visit_id: visitId || null,
     } as any);
     if (logError) console.error("[twilio:log:error]", logError);
 
@@ -106,6 +108,7 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
         status: "sent",
         error_message: null,
         metadata: { sid: message.sid },
+        visit_id: visitId || null,
       } as any);
       if (logError) console.error("[twilio:log:error]", logError);
 
@@ -139,6 +142,7 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
     status: "failed",
     error_message: lastError || "Unknown error",
     metadata: null,
+    visit_id: visitId || null,
   } as any);
   if (logError) console.error("[twilio:log:error]", logError);
 
@@ -149,7 +153,8 @@ export async function sendWhatsApp(to: string, body: string): Promise<SendResult
 export async function sendWhatsAppTemplate(
   to: string,
   contentSid: string,
-  contentVariables: Record<string, string>
+  contentVariables: Record<string, string>,
+  visitId?: string
 ): Promise<SendResult> {
   const supabase = createAdminClient();
 
@@ -172,6 +177,7 @@ export async function sendWhatsAppTemplate(
       status: "failed",
       error_message: msg,
       metadata: { contentSid },
+      visit_id: visitId || null,
     } as any);
     if (logError) console.error("[twilio:log:error]", logError);
     return { success: false, error: msg };
@@ -192,6 +198,7 @@ export async function sendWhatsAppTemplate(
       status: "failed",
       error_message: msg,
       metadata: { contentSid },
+      visit_id: visitId || null,
     } as any);
     if (logError) console.error("[twilio:log:error]", logError);
     return { success: false, error: msg };
@@ -215,6 +222,7 @@ export async function sendWhatsAppTemplate(
         status: "sent",
         error_message: null,
         metadata: { sid: message.sid, contentSid },
+        visit_id: visitId || null,
       } as any);
       if (logError) console.error("[twilio:log:error]", logError);
       return { success: true, sid: message.sid };
@@ -243,6 +251,7 @@ export async function sendWhatsAppTemplate(
     status: "failed",
     error_message: lastError || "Unknown error",
     metadata: { contentSid },
+    visit_id: visitId || null,
   } as any);
   if (logError) console.error("[twilio:log:error]", logError);
   return { success: false, error: lastError || "Failed to send WhatsApp template" };

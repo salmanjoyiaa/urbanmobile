@@ -57,7 +57,9 @@ export function isWeekday(date: Date): boolean {
 export function isFutureDate(date: Date): boolean {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  return date >= today;
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return date >= tomorrow;
 }
 
 export function formatSlotLabel(time: string): string {

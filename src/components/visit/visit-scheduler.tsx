@@ -43,17 +43,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
   const { data: slots = [], isLoading: loadingSlots } = useVisitSlots(propertyId, dateKey, !!dateKey);
   const availableSlots = useMemo(() => slots.filter((s) => s.available), [slots]);
 
-  // Filter out past time slots when the selected date is today
-  const filteredSlots = useMemo(() => {
-    if (!date) return availableSlots;
-    const today = new Date();
-    const todayStr = today.toLocaleDateString("en-CA", { timeZone: "Asia/Riyadh" });
-    if (dateKey !== todayStr) return availableSlots;
 
-    // Get current Saudi time as HH:MM for comparison
-    const nowSaudi = new Date().toLocaleTimeString("en-GB", { timeZone: "Asia/Riyadh", hour: "2-digit", minute: "2-digit", hour12: false });
-    return availableSlots.filter((s) => s.time > nowSaudi);
-  }, [availableSlots, date, dateKey]);
   const createVisit = useCreateVisitRequest();
 
   const {
@@ -160,7 +150,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
               selected={date}
               onSelect={(selected) => setDate(selected)}
               disabled={isDateDisabled}
-              fromDate={new Date()}
+              fromDate={addDays(new Date(), 1)}
               toDate={addDays(new Date(), 45)}
             />
             <Button disabled={!date} onClick={() => setStep(2)} className="h-10 px-5 rounded-xl">
@@ -181,16 +171,16 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Loading slots...
               </div>
-            ) : filteredSlots.length === 0 && slots.length > 0 ? (
+            ) : availableSlots.length === 0 && slots.length > 0 ? (
               <p className="text-sm text-muted-foreground">
                 No slots available on this day. Try another date.
               </p>
-            ) : filteredSlots.length === 0 ? (
+            ) : availableSlots.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 No slots available. Select a weekday to see times.
               </p>
             ) : (
-              <SlotGrid slots={filteredSlots} selectedSlot={slot} onSelect={setSlot} />
+              <SlotGrid slots={availableSlots} selectedSlot={slot} onSelect={setSlot} />
             )}
 
             <div className="flex gap-2">

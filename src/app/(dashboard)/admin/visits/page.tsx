@@ -3,6 +3,7 @@ import { DataTable } from "@/components/dashboard/data-table";
 
 import { VisitRowActions } from "@/components/admin/visit-row-actions";
 import { SendDayVisits } from "@/components/admin/send-day-visits";
+import { BulkAssignDialog } from "@/components/admin/bulk-assign-dialog";
 import { MessageCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -120,9 +121,23 @@ function waLink(phone: string | null | undefined, message: string): string | nul
   return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
 }
 
-export default async function AdminVisitsPage() {
+export default async function AdminVisitsPage({
+  searchParams,
+}: {
+  searchParams: {
+    status?: string;
+    date_from?: string;
+    date_to?: string;
+    sort?: string;
+  };
+}) {
   const supabase = createAdminClient();
-  const { data } = (await supabase
+
+  // Build query with filters
+  const sortField = searchParams.sort === "visit_date_asc" || searchParams.sort === "visit_date_desc" ? "visit_date" : "created_at";
+  const sortAsc = searchParams.sort === "visit_date_asc";
+
+  let query = supabase
     .from("visit_requests")
     .select(
       `
@@ -136,7 +151,19 @@ export default async function AdminVisitsPage() {
       )
     `
     )
-    .order("created_at", { ascending: false })) as { data: VisitRow[] | null };
+    .order(sortField, { ascending: sortAsc });
+
+  if (searchParams.status && ["pending", "assigned", "confirmed", "cancelled", "completed"].includes(searchParams.status)) {
+    query = query.eq("status", searchParams.status);
+  }
+  if (searchParams.date_from) {
+    query = query.gte("visit_date", searchParams.date_from);
+  }
+  if (searchParams.date_to) {
+    query = query.lte("visit_date", searchParams.date_to);
+  }
+
+  const { data } = (await query) as { data: VisitRow[] | null };
 
   const rows = data || [];
 
@@ -171,7 +198,71 @@ export default async function AdminVisitsPage() {
         <p className="text-sm text-muted-foreground">Orchestrate and route scheduled visits.</p>
       </div>
 
-      <SendDayVisits visitingAgents={visitingAgents} propertyAgents={propertyAgents} />
+      <div className="flex items-center justify-between">
+        <SendDayVisits visitingAgents={visitingAgents} propertyAgents={propertyAgents} />
+        <BulkAssignDialog visitingAgents={visitingAgents} />
+      </div>
+
+      {/* Filters */}
+      <form className="flex flex-wrap gap-3 items-end">
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-1">Status</label>
+          <select
+            name="status"
+            defaultValue={searchParams.status || ""}
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="assigned">Assigned</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-1">Visit From</label>
+          <input
+            type="date"
+            name="date_from"
+            defaultValue={searchParams.date_from || ""}
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-1">Visit To</label>
+          <input
+            type="date"
+            name="date_to"
+            defaultValue={searchParams.date_to || ""}
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-1">Sort</label>
+          <select
+            name="sort"
+            defaultValue={searchParams.sort || ""}
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="">Newest First</option>
+            <option value="visit_date_asc">Visit Date ↑</option>
+            <option value="visit_date_desc">Visit Date ↓</option>
+          </select>
+        </div>
+        <button
+          type="submit"
+          className="h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          Filter
+        </button>
+        <a
+          href="/admin/visits"
+          className="h-9 rounded-md border border-input bg-background px-4 text-sm font-medium inline-flex items-center hover:bg-muted"
+        >
+          Reset
+        </a>
+      </form>
 
       <DataTable
         rows={rows}
@@ -180,12 +271,7 @@ export default async function AdminVisitsPage() {
           {
             key: "property_id", title: "Property ID", render: (row) => (
               <span className="font-mono text-xs">
-                {row.properties?.property_ref || "—"}
-                {row.properties?.id && (
-                  <span className="block text-muted-foreground" title={row.properties.id}>
-                    UUID: {row.properties.id.slice(0, 8)}…
-                  </span>
-                )}
+                {row.properties?.property_ref || "Not set"}
               </span>
             )
           },

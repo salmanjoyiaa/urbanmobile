@@ -90,7 +90,7 @@ export function PropertyCard({
           {property.status === "rented" && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden>
               <Image
-                src="/images/rented-stamp.png.png"
+                src="/images/rented-stamp.png"
                 alt="Rented"
                 width={140}
                 height={140}
