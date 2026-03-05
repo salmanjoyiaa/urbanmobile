@@ -71,39 +71,42 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
   let oldVisitingAgentId: string | null = null;
   let alreadyNotified = false;
-  if (parsed.data.status === "assigned" && parsed.data.visiting_agent_id) {
+  if ((parsed.data.status === "assigned" && parsed.data.visiting_agent_id) || parsed.data.status === "confirmed") {
     const { data: current } = await admin.supabase
       .from("visit_requests")
       .select("visiting_agent_id, notification_sent_at, visit_date, visit_time")
       .eq("id", context.params.id)
       .single();
-    oldVisitingAgentId = (current as { visiting_agent_id: string | null; notification_sent_at: string | null } | null)?.visiting_agent_id ?? null;
     alreadyNotified = !!(current as { notification_sent_at: string | null } | null)?.notification_sent_at;
 
-    const schedule = current as { visit_date: string | null; visit_time: string | null } | null;
+    if (parsed.data.status === "assigned" && parsed.data.visiting_agent_id) {
+      oldVisitingAgentId = (current as { visiting_agent_id: string | null } | null)?.visiting_agent_id ?? null;
 
-    if (!schedule?.visit_date || !schedule?.visit_time) {
-      return NextResponse.json({ error: "Visit schedule is missing date or time." }, { status: 400 });
+      const schedule = current as { visit_date: string | null; visit_time: string | null } | null;
+
+      if (!schedule?.visit_date || !schedule?.visit_time) {
+        return NextResponse.json({ error: "Visit schedule is missing date or time." }, { status: 400 });
+      }
+
+      const { count: conflictingCount } = await admin.supabase
+        .from("visit_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("visiting_agent_id", parsed.data.visiting_agent_id)
+        .eq("visit_date", schedule.visit_date)
+        .eq("visit_time", schedule.visit_time)
+        .eq("status", "assigned")
+        .neq("id", context.params.id);
+
+      if ((conflictingCount || 0) > 0) {
+        return NextResponse.json(
+          { error: "This visiting agent is already assigned on this slot." },
+          { status: 409 }
+        );
+      }
+
+      payload.visiting_agent_id = parsed.data.visiting_agent_id;
+      payload.visiting_status = "view";
     }
-
-    const { count: conflictingCount } = await admin.supabase
-      .from("visit_requests")
-      .select("id", { count: "exact", head: true })
-      .eq("visiting_agent_id", parsed.data.visiting_agent_id)
-      .eq("visit_date", schedule.visit_date)
-      .eq("visit_time", schedule.visit_time)
-      .eq("status", "assigned")
-      .neq("id", context.params.id);
-
-    if ((conflictingCount || 0) > 0) {
-      return NextResponse.json(
-        { error: "This visiting agent is already assigned on this slot." },
-        { status: 409 }
-      );
-    }
-
-    payload.visiting_agent_id = parsed.data.visiting_agent_id;
-    payload.visiting_status = "view";
   }
 
   if (parsed.data.status === "confirmed" && parsed.data.visiting_agent_id) {
@@ -166,77 +169,6 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       visitTime: formatMessageTime(visitDetails.visit_time),
       locationUrl: visitDetails.properties.location_url,
     };
-
-    if (parsed.data.status === "assigned" && visitDetails.visiting_agent) {
-      const visitingAgentProfile = visitDetails.visiting_agent;
-      const ownerAgentProfile = visitDetails.properties.agents?.profiles;
-
-      const ownerName = ownerAgentProfile?.full_name || "Agent";
-      const ownerPhone = ownerAgentProfile?.phone || "N/A";
-
-      const custContent = visitConfirmationCustomerContent({
-        ...templateParams,
-        visitingAgentName: visitingAgentProfile.full_name,
-        visitingAgentPhone: visitingAgentProfile.phone ?? "",
-      });
-      notifyJobs.push(
-        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables, visitId)
-      );
-      const propertyId = visitDetails.properties.property_ref || String(visitDetails.properties.id);
-
-      if (visitDetails.visitor_email) {
-        const emailTpl = visitConfirmedCustomerEmail({
-          ...templateParams,
-          propertyId,
-          visitingAgentName: visitingAgentProfile.full_name,
-          visitingAgentPhone: visitingAgentProfile.phone ?? "",
-        });
-        notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl, visitId }));
-      }
-
-      const visitingAgentParams = {
-        visitingAgentName: visitingAgentProfile.full_name,
-        propertyTitle: visitDetails.properties.title,
-        visitDate: visitDetails.visit_date,
-        visitTime: visitDetails.visit_time,
-        visitorName: visitDetails.visitor_name,
-        visitorPhone: visitDetails.visitor_phone,
-        ownerName,
-        ownerPhone,
-        locationUrl: visitDetails.properties.location_url,
-        instructions: visitDetails.properties.visiting_agent_instructions,
-        image: visitDetails.properties.visiting_agent_image,
-        propertyId,
-      };
-
-      if (visitingAgentProfile.phone) {
-        const vaContent = visitAssignedVisitingAgentContent(visitingAgentParams);
-        notifyJobs.push(sendWhatsAppTemplate(visitingAgentProfile.phone, vaContent.contentSid, vaContent.contentVariables, visitId));
-      }
-      if (visitingAgentProfile.email) {
-        notifyJobs.push(sendEmail({ to: visitingAgentProfile.email, ...visitAssignedVisitingAgentEmail(visitingAgentParams), visitId }));
-      }
-
-      const propertyAgentParams = {
-        ownerName,
-        propertyTitle: visitDetails.properties.title,
-        visitDate: visitDetails.visit_date,
-        visitTime: visitDetails.visit_time,
-        visitorName: visitDetails.visitor_name,
-        visitingAgentName: visitingAgentProfile.full_name,
-        visitingAgentPhone: visitingAgentProfile.phone || "N/A",
-        locationUrl: visitDetails.properties.location_url,
-        propertyId,
-      };
-
-      if (ownerAgentProfile?.phone) {
-        const paContent = visitAssignedPropertyAgentContent(propertyAgentParams);
-        notifyJobs.push(sendWhatsAppTemplate(ownerAgentProfile.phone, paContent.contentSid, paContent.contentVariables, visitId));
-      }
-      if (ownerAgentProfile?.email) {
-        notifyJobs.push(sendEmail({ to: ownerAgentProfile.email, ...visitAssignedPropertyAgentEmail(propertyAgentParams), visitId }));
-      }
-    }
 
     if (parsed.data.status === "confirmed" && visitDetails.visiting_agent) {
       const visitingAgentProfile = visitDetails.visiting_agent;
@@ -359,7 +291,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   if (notifyJobs.length > 0) {
     await Promise.allSettled(notifyJobs);
     // Stamp notification_sent_at to prevent duplicate messages
-    if (!alreadyNotified && (parsed.data.status === "assigned" || parsed.data.status === "confirmed")) {
+    if (!alreadyNotified && parsed.data.status === "confirmed") {
       await admin.supabase
         .from("visit_requests")
         .update({ notification_sent_at: new Date().toISOString() } as never)

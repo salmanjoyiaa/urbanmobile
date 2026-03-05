@@ -81,7 +81,7 @@ export function BulkAssignDialog({ visitingAgents }: BulkAssignDialogProps) {
                     `Assigned ${data.assignedCount} visits. ${data.conflictCount} skipped (Already assigned on this slot).`
                 );
             } else {
-                toast.success(`Assigned ${data.assignedCount} visits. ${data.notifiedCount} notifications queued.`);
+                toast.success(`Assigned ${data.assignedCount} visits. Notifications will send only after Confirm & Notify.`);
             }
             setOpen(false);
             setDate(undefined);

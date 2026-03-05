@@ -311,6 +311,9 @@ export function VisitRequestDialog({ visit, visitingAgents, busyAgentIds = [], t
                     <Label className="text-sm font-semibold">
                         {visit.status === "pending" ? "Step 1: Assign Visiting Team Agent" : "Visiting Team Agent"}
                     </Label>
+                    <p className="text-xs text-muted-foreground">
+                        Assigning an agent will not send WhatsApp/email. Messages send only after Step 2: Confirm & Notify.
+                    </p>
                     <div className="flex flex-col gap-2 sm:flex-row">
                         <Select value={selectedAgentId} onValueChange={setSelectedAgentId}>
                             <SelectTrigger className="w-full sm:flex-1 bg-background min-h-[44px]">

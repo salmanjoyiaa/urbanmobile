@@ -1,19 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
-import { sendWhatsAppTemplate } from "@/lib/twilio";
-import { sendEmail } from "@/lib/resend";
-import {
-    visitConfirmationCustomerContent,
-    visitAssignedVisitingAgentContent,
-    visitAssignedPropertyAgentContent,
-} from "@/lib/whatsapp-templates";
-import {
-    visitConfirmedCustomerEmail,
-    visitAssignedVisitingAgentEmail,
-    visitAssignedPropertyAgentEmail,
-} from "@/lib/email-templates";
-import { formatMessageDate, formatMessageTime } from "@/lib/format";
 
 // GET: count pending visits for a given date
 export async function GET(request: Request) {
@@ -64,19 +51,7 @@ export async function POST(request: Request) {
     // Fetch all pending visit requests for the date
     const { data: visits } = await admin.supabase
         .from("visit_requests")
-        .select(
-            `
-      id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time,
-      notification_sent_at,
-      properties:property_id (
-        id, property_ref, title, location_url, visiting_agent_instructions, visiting_agent_image,
-        agents:agent_id (
-          profile_id,
-          profiles:profile_id (full_name, phone, email)
-        )
-      )
-    `
-        )
+                .select("id, visit_time")
         .eq("status", "pending")
         .eq("visit_date", parsed.data.date)
         .order("visit_time", { ascending: true });
@@ -86,24 +61,20 @@ export async function POST(request: Request) {
     }
 
     // Fetch the visiting agent details
-    const { data: rawAgentData } = await admin.supabase
+    const { data: agentData } = await admin.supabase
         .from("profiles")
-        .select("id, full_name, phone, email")
+        .select("id")
         .eq("id", parsed.data.visiting_agent_id)
         .single();
 
-    if (!rawAgentData) {
+    if (!agentData) {
         return NextResponse.json({ error: "Visiting agent not found" }, { status: 404 });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const agentData = rawAgentData as any;
-
     let assignedCount = 0;
-    let notifiedCount = 0;
+    const notifiedCount = 0;
     let conflictCount = 0;
     const conflicts: Array<{ visitId: string; visitTime: string; reason: string }> = [];
-    const allNotifyJobs: Array<Promise<unknown>> = [];
 
     const { data: existingAssigned } = await admin.supabase
         .from("visit_requests")
@@ -163,106 +134,6 @@ export async function POST(request: Request) {
             new_agent_id: parsed.data.visiting_agent_id,
             changed_by: admin.profile.id,
         } as never);
-
-        // Skip notifications if already sent
-        if (v.notification_sent_at) continue;
-
-        const templateParams = {
-            visitorName: v.visitor_name,
-            propertyTitle: v.properties?.title || "Property",
-            visitDate: formatMessageDate(v.visit_date),
-            visitTime: formatMessageTime(v.visit_time),
-            locationUrl: v.properties?.location_url,
-        };
-
-        const propertyId = v.properties?.property_ref || String(v.properties?.id || "");
-        const ownerAgentProfile = v.properties?.agents?.profiles;
-        const ownerName = ownerAgentProfile?.full_name || "Agent";
-        const ownerPhone = ownerAgentProfile?.phone || "N/A";
-
-        // 1. Customer notification
-        const custContent = visitConfirmationCustomerContent({
-            ...templateParams,
-            visitingAgentName: agentData.full_name,
-            visitingAgentPhone: agentData.phone ?? "",
-        });
-        allNotifyJobs.push(
-            sendWhatsAppTemplate(v.visitor_phone, custContent.contentSid, custContent.contentVariables, v.id)
-        );
-        if (v.visitor_email) {
-            allNotifyJobs.push(sendEmail({
-                to: v.visitor_email,
-                ...visitConfirmedCustomerEmail({
-                    ...templateParams,
-                    propertyId,
-                    visitingAgentName: agentData.full_name,
-                    visitingAgentPhone: agentData.phone ?? "",
-                }),
-                visitId: v.id,
-            }));
-        }
-
-        // 2. Visiting Agent notification
-        const visitingAgentParams = {
-            visitingAgentName: agentData.full_name,
-            propertyTitle: v.properties?.title || "Property",
-            visitDate: v.visit_date,
-            visitTime: v.visit_time,
-            visitorName: v.visitor_name,
-            visitorPhone: v.visitor_phone,
-            ownerName,
-            ownerPhone,
-            locationUrl: v.properties?.location_url,
-            instructions: v.properties?.visiting_agent_instructions,
-            image: v.properties?.visiting_agent_image,
-            propertyId,
-        };
-
-        if (agentData.phone) {
-            const vaContent = visitAssignedVisitingAgentContent(visitingAgentParams);
-            allNotifyJobs.push(sendWhatsAppTemplate(agentData.phone, vaContent.contentSid, vaContent.contentVariables, v.id));
-        }
-        if (agentData.email) {
-            allNotifyJobs.push(sendEmail({ to: agentData.email, ...visitAssignedVisitingAgentEmail(visitingAgentParams), visitId: v.id }));
-        }
-
-        // 3. Property Agent notification
-        const propertyAgentParams = {
-            ownerName,
-            visitorName: v.visitor_name,
-            visitingAgentName: agentData.full_name,
-            visitingAgentPhone: agentData.phone || "N/A",
-        };
-
-        if (ownerAgentProfile?.phone) {
-            const paContent = visitAssignedPropertyAgentContent(propertyAgentParams);
-            allNotifyJobs.push(sendWhatsAppTemplate(ownerAgentProfile.phone, paContent.contentSid, paContent.contentVariables, v.id));
-        }
-        if (ownerAgentProfile?.email) {
-            allNotifyJobs.push(sendEmail({
-                to: ownerAgentProfile.email, ...visitAssignedPropertyAgentEmail({
-                    ...propertyAgentParams,
-                    propertyTitle: v.properties?.title || "Property",
-                    visitDate: v.visit_date,
-                    visitTime: v.visit_time,
-                    locationUrl: v.properties?.location_url,
-                    propertyId,
-                }), visitId: v.id
-            }));
-        }
-
-        // Stamp notification_sent_at
-        await admin.supabase
-            .from("visit_requests")
-            .update({ notification_sent_at: new Date().toISOString() } as never)
-            .eq("id", v.id);
-
-        notifiedCount++;
-    }
-
-    // Fire all notifications in parallel
-    if (allNotifyJobs.length > 0) {
-        await Promise.allSettled(allNotifyJobs);
     }
 
     await writeAuditLog({
