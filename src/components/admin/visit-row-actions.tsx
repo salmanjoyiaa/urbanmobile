@@ -36,6 +36,7 @@ type VisitRow = {
         } | null;
     } | null;
     visiting_agent: {
+        id: string;
         full_name: string;
     } | null;
 };
@@ -48,9 +49,10 @@ type VisitingAgent = {
 interface VisitRowActionsProps {
     visit: VisitRow;
     visitingAgents: VisitingAgent[];
+    busyAgentIds: string[];
 }
 
-export function VisitRowActions({ visit, visitingAgents }: VisitRowActionsProps) {
+export function VisitRowActions({ visit, visitingAgents, busyAgentIds }: VisitRowActionsProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -108,6 +110,7 @@ export function VisitRowActions({ visit, visitingAgents }: VisitRowActionsProps)
                 <VisitRequestDialog
                     visit={visit}
                     visitingAgents={visitingAgents}
+                    busyAgentIds={busyAgentIds}
                     triggerNode={
                         <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
                             <Eye className="mr-2 h-4 w-4" /> Manage Request

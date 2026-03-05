@@ -23,13 +23,16 @@ interface VisitingAgent {
 interface AssignVisitingAgentDropdownProps {
     visitId: string;
     visitingAgents: VisitingAgent[];
+    busyAgentIds?: string[];
 }
 
-export function AssignVisitingAgentDropdown({ visitId, visitingAgents }: AssignVisitingAgentDropdownProps) {
+export function AssignVisitingAgentDropdown({ visitId, visitingAgents, busyAgentIds = [] }: AssignVisitingAgentDropdownProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const busySet = new Set(busyAgentIds);
 
     const handleAssign = async (agentId: string) => {
+        if (busySet.has(agentId)) return;
         setLoading(true);
         try {
             const res = await fetch(`/api/admin/visits/${visitId}`, {
@@ -72,8 +75,10 @@ export function AssignVisitingAgentDropdown({ visitId, visitingAgents }: AssignV
                 <DropdownMenuSeparator />
                 <DropdownMenuRadioGroup onValueChange={handleAssign}>
                     {visitingAgents.map((agent) => (
-                        <DropdownMenuRadioItem key={agent.id} value={agent.id}>
-                            {agent.name}
+                        <DropdownMenuRadioItem key={agent.id} value={agent.id} disabled={busySet.has(agent.id)}>
+                            {busySet.has(agent.id)
+                                ? `${agent.name} — Already assigned on this slot`
+                                : agent.name}
                         </DropdownMenuRadioItem>
                     ))}
                     {visitingAgents.length === 0 && (

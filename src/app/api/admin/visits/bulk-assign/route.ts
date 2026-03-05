@@ -101,11 +101,33 @@ export async function POST(request: Request) {
 
     let assignedCount = 0;
     let notifiedCount = 0;
+    let conflictCount = 0;
+    const conflicts: Array<{ visitId: string; visitTime: string; reason: string }> = [];
     const allNotifyJobs: Array<Promise<unknown>> = [];
+
+    const { data: existingAssigned } = await admin.supabase
+        .from("visit_requests")
+        .select("visit_time")
+        .eq("visit_date", parsed.data.date)
+        .eq("visiting_agent_id", parsed.data.visiting_agent_id)
+        .eq("status", "assigned");
+
+    const blockedTimes = new Set<string>((existingAssigned || []).map((row) => String((row as { visit_time: string }).visit_time).slice(0, 5)));
 
     for (const visit of visits) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const v = visit as any;
+        const visitTime = String(v.visit_time || "").slice(0, 5);
+
+        if (blockedTimes.has(visitTime)) {
+            conflictCount++;
+            conflicts.push({
+                visitId: v.id,
+                visitTime,
+                reason: "Already assigned on this slot",
+            });
+            continue;
+        }
 
         // Update status to assigned
         const { error: updateError } = await admin.supabase
@@ -119,7 +141,19 @@ export async function POST(request: Request) {
             } as never)
             .eq("id", v.id);
 
-        if (updateError) continue;
+        if (updateError) {
+            if (updateError.code === "23505") {
+                conflictCount++;
+                conflicts.push({
+                    visitId: v.id,
+                    visitTime,
+                    reason: "Already assigned on this slot",
+                });
+            }
+            continue;
+        }
+
+        blockedTimes.add(visitTime);
         assignedCount++;
 
         // Log assignment history
@@ -241,8 +275,9 @@ export async function POST(request: Request) {
             visiting_agent_id: parsed.data.visiting_agent_id,
             assignedCount,
             notifiedCount,
+            conflictCount,
         },
     });
 
-    return NextResponse.json({ success: true, assignedCount, notifiedCount });
+    return NextResponse.json({ success: true, assignedCount, notifiedCount, conflictCount, conflicts });
 }

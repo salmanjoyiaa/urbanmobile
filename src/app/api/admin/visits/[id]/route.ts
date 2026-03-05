@@ -74,11 +74,33 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   if (parsed.data.status === "assigned" && parsed.data.visiting_agent_id) {
     const { data: current } = await admin.supabase
       .from("visit_requests")
-      .select("visiting_agent_id, notification_sent_at")
+      .select("visiting_agent_id, notification_sent_at, visit_date, visit_time")
       .eq("id", context.params.id)
       .single();
     oldVisitingAgentId = (current as { visiting_agent_id: string | null; notification_sent_at: string | null } | null)?.visiting_agent_id ?? null;
     alreadyNotified = !!(current as { notification_sent_at: string | null } | null)?.notification_sent_at;
+
+    const schedule = current as { visit_date: string | null; visit_time: string | null } | null;
+
+    if (!schedule?.visit_date || !schedule?.visit_time) {
+      return NextResponse.json({ error: "Visit schedule is missing date or time." }, { status: 400 });
+    }
+
+    const { count: conflictingCount } = await admin.supabase
+      .from("visit_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("visiting_agent_id", parsed.data.visiting_agent_id)
+      .eq("visit_date", schedule.visit_date)
+      .eq("visit_time", schedule.visit_time)
+      .eq("status", "assigned")
+      .neq("id", context.params.id);
+
+    if ((conflictingCount || 0) > 0) {
+      return NextResponse.json(
+        { error: "This visiting agent is already assigned on this slot." },
+        { status: 409 }
+      );
+    }
 
     payload.visiting_agent_id = parsed.data.visiting_agent_id;
     payload.visiting_status = "view";
@@ -94,6 +116,12 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     .eq("id", context.params.id);
 
   if (error) {
+    if (error.code === "23505") {
+      return NextResponse.json(
+        { error: "This visiting agent is already assigned on this slot." },
+        { status: 409 }
+      );
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

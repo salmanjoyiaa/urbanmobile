@@ -38,6 +38,7 @@ type VisitRow = {
     visiting_status?: string | null;
     customer_remarks?: string | null;
     visiting_agent: {
+        id: string;
         full_name: string;
     } | null;
     properties: {
@@ -58,10 +59,11 @@ type VisitingAgent = {
 interface VisitRequestDialogProps {
     visit: VisitRow;
     visitingAgents: VisitingAgent[];
+    busyAgentIds?: string[];
     triggerNode?: React.ReactNode;
 }
 
-export function VisitRequestDialog({ visit, visitingAgents, triggerNode }: VisitRequestDialogProps) {
+export function VisitRequestDialog({ visit, visitingAgents, busyAgentIds = [], triggerNode }: VisitRequestDialogProps) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [isLgLoading, setIsLgLoading] = useState(false);
@@ -69,6 +71,7 @@ export function VisitRequestDialog({ visit, visitingAgents, triggerNode }: Visit
     const [comments, setComments] = useState<CommentRow[]>([]);
     const [newComment, setNewComment] = useState("");
     const [commentLoading, setCommentLoading] = useState(false);
+    const busySet = new Set(busyAgentIds);
 
     const fetchComments = useCallback(async () => {
         const res = await fetch(`/api/admin/visits/${visit.id}/comments`);
@@ -315,8 +318,10 @@ export function VisitRequestDialog({ visit, visitingAgents, triggerNode }: Visit
                             </SelectTrigger>
                             <SelectContent>
                                 {visitingAgents.map((agent) => (
-                                    <SelectItem key={agent.id} value={agent.id}>
-                                        {agent.name}
+                                    <SelectItem key={agent.id} value={agent.id} disabled={busySet.has(agent.id)}>
+                                        {busySet.has(agent.id)
+                                            ? `${agent.name} — Already assigned on this slot`
+                                            : agent.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

@@ -37,10 +37,22 @@ type VisitRow = {
     } | null;
   } | null;
   visiting_agent: {
+    id: string;
     full_name: string;
     phone: string | null;
   } | null;
 };
+
+type AssignedVisitSlot = {
+  id: string;
+  visit_date: string;
+  visit_time: string;
+  visiting_agent_id: string;
+};
+
+function normalizeVisitTime(time: string): string {
+  return String(time || "").slice(0, 5);
+}
 
 function buildCustomerMessage(row: VisitRow): string {
   const property = row.properties?.title || "the property";
@@ -142,7 +154,7 @@ export default async function AdminVisitsPage({
     .select(
       `
       id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status, visiting_status, customer_remarks, admin_notes,
-      visiting_agent:visiting_agent_id(full_name, phone),
+      visiting_agent:visiting_agent_id(id, full_name, phone),
       properties:property_id (
         id, title, property_ref, location_url, visiting_agent_image, visiting_agent_instructions,
         agents:agent_id (
@@ -190,6 +202,28 @@ export default async function AdminVisitsPage({
     id: a.id,
     name: a.profiles?.full_name || "Unknown",
   }));
+
+  const { data: assignedSlotsData } = await supabase
+    .from("visit_requests")
+    .select("id, visit_date, visit_time, visiting_agent_id")
+    .eq("status", "assigned")
+    .not("visiting_agent_id", "is", null);
+
+  const assignedBySlot = new Map<string, Array<{ visitId: string; agentId: string }>>();
+  for (const entry of (assignedSlotsData || []) as AssignedVisitSlot[]) {
+    const key = `${entry.visit_date}|${normalizeVisitTime(entry.visit_time)}`;
+    const bucket = assignedBySlot.get(key) || [];
+    bucket.push({ visitId: entry.id, agentId: entry.visiting_agent_id });
+    assignedBySlot.set(key, bucket);
+  }
+
+  const busyAgentIdsForVisit = (row: VisitRow): string[] => {
+    const key = `${row.visit_date}|${normalizeVisitTime(row.visit_time)}`;
+    const assignments = assignedBySlot.get(key) || [];
+    return assignments
+      .filter((assignment) => assignment.visitId !== row.id)
+      .map((assignment) => assignment.agentId);
+  };
 
   return (
     <div className="space-y-6">
@@ -351,7 +385,11 @@ export default async function AdminVisitsPage({
             key: "actions",
             title: "Actions",
             render: (row) => (
-              <VisitRowActions visit={row as VisitRow} visitingAgents={visitingAgents} />
+              <VisitRowActions
+                visit={row as VisitRow}
+                visitingAgents={visitingAgents}
+                busyAgentIds={busyAgentIdsForVisit(row as VisitRow)}
+              />
             ),
           },
         ]}

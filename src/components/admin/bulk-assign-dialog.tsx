@@ -76,7 +76,13 @@ export function BulkAssignDialog({ visitingAgents }: BulkAssignDialogProps) {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Bulk assign failed");
 
-            toast.success(`Assigned ${data.assignedCount} visits. ${data.notifiedCount} notifications queued.`);
+            if (data.conflictCount && data.conflictCount > 0) {
+                toast.success(
+                    `Assigned ${data.assignedCount} visits. ${data.conflictCount} skipped (Already assigned on this slot).`
+                );
+            } else {
+                toast.success(`Assigned ${data.assignedCount} visits. ${data.notifiedCount} notifications queued.`);
+            }
             setOpen(false);
             setDate(undefined);
             setAgentId("");
