@@ -11,9 +11,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { formatTime } from "@/lib/format";
+import { formatDate, formatTime } from "@/lib/format";
 import { toast } from "sonner";
 import { MapPin, Phone, User, Mail, FileText, Image as ImageIcon, Send, MessageSquare } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 export type AssignmentRow = {
     id: string;
@@ -26,6 +34,8 @@ export type AssignmentRow = {
     status: string;
     visiting_status: string;
     customer_remarks: string | null;
+    commission_received_amount?: number | null;
+    commission_received_at?: string | null;
     admin_notes?: string | null;
     properties: {
         title: string;
@@ -200,14 +210,22 @@ const PipelineActions = ({
     setRemarks,
     showReschedule,
     setShowReschedule,
+    commissionModalOpen,
+    setCommissionModalOpen,
+    commissionAmount,
+    setCommissionAmount,
 }: {
     visit: AssignmentRow;
-    updateStatus: (id: string, status: string, extra?: Record<string, string>) => void;
+    updateStatus: (id: string, status: string, extra?: Record<string, string | number>) => void;
     loadingId: string | null;
     remarks: Record<string, string>;
     setRemarks: (r: Record<string, string>) => void;
     showReschedule: boolean;
     setShowReschedule: (v: boolean) => void;
+    commissionModalOpen: boolean;
+    setCommissionModalOpen: (v: boolean) => void;
+    commissionAmount: string;
+    setCommissionAmount: (v: string) => void;
 }) => {
     if (showReschedule) {
         return (
@@ -285,12 +303,55 @@ const PipelineActions = ({
                     </Button>
                 </div>
             );
-        case "deal_pending":
+        case "deal_pending": {
+            const amount = Number(commissionAmount);
+            const canSubmitAmount = Number.isFinite(amount) && amount > 0;
             return (
-                <Button size="sm" variant="outline" className="text-green-600" onClick={() => updateStatus(visit.id, "commission_got")} disabled={loadingId === visit.id}>
-                    Commission Received
-                </Button>
+                <>
+                    <Button size="sm" variant="outline" className="text-green-600" onClick={() => setCommissionModalOpen(true)} disabled={loadingId === visit.id}>
+                        Commission Received
+                    </Button>
+                    <Dialog open={commissionModalOpen} onOpenChange={setCommissionModalOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Enter Commission Amount</DialogTitle>
+                                <DialogDescription>
+                                    Add the received commission amount before marking this visit as commission received.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-2">
+                                <Label htmlFor={`commission-amount-${visit.id}`} className="text-xs font-semibold">
+                                    Commission Received (SAR)
+                                </Label>
+                                <Input
+                                    id={`commission-amount-${visit.id}`}
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={commissionAmount}
+                                    onChange={(e) => setCommissionAmount(e.target.value)}
+                                    placeholder="e.g. 5000"
+                                />
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setCommissionModalOpen(false)}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        updateStatus(visit.id, "commission_got", { commission_received_amount: amount });
+                                        setCommissionModalOpen(false);
+                                    }}
+                                    disabled={!canSubmitAmount || loadingId === visit.id}
+                                >
+                                    Confirm Commission Received
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </>
             );
+            }
         case "commission_got":
             return (
                 <Button size="sm" className="bg-navy hover:bg-navy/90" onClick={() => updateStatus(visit.id, "deal_close")} disabled={loadingId === visit.id}>
@@ -316,6 +377,8 @@ export function VisitingAgentClient({
     const [loadingId, setLoadingId] = useState<string | null>(null);
     const [remarks, setRemarks] = useState<Record<string, string>>({});
     const [rescheduleOpen, setRescheduleOpen] = useState<Record<string, boolean>>({});
+    const [commissionModalOpenByVisit, setCommissionModalOpenByVisit] = useState<Record<string, boolean>>({});
+    const [commissionAmountByVisit, setCommissionAmountByVisit] = useState<Record<string, string>>({});
 
     const selectedDateVisits = rows
         .filter((row) =>
@@ -323,7 +386,7 @@ export function VisitingAgentClient({
         )
         .sort((a, b) => String(a.visit_time).localeCompare(String(b.visit_time)));
 
-    const updateStatus = async (id: string, newStatus: string, extra?: Record<string, string>) => {
+    const updateStatus = async (id: string, newStatus: string, extra?: Record<string, string | number>) => {
         setLoadingId(id);
         try {
             const res = await fetch(`/api/agent/visits/${id}`, {
@@ -341,6 +404,9 @@ export function VisitingAgentClient({
             }
             toast.success("Pipeline updated successfully");
             setRescheduleOpen((prev) => ({ ...prev, [id]: false }));
+            if (newStatus === "commission_got") {
+                setCommissionAmountByVisit((prev) => ({ ...prev, [id]: "" }));
+            }
             router.refresh();
         } catch (err: unknown) {
             toast.error(err instanceof Error ? err.message : "An unknown error occurred");
@@ -393,7 +459,7 @@ export function VisitingAgentClient({
 
             <div className="md:col-span-8 lg:col-span-8">
                 <h2 className="text-xl font-semibold mb-4 text-navy">
-                    Assignments on {date ? format(date, "PPP") : "Selected Date"}
+                    Assignments on {date ? formatDate(date) : "Selected Date"}
                 </h2>
 
                 {selectedDateVisits.length === 0 ? (
@@ -525,6 +591,10 @@ export function VisitingAgentClient({
                                             setRemarks={setRemarks}
                                             showReschedule={rescheduleOpen[visit.id] || false}
                                             setShowReschedule={(v) => setRescheduleOpen(prev => ({ ...prev, [visit.id]: v }))}
+                                            commissionModalOpen={commissionModalOpenByVisit[visit.id] || false}
+                                            setCommissionModalOpen={(v) => setCommissionModalOpenByVisit((prev) => ({ ...prev, [visit.id]: v }))}
+                                            commissionAmount={commissionAmountByVisit[visit.id] || ""}
+                                            setCommissionAmount={(v) => setCommissionAmountByVisit((prev) => ({ ...prev, [visit.id]: v }))}
                                         />
                                     </CardFooter>
                                 )}

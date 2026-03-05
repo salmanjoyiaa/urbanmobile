@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Building2, Calendar, Clock, Phone, User, Trash2, Send, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/format";
 
 type CommentRow = {
     id: string;
@@ -230,7 +231,7 @@ export function VisitRequestDialog({ visit, visitingAgents, busyAgentIds = [], t
                             <Label className="text-muted-foreground text-xs uppercase tracking-wider">Schedule</Label>
                             <div className="flex items-center gap-2 mt-1">
                                 <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <span>{format(new Date(visit.visit_date), "MMMM d, yyyy")}</span>
+                                <span>{formatDate(visit.visit_date)}</span>
                             </div>
                             <div className="flex items-center gap-2 mt-1">
                                 <Clock className="h-4 w-4 text-muted-foreground shrink-0" />

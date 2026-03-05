@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { format, isSameDay, parseISO } from "date-fns";
+import { isSameDay, parseISO } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatTime } from "@/lib/format";
+import { formatDate, formatTime } from "@/lib/format";
 
 type VisitRow = {
     id: string;
@@ -61,7 +61,7 @@ export function AgentVisitsClient({ rows }: { rows: VisitRow[] }) {
 
             <div className="md:col-span-8 lg:col-span-7">
                 <h2 className="text-xl font-semibold mb-4 text-navy">
-                    Visits on {date ? format(date, "PPP") : "Selected Date"}
+                    Visits on {date ? formatDate(date) : "Selected Date"}
                 </h2>
 
                 {selectedDateVisits.length === 0 ? (

@@ -4,6 +4,7 @@ import { getAdminRouteContext } from "@/lib/admin";
 import { sendWhatsApp } from "@/lib/twilio";
 import { sendEmail } from "@/lib/resend";
 import { dayVisitsSummaryEmail } from "@/lib/email-templates";
+import { formatMonthDayYear } from "@/lib/format";
 
 const bodySchema = z
   .object({
@@ -97,7 +98,7 @@ function buildDigestText({
     "",
     `Daily visit summary for ${date}:`,
     "",
-    ...lines,
+    lines.join("\n\n"),
     "",
     "Please be prepared for all scheduled visits. Contact admin if any slot needs rescheduling.",
     "",
@@ -127,6 +128,7 @@ export async function POST(request: Request) {
   }
 
   const { date, recipientType, profileId, agentId, preview, emailOnly } = parsed.data;
+  const formattedDate = formatMonthDayYear(date);
 
   let visits: SummaryVisit[] = [];
 
@@ -188,7 +190,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const text = buildDigestText({ recipientType, agentName: agentNameP, date, visits });
+    const text = buildDigestText({ recipientType, agentName: agentNameP, date: formattedDate, visits });
 
     return NextResponse.json({
       success: true,
@@ -242,7 +244,7 @@ export async function POST(request: Request) {
   }
 
   if (!emailOnly && agentPhone) {
-    const digestBody = buildDigestText({ recipientType, agentName, date, visits });
+    const digestBody = buildDigestText({ recipientType, agentName, date: formattedDate, visits });
     whatsAppJobs.push(
       sendWhatsApp(agentPhone, digestBody).then((result) => {
         if (result.success) whatsAppCount += 1;
@@ -256,7 +258,7 @@ export async function POST(request: Request) {
   if (agentEmail) {
     const emailTpl = dayVisitsSummaryEmail({
       agentName,
-      date,
+      date: formattedDate,
       forPropertyAgent: recipientType === "property_agent",
       visits: emailVisitRows,
     });

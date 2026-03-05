@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { cacheDel } from "@/lib/redis";
 import { sendWhatsApp, sendWhatsAppTemplate } from "@/lib/twilio";
 import { sendEmail } from "@/lib/resend";
 import {
@@ -19,6 +20,12 @@ import {
   visitAssignedPropertyAgentEmail,
 } from "@/lib/email-templates";
 import { formatMessageDate, formatMessageTime } from "@/lib/format";
+
+function revalidateVisitSurfaces() {
+  revalidatePath("/admin/visits", "page");
+  revalidatePath("/agent/visits", "page");
+  revalidatePath("/agent/assignments", "page");
+}
 
 const payloadSchema = z.object({
   status: z.enum(["confirmed", "cancelled", "completed", "assigned"]),
@@ -201,7 +208,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       const visitingAgentParams = {
         visitingAgentName: visitingAgentProfile.full_name,
         propertyTitle: visitDetails.properties.title,
-        visitDate: visitDetails.visit_date,
+        visitDate: formatMessageDate(visitDetails.visit_date),
         visitTime: visitDetails.visit_time,
         visitorName: visitDetails.visitor_name,
         visitorPhone: visitDetails.visitor_phone,
@@ -225,7 +232,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       const propertyAgentParams = {
         ownerName: ownerName,
         propertyTitle: visitDetails.properties.title,
-        visitDate: visitDetails.visit_date,
+        visitDate: formatMessageDate(visitDetails.visit_date),
         visitTime: visitDetails.visit_time,
         visitorName: visitDetails.visitor_name,
         visitingAgentName: visitingAgentProfile.full_name,
@@ -259,7 +266,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
           agentName: agent.profiles.full_name || "Agent",
           visitorName: visitDetails.visitor_name,
           propertyTitle: visitDetails.properties.title,
-          visitDate: visitDetails.visit_date,
+          visitDate: formatMessageDate(visitDetails.visit_date),
           visitTime: visitDetails.visit_time,
         });
         notifyJobs.push(sendEmail({ to: agent.profiles.email, ...agentEmailTpl, visitId }));
@@ -311,7 +318,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     },
   });
 
-  revalidatePath("/admin/visits", "page");
+  revalidateVisitSurfaces();
 
   return NextResponse.json({ success: true });
 }
@@ -343,6 +350,17 @@ export async function PUT(request: Request, context: { params: { id: string } })
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
   }
 
+  const { data: currentVisit } = await admin.supabase
+    .from("visit_requests")
+    .select("property_id, visit_date")
+    .eq("id", context.params.id)
+    .maybeSingle();
+
+  const existingVisit = currentVisit as { property_id: string | null; visit_date: string | null } | null;
+  if (!existingVisit?.property_id) {
+    return NextResponse.json({ error: "Visit not found" }, { status: 404 });
+  }
+
   const { error } = await admin.supabase
     .from("visit_requests")
     .update({
@@ -359,6 +377,15 @@ export async function PUT(request: Request, context: { params: { id: string } })
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  const oldDate = existingVisit.visit_date;
+  const newDate = parsed.data.visit_date;
+  const propertyId = existingVisit.property_id;
+
+  await cacheDel(`slots:${propertyId}:${newDate}`);
+  if (oldDate && oldDate !== newDate) {
+    await cacheDel(`slots:${propertyId}:${oldDate}`);
+  }
+
   await writeAuditLog({
     actorId: admin.profile.id,
     action: "visit_edited",
@@ -367,7 +394,7 @@ export async function PUT(request: Request, context: { params: { id: string } })
     metadata: { ...parsed.data },
   });
 
-  revalidatePath("/admin/visits", "page");
+  revalidateVisitSurfaces();
   return NextResponse.json({ success: true });
 }
 
@@ -395,7 +422,7 @@ export async function DELETE(request: Request, context: { params: { id: string }
     metadata: {},
   });
 
-  revalidatePath("/admin/visits", "page");
+  revalidateVisitSurfaces();
 
   return NextResponse.json({ success: true });
 }

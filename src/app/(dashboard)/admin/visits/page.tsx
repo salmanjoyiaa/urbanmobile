@@ -3,7 +3,6 @@ import { DataTable } from "@/components/dashboard/data-table";
 
 import { VisitRowActions } from "@/components/admin/visit-row-actions";
 import { SendDayVisits } from "@/components/admin/send-day-visits";
-import { BulkAssignDialog } from "@/components/admin/bulk-assign-dialog";
 import { RescheduleReviewActions } from "@/components/admin/reschedule-review-actions";
 import { MessageCircle } from "lucide-react";
 
@@ -11,6 +10,22 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate, formatTime, formatMessageDate, formatMessageTime } from "@/lib/format";
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  assigned: "Assigned",
+  confirmed: "Confirmed",
+  cancelled: "Cancelled",
+  completed: "Completed",
+};
+
+const STATUS_BADGE_CLASSES: Record<string, string> = {
+  pending: "border-amber-200 bg-amber-50 text-amber-800",
+  assigned: "border-blue-200 bg-blue-50 text-blue-800",
+  confirmed: "border-green-200 bg-green-50 text-green-800",
+  cancelled: "border-red-200 bg-red-50 text-red-800",
+  completed: "border-emerald-200 bg-emerald-50 text-emerald-800",
+};
 
 type VisitRow = {
   id: string;
@@ -183,6 +198,15 @@ export default async function AdminVisitsPage({
   const { data } = (await query) as { data: VisitRow[] | null };
 
   const rows = data || [];
+  const summaryDate = searchParams.date_from || new Date().toISOString().slice(0, 10);
+  const summaryRows = rows.filter((row) => row.visit_date === summaryDate);
+  const summaryCounts = {
+    pending: summaryRows.filter((row) => row.status === "pending").length,
+    assigned: summaryRows.filter((row) => row.status === "assigned").length,
+    confirmed: summaryRows.filter((row) => row.status === "confirmed").length,
+    cancelled: summaryRows.filter((row) => row.status === "cancelled").length,
+    completed: summaryRows.filter((row) => row.status === "completed").length,
+  };
 
   const { data: agentsData } = await supabase
     .from("agents")
@@ -237,9 +261,66 @@ export default async function AdminVisitsPage({
         <p className="text-sm text-muted-foreground">Orchestrate and route scheduled visits.</p>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="grid gap-4 lg:grid-cols-2">
         <SendDayVisits visitingAgents={visitingAgents} propertyAgents={propertyAgents} />
-        <BulkAssignDialog visitingAgents={visitingAgents} />
+        <div className="rounded-xl border bg-card p-4 shadow-sm">
+          <div className="mb-3">
+            <h2 className="text-base font-semibold text-navy">Day Visit Summary</h2>
+            <p className="text-xs text-muted-foreground">Status breakdown for {formatDate(summaryDate)} and required color legend.</p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="overflow-hidden rounded-md border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-medium">Status</th>
+                    <th className="px-3 py-2 text-right font-medium">Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(summaryCounts).map(([status, count]) => (
+                    <tr key={status} className="border-t">
+                      <td className="px-3 py-2">
+                        <Badge variant="outline" className={STATUS_BADGE_CLASSES[status] || ""}>
+                          {STATUS_LABELS[status] || status}
+                        </Badge>
+                      </td>
+                      <td className="px-3 py-2 text-right font-semibold">{count}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-t bg-muted/20">
+                    <td className="px-3 py-2 font-semibold">Total</td>
+                    <td className="px-3 py-2 text-right font-semibold">{summaryRows.length}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="overflow-hidden rounded-md border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-medium">Color</th>
+                    <th className="px-3 py-2 text-left font-medium">Meaning</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.keys(STATUS_LABELS).map((status) => (
+                    <tr key={status} className="border-t">
+                      <td className="px-3 py-2">
+                        <Badge variant="outline" className={STATUS_BADGE_CLASSES[status] || ""}>
+                          {STATUS_LABELS[status]}
+                        </Badge>
+                      </td>
+                      <td className="px-3 py-2 text-muted-foreground">{STATUS_LABELS[status]} visits</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -344,7 +425,15 @@ export default async function AdminVisitsPage({
               </div>
             ),
           },
-          { key: "status", title: "Status", render: (row) => <Badge className="capitalize">{row.status}</Badge> },
+          {
+            key: "status",
+            title: "Status",
+            render: (row) => (
+              <Badge variant="outline" className={STATUS_BADGE_CLASSES[row.status] || ""}>
+                {STATUS_LABELS[row.status] || row.status}
+              </Badge>
+            )
+          },
           {
             key: "reschedule",
             title: "Reschedule",

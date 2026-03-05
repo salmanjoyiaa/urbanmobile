@@ -21,6 +21,7 @@ const payloadSchema = z.object({
     reschedule_reason: z.string().optional().nullable(),
     reschedule_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD").optional().nullable(),
     reschedule_time: z.string().regex(/^\d{2}:\d{2}$/, "Time must be HH:MM").optional().nullable(),
+    commission_received_amount: z.coerce.number().positive("Commission amount must be greater than zero").optional(),
 });
 
 function timeToMinutes(time: string) {
@@ -58,6 +59,13 @@ export async function PATCH(request: Request, context: { params: { id: string } 
                 { status: 400 }
             );
         }
+    }
+
+    if (parsed.data.visiting_status === "commission_got" && !parsed.data.commission_received_amount) {
+        return NextResponse.json(
+            { error: "Commission amount is required before marking commission received" },
+            { status: 400 }
+        );
     }
 
     const { data: currentVisit } = (await supabase
@@ -198,6 +206,12 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         visiting_status: parsed.data.visiting_status,
         ...(parsed.data.visiting_status === "visit_done" ? { status: "completed" } : {}),
         ...(parsed.data.customer_remarks !== undefined ? { customer_remarks: parsed.data.customer_remarks } : {}),
+        ...(parsed.data.visiting_status === "commission_got"
+            ? {
+                commission_received_amount: parsed.data.commission_received_amount,
+                commission_received_at: new Date().toISOString(),
+            }
+            : {}),
     };
 
     const { error } = await supabase
