@@ -20,13 +20,16 @@ export type AssignmentRow = {
     visitor_name: string;
     visitor_email: string;
     visitor_phone: string;
+    visitor_message?: string | null;
     visit_date: string;
     visit_time: string;
     status: string;
     visiting_status: string;
     customer_remarks: string | null;
+    admin_notes?: string | null;
     properties: {
         title: string;
+        property_ref?: string | null;
         location_url: string | null;
         visiting_agent_instructions: string | null;
         visiting_agent_image: string | null;
@@ -37,6 +40,17 @@ export type AssignmentRow = {
             } | null;
         } | null;
     } | null;
+};
+
+export type AssignedPropertyRow = {
+    id: string;
+    title: string;
+    property_ref: string | null;
+};
+
+export type AssignmentHistoryItem = {
+    id: string;
+    created_at: string;
 };
 
 type CommentRow = {
@@ -117,7 +131,7 @@ function CommentsSection({ visitId }: { visitId: string }) {
 
     const fetchComments = useCallback(async () => {
         try {
-            const res = await fetch(`/api/admin/visits/${visitId}/comments`);
+            const res = await fetch(`/api/agent/visits/${visitId}/comments`);
             if (res.ok) {
                 const data = await res.json();
                 setComments(data.comments || []);
@@ -131,7 +145,7 @@ function CommentsSection({ visitId }: { visitId: string }) {
         if (!newComment.trim()) return;
         setLoading(true);
         try {
-            const res = await fetch(`/api/admin/visits/${visitId}/comments`, {
+            const res = await fetch(`/api/agent/visits/${visitId}/comments`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ content: newComment.trim() }),
@@ -288,16 +302,26 @@ const PipelineActions = ({
     }
 };
 
-export function VisitingAgentClient({ rows }: { rows: AssignmentRow[] }) {
+export function VisitingAgentClient({
+    rows,
+    assignedProperties,
+    assignmentHistoryByVisit,
+}: {
+    rows: AssignmentRow[];
+    assignedProperties: AssignedPropertyRow[];
+    assignmentHistoryByVisit: Record<string, AssignmentHistoryItem[]>;
+}) {
     const router = useRouter();
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [loadingId, setLoadingId] = useState<string | null>(null);
     const [remarks, setRemarks] = useState<Record<string, string>>({});
     const [rescheduleOpen, setRescheduleOpen] = useState<Record<string, boolean>>({});
 
-    const selectedDateVisits = rows.filter((row) =>
+    const selectedDateVisits = rows
+        .filter((row) =>
         date ? isSameDay(parseISO(row.visit_date), date) : false
-    );
+        )
+        .sort((a, b) => String(a.visit_time).localeCompare(String(b.visit_time)));
 
     const updateStatus = async (id: string, newStatus: string, extra?: Record<string, string>) => {
         setLoadingId(id);
@@ -328,6 +352,7 @@ export function VisitingAgentClient({ rows }: { rows: AssignmentRow[] }) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             <div className="md:col-span-4 lg:col-span-4 flex justify-center md:justify-start">
+                <div className="w-full space-y-4">
                 <Card className="w-full h-max">
                     <CardHeader>
                         <CardTitle>Calendar</CardTitle>
@@ -344,6 +369,26 @@ export function VisitingAgentClient({ rows }: { rows: AssignmentRow[] }) {
                         />
                     </CardContent>
                 </Card>
+
+                <Card className="w-full h-max">
+                    <CardHeader>
+                        <CardTitle>Assigned Properties</CardTitle>
+                        <CardDescription>Properties currently assigned by admin.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2 text-sm">
+                        {assignedProperties.length === 0 ? (
+                            <p className="text-muted-foreground">No assigned properties found.</p>
+                        ) : (
+                            assignedProperties.map((property) => (
+                                <div key={property.id} className="rounded-md border p-2">
+                                    <div className="font-medium">{property.title}</div>
+                                    <div className="text-xs text-muted-foreground">Property ID: {property.property_ref || "Not set"}</div>
+                                </div>
+                            ))
+                        )}
+                    </CardContent>
+                </Card>
+                </div>
             </div>
 
             <div className="md:col-span-8 lg:col-span-8">
@@ -364,6 +409,7 @@ export function VisitingAgentClient({ rows }: { rows: AssignmentRow[] }) {
                                         <div>
                                             <CardTitle className="text-lg text-navy">{visit.properties?.title || "Unknown Property"}</CardTitle>
                                             <CardDescription className="mt-1 flex items-center gap-2 flex-wrap">
+                                                <span className="font-mono text-xs">Property ID: {visit.properties?.property_ref || "Not set"}</span>
                                                 <span>{formatTime(visit.visit_time)}</span>
                                                 {visit.properties?.location_url && (
                                                     <a href={visit.properties.location_url} target="_blank" rel="noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
@@ -393,6 +439,11 @@ export function VisitingAgentClient({ rows }: { rows: AssignmentRow[] }) {
                                         {visit.visitor_email && (
                                             <p className="text-muted-foreground flex items-center gap-1">
                                                 <Mail className="h-3 w-3" /> {visit.visitor_email}
+                                            </p>
+                                        )}
+                                        {visit.visitor_message && (
+                                            <p className="mt-2 rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
+                                                Customer Message: {visit.visitor_message}
                                             </p>
                                         )}
                                     </div>
@@ -437,6 +488,30 @@ export function VisitingAgentClient({ rows }: { rows: AssignmentRow[] }) {
                                             </p>
                                         </div>
                                     )}
+
+                                    {visit.admin_notes && (
+                                        <div className="sm:col-span-2">
+                                            <p className="font-semibold text-foreground">Admin Notes</p>
+                                            <p className="bg-muted p-2 rounded text-muted-foreground text-xs mt-1 whitespace-pre-wrap">
+                                                {visit.admin_notes}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    <div className="sm:col-span-2">
+                                        <p className="font-semibold text-foreground text-xs">Assignment History</p>
+                                        {assignmentHistoryByVisit[visit.id]?.length ? (
+                                            <div className="mt-1 space-y-1">
+                                                {assignmentHistoryByVisit[visit.id].map((item) => (
+                                                    <p key={item.id} className="text-xs text-muted-foreground">
+                                                        Reassigned: {format(new Date(item.created_at), "MMM d, yyyy h:mm a")}
+                                                    </p>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs text-muted-foreground mt-1">No reassignment history.</p>
+                                        )}
+                                    </div>
 
                                     <CommentsSection visitId={visit.id} />
                                 </CardContent>

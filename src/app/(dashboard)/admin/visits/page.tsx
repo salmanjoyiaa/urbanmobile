@@ -4,6 +4,7 @@ import { DataTable } from "@/components/dashboard/data-table";
 import { VisitRowActions } from "@/components/admin/visit-row-actions";
 import { SendDayVisits } from "@/components/admin/send-day-visits";
 import { BulkAssignDialog } from "@/components/admin/bulk-assign-dialog";
+import { RescheduleReviewActions } from "@/components/admin/reschedule-review-actions";
 import { MessageCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,9 @@ type VisitRow = {
   visitor_email: string;
   visitor_phone: string;
   visitor_message?: string | null;
+  request_source?: string | null;
+  parent_visit_id?: string | null;
+  reschedule_reason?: string | null;
   visit_date: string;
   visit_time: string;
   status: string;
@@ -154,7 +158,7 @@ export default async function AdminVisitsPage({
     .from("visit_requests")
     .select(
       `
-      id, visitor_name, visitor_email, visitor_phone, visitor_message, visit_date, visit_time, status, visiting_status, customer_remarks, admin_notes,
+      id, visitor_name, visitor_email, visitor_phone, visitor_message, request_source, parent_visit_id, reschedule_reason, visit_date, visit_time, status, visiting_status, customer_remarks, admin_notes,
       visiting_agent:visiting_agent_id(id, full_name, phone),
       properties:property_id (
         id, title, property_ref, location_url, visiting_agent_image, visiting_agent_instructions,
@@ -341,6 +345,17 @@ export default async function AdminVisitsPage({
             ),
           },
           { key: "status", title: "Status", render: (row) => <Badge className="capitalize">{row.status}</Badge> },
+          {
+            key: "reschedule",
+            title: "Reschedule",
+            render: (row) => row.request_source === "visiting_agent_reschedule" ? (
+              <div className="space-y-1">
+                <Badge variant="outline" className="text-[10px]">Reschedule Request</Badge>
+                <div className="text-xs text-muted-foreground">{row.reschedule_reason || "No reason"}</div>
+                {row.status === "pending" ? <RescheduleReviewActions visitId={row.id} /> : null}
+              </div>
+            ) : "—",
+          },
           {
             key: "whatsapp",
             title: "WhatsApp",
