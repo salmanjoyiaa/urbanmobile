@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { generateSlotsInTimeframe, formatSlotLabel } from "@/lib/slots";
 import { createClient } from "@/lib/supabase/client";
+import { VISIT_BOOKING_WINDOW_DAYS } from "@/lib/constants";
 
 type BlockedSlot = { id: string; date: string; time: string };
 type Property = { id: string; title: string; status: string };
@@ -19,6 +20,8 @@ type VisitHourRow = {
   start_time: string;
   end_time: string;
 };
+
+const DEFAULT_PROPERTY_STATUSES = ["available", "rented", "reserved", "sold"];
 
 const WEEK_DAYS = [
   { key: 0, label: "Sunday" },
@@ -50,6 +53,13 @@ export default function AdminSlotsPage() {
   const [savingSchedule, setSavingSchedule] = useState(false);
   const [toggling, setToggling] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<Set<string>>(new Set(DEFAULT_PROPERTY_STATUSES));
+  const [bulkDays, setBulkDays] = useState<Set<number>>(new Set([1, 2, 3, 4, 5]));
+  const [bulkOpen, setBulkOpen] = useState(true);
+  const [bulkStartTime, setBulkStartTime] = useState("08:00");
+  const [bulkEndTime, setBulkEndTime] = useState("19:00");
+  const [bookingWindowDays, setBookingWindowDays] = useState<number>(VISIT_BOOKING_WINDOW_DAYS);
+  const [savingBookingWindow, setSavingBookingWindow] = useState(false);
 
   const dateStr = date ? format(date, "yyyy-MM-dd") : "";
 
@@ -113,6 +123,23 @@ export default function AdminSlotsPage() {
   useEffect(() => {
     fetchSchedule();
   }, [fetchSchedule]);
+
+  useEffect(() => {
+    const fetchVisitSettings = async () => {
+      try {
+        const res = await fetch("/api/admin/visit-settings");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load booking settings");
+        if (typeof data.booking_window_days === "number") {
+          setBookingWindowDays(data.booking_window_days);
+        }
+      } catch {
+        // keep fallback
+      }
+    };
+
+    fetchVisitSettings();
+  }, []);
 
   const fetchBlocked = useCallback(async () => {
     if (!dateStr || !selectedPropertyId) return;
@@ -184,9 +211,80 @@ export default function AdminSlotsPage() {
     }
   };
 
-  const filteredProperties = search
-    ? properties.filter((p) => p.title.toLowerCase().includes(search.toLowerCase()))
-    : properties;
+  const toggleStatusFilter = (status: string) => {
+    setStatusFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(status)) {
+        next.delete(status);
+      } else {
+        next.add(status);
+      }
+      return next;
+    });
+  };
+
+  const toggleBulkDay = (weekday: number) => {
+    setBulkDays((prev) => {
+      const next = new Set(prev);
+      if (next.has(weekday)) {
+        next.delete(weekday);
+      } else {
+        next.add(weekday);
+      }
+      return next;
+    });
+  };
+
+  const applyBulkDefaults = () => {
+    if (bulkDays.size === 0) {
+      toast.error("Select at least one day to apply defaults");
+      return;
+    }
+    if (bulkStartTime >= bulkEndTime) {
+      toast.error("Start time must be earlier than end time");
+      return;
+    }
+
+    setSchedule((prev) => prev.map((row) => (
+      bulkDays.has(row.weekday)
+        ? {
+          ...row,
+          is_open: bulkOpen,
+          start_time: bulkStartTime,
+          end_time: bulkEndTime,
+        }
+        : row
+    )));
+    toast.success("Default hours applied to selected days");
+  };
+
+  const saveBookingWindow = async () => {
+    setSavingBookingWindow(true);
+    try {
+      const safeValue = Math.max(1, Math.min(60, Math.trunc(bookingWindowDays || 1)));
+      const res = await fetch("/api/admin/visit-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ booking_window_days: safeValue }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save booking window");
+      setBookingWindowDays(data.booking_window_days);
+      toast.success("Booking window updated");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save booking window");
+    } finally {
+      setSavingBookingWindow(false);
+    }
+  };
+
+  const filteredProperties = properties.filter((property) => {
+    const matchSearch = search
+      ? property.title.toLowerCase().includes(search.toLowerCase())
+      : true;
+    const matchStatus = statusFilter.size === 0 ? true : statusFilter.has(property.status);
+    return matchSearch && matchStatus;
+  });
 
   const selectedLabel = properties.find((p) => p.id === selectedPropertyId)?.title || "";
 
@@ -220,6 +318,24 @@ export default function AdminSlotsPage() {
                   className="flex h-9 w-full max-w-sm rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 />
               </div>
+              <div className="flex flex-wrap gap-2">
+                {DEFAULT_PROPERTY_STATUSES.map((status) => {
+                  const checked = statusFilter.has(status);
+                  return (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => toggleStatusFilter(status)}
+                      className={`h-8 px-3 rounded-md border text-xs capitalize transition-colors ${checked
+                        ? "bg-primary/10 border-primary text-primary"
+                        : "bg-background border-input text-muted-foreground"
+                        }`}
+                    >
+                      {status}
+                    </button>
+                  );
+                })}
+              </div>
               <div className="max-h-60 overflow-y-auto rounded-md border p-2 space-y-1">
                 {filteredProperties.map((p) => {
                   const checked = selectedPropertyId === p.id;
@@ -250,6 +366,32 @@ export default function AdminSlotsPage() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Customer Booking Window</CardTitle>
+          <CardDescription>Set how many days ahead customers can book (minimum is always tomorrow).</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="flex flex-wrap items-end gap-2">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1">Days Ahead</label>
+              <input
+                type="number"
+                min={1}
+                max={60}
+                value={bookingWindowDays}
+                onChange={(e) => setBookingWindowDays(Number(e.target.value || 1))}
+                className="h-9 w-32 rounded-md border border-input bg-background px-3 text-sm"
+              />
+            </div>
+            <Button onClick={saveBookingWindow} disabled={savingBookingWindow}>
+              {savingBookingWindow ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Save Window
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {selectedPropertyId && (
         <Card>
           <CardHeader>
@@ -265,6 +407,55 @@ export default function AdminSlotsPage() {
               </div>
             ) : (
               <div className="space-y-2">
+                <div className="rounded-md border p-3 space-y-3 bg-muted/20">
+                  <div>
+                    <p className="text-sm font-medium">Default hours for selected days</p>
+                    <p className="text-xs text-muted-foreground">Select days once, set open/start/end once, then apply in one click.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {WEEK_DAYS.map((day) => {
+                      const checked = bulkDays.has(day.key);
+                      return (
+                        <button
+                          key={day.key}
+                          type="button"
+                          onClick={() => toggleBulkDay(day.key)}
+                          className={`h-8 px-3 rounded-md border text-xs transition-colors ${checked
+                            ? "bg-primary/10 border-primary text-primary"
+                            : "bg-background border-input text-muted-foreground"
+                            }`}
+                        >
+                          {day.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-[110px_1fr_1fr_auto] gap-2 items-center">
+                    <label className="inline-flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={bulkOpen}
+                        onChange={(e) => setBulkOpen(e.target.checked)}
+                      />
+                      Open
+                    </label>
+                    <input
+                      type="time"
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                      value={bulkStartTime}
+                      onChange={(e) => setBulkStartTime(e.target.value)}
+                    />
+                    <input
+                      type="time"
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                      value={bulkEndTime}
+                      onChange={(e) => setBulkEndTime(e.target.value)}
+                    />
+                    <Button type="button" variant="outline" onClick={applyBulkDefaults}>
+                      Apply
+                    </Button>
+                  </div>
+                </div>
                 {schedule.map((row) => (
                   <div key={row.weekday} className="grid grid-cols-1 sm:grid-cols-[180px_110px_1fr_1fr] gap-2 items-center rounded-md border p-2">
                     <div className="text-sm font-medium">{WEEK_DAYS.find((d) => d.key === row.weekday)?.label}</div>
@@ -314,7 +505,7 @@ export default function AdminSlotsPage() {
                 selected={date}
                 onSelect={setDate}
                 fromDate={new Date()}
-                toDate={addDays(new Date(), 90)}
+                toDate={addDays(new Date(), bookingWindowDays)}
               />
             </CardContent>
           </Card>

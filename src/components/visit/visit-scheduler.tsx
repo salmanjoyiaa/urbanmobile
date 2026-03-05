@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,7 +16,8 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { SlotGrid } from "@/components/visit/slot-grid";
 import { useVisitSlots, useCreateVisitRequest } from "@/queries/visits";
 import { useRealtimeSlots } from "@/hooks/use-realtime-slots";
-import { isFutureDate } from "@/lib/slots";
+import { getVisitBookingMaxDate, getVisitBookingMinDate, isWithinVisitBookingWindow } from "@/lib/slots";
+import { VISIT_BOOKING_WINDOW_DAYS } from "@/lib/constants";
 import { SuccessState } from "@/components/ui/success-state";
 import { toast } from "sonner";
 
@@ -38,6 +39,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [slot, setSlot] = useState<string | null>(null);
+  const [bookingWindowDays, setBookingWindowDays] = useState<number>(VISIT_BOOKING_WINDOW_DAYS);
 
   const dateKey = useMemo(() => (date ? format(date, "yyyy-MM-dd") : ""), [date]);
   const { data: slots = [], isLoading: loadingSlots } = useVisitSlots(propertyId, dateKey, !!dateKey);
@@ -73,7 +75,25 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
     setSlot(null);
   }, [dateKey]);
 
-  const isDateDisabled = (day: Date) => !isFutureDate(day);
+  useEffect(() => {
+    const fetchWindow = async () => {
+      try {
+        const res = await fetch("/api/visits/settings");
+        const data = await res.json();
+        if (res.ok && typeof data.booking_window_days === "number") {
+          setBookingWindowDays(data.booking_window_days);
+        }
+      } catch {
+        // keep fallback
+      }
+    };
+
+    fetchWindow();
+  }, []);
+
+  const minDate = getVisitBookingMinDate(new Date());
+  const maxDate = getVisitBookingMaxDate(new Date(), bookingWindowDays);
+  const isDateDisabled = (day: Date) => !isWithinVisitBookingWindow(day, new Date(), bookingWindowDays);
 
   const onContactSubmit = async (values: ContactInput) => {
     if (!date || !slot) {
@@ -146,13 +166,16 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
             <p className="text-sm text-muted-foreground">
               Select a day to see available times.
             </p>
+            <p className="text-xs text-muted-foreground">
+              You can book from tomorrow up to {bookingWindowDays} day{bookingWindowDays === 1 ? "" : "s"} ahead.
+            </p>
             <Calendar
               mode="single"
               selected={date}
               onSelect={(selected) => setDate(selected)}
               disabled={isDateDisabled}
-              fromDate={addDays(new Date(), 1)}
-              toDate={addDays(new Date(), 45)}
+              fromDate={minDate}
+              toDate={maxDate}
             />
             <Button disabled={!date} onClick={() => setStep(2)} className="h-10 px-5 rounded-xl">
               Continue to slots
@@ -178,7 +201,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
               </p>
             ) : availableSlots.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No slots available. Select a weekday to see times.
+                No slots available for this date. Try another day in the booking window.
               </p>
             ) : (
               <SlotGrid slots={availableSlots} selectedSlot={slot} onSelect={setSlot} />

@@ -60,6 +60,11 @@ export const SLOT_CONFIG = {
   workDays: [0, 1, 2, 3, 4, 5, 6] as number[],
 } as const;
 
+const rawVisitWindowDays = Number(process.env.NEXT_PUBLIC_VISIT_BOOKING_WINDOW_DAYS || "10");
+export const VISIT_BOOKING_WINDOW_DAYS = Number.isFinite(rawVisitWindowDays)
+  ? Math.min(Math.max(Math.trunc(rawVisitWindowDays), 1), 60)
+  : 10;
+
 export const ROOM_COUNT_OPTIONS = ["0", "1", "2", "3", "4", "5+"] as const;
 
 export const INSTALLMENT_OPTIONS = [

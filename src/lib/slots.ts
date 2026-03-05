@@ -1,4 +1,4 @@
-import { SLOT_CONFIG } from "./constants";
+import { SLOT_CONFIG, VISIT_BOOKING_WINDOW_DAYS } from "./constants";
 
 export interface TimeSlot {
   time: string; // "HH:MM"
@@ -89,6 +89,28 @@ export function isFutureDate(date: Date): boolean {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
   return date >= tomorrow;
+}
+
+export function getVisitBookingMinDate(now = new Date()): Date {
+  const minDate = new Date(now);
+  minDate.setHours(0, 0, 0, 0);
+  minDate.setDate(minDate.getDate() + 1);
+  return minDate;
+}
+
+export function getVisitBookingMaxDate(now = new Date(), windowDays = VISIT_BOOKING_WINDOW_DAYS): Date {
+  const maxDate = new Date(now);
+  maxDate.setHours(0, 0, 0, 0);
+  maxDate.setDate(maxDate.getDate() + windowDays);
+  return maxDate;
+}
+
+export function isWithinVisitBookingWindow(date: Date, now = new Date(), windowDays = VISIT_BOOKING_WINDOW_DAYS): boolean {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  const minDate = getVisitBookingMinDate(now);
+  const maxDate = getVisitBookingMaxDate(now, windowDays);
+  return normalized >= minDate && normalized <= maxDate;
 }
 
 export function formatSlotLabel(time: string): string {

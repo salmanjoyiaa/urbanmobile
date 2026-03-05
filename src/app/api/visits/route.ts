@@ -4,8 +4,9 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyAdmins } from "@/lib/admin";
 import { cacheAside, cacheDel } from "@/lib/redis";
-import { buildAvailabilitySlots, generateSlotsInTimeframe, isFutureDate } from "@/lib/slots";
+import { buildAvailabilitySlots, generateSlotsInTimeframe, isWithinVisitBookingWindow } from "@/lib/slots";
 import { visitRequestSchema } from "@/lib/validators";
+import { getVisitBookingWindowDays } from "@/lib/visit-settings";
 
 const redisEnabled =
   Boolean(process.env.UPSTASH_REDIS_REST_URL) &&
@@ -61,8 +62,9 @@ export async function GET(request: NextRequest) {
   }
 
   const parsedDate = new Date(`${date}T00:00:00`);
+  const bookingWindowDays = await getVisitBookingWindowDays();
 
-  if (!isFutureDate(parsedDate)) {
+  if (!isWithinVisitBookingWindow(parsedDate, new Date(), bookingWindowDays)) {
     return NextResponse.json({ slots: [] });
   }
 
@@ -127,11 +129,6 @@ export async function GET(request: NextRequest) {
         const slots = buildAvailabilitySlots(bookedTimes, slotWindow)
           .map((s) => adminBlockedTimes.has(s.time) ? { ...s, available: false } : s);
 
-        const today = new Date().toISOString().slice(0, 10);
-        if (date === today) {
-          const now = new Date();
-          return slots.filter((s) => new Date(`${date}T${s.time}`) > now);
-        }
         return slots;
       },
     });
@@ -178,6 +175,11 @@ export async function POST(request: NextRequest) {
   }
 
   const payload = parsed.data;
+  const bookingWindowDays = await getVisitBookingWindowDays();
+  const visitDate = new Date(`${payload.visit_date}T00:00:00`);
+  if (!isWithinVisitBookingWindow(visitDate, new Date(), bookingWindowDays)) {
+    return NextResponse.json({ error: "Visit date must be from tomorrow and within booking window" }, { status: 400 });
+  }
 
   const { data: existing } = (await supabase
     .from("visit_requests")
