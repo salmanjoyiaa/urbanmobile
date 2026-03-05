@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/client";
 import { VISIT_BOOKING_WINDOW_DAYS } from "@/lib/constants";
 
 type BlockedSlot = { id: string; date: string; time: string };
-type Property = { id: string; title: string; status: string };
+type Property = { id: string; title: string; status: string; property_ref: string | null };
 
 type VisitHourRow = {
   weekday: number;
@@ -32,14 +32,6 @@ const WEEK_DAYS = [
   { key: 5, label: "Friday" },
   { key: 6, label: "Saturday" },
 ] as const;
-
-const VISIT_STATUS_COLORS: Array<{ status: string; className: string }> = [
-  { status: "Pending", className: "border-amber-200 bg-amber-50 text-amber-800" },
-  { status: "Assigned", className: "border-blue-200 bg-blue-50 text-blue-800" },
-  { status: "Confirmed", className: "border-green-200 bg-green-50 text-green-800" },
-  { status: "Cancelled", className: "border-red-200 bg-red-50 text-red-800" },
-  { status: "Completed", className: "border-emerald-200 bg-emerald-50 text-emerald-800" },
-];
 
 const defaultSchedule = (): VisitHourRow[] =>
   WEEK_DAYS.map((day) => ({
@@ -89,7 +81,7 @@ export default function AdminSlotsPage() {
         const supabase = createClient();
         const { data } = await supabase
           .from("properties")
-          .select("id, title, status")
+          .select("id, title, status, property_ref")
           .order("title");
         const list = (data || []) as Property[];
         setProperties(list);
@@ -365,7 +357,9 @@ export default function AdminSlotsPage() {
     }
   };
 
-  const selectedLabel = properties.find((p) => p.id === selectedPropertyId)?.title || "";
+  const selectedProperty = properties.find((p) => p.id === selectedPropertyId);
+  const selectedLabel = selectedProperty?.title || "";
+  const selectedPropertyRef = selectedProperty?.property_ref || selectedProperty?.id || "N/A";
 
   return (
     <div className="space-y-6">
@@ -375,37 +369,6 @@ export default function AdminSlotsPage() {
           Select a property and configure open days, start/end hours, and date-level blocked slots.
         </p>
       </div>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Visit Status Color Table</CardTitle>
-          <CardDescription>Reference colors used across visit management and day summaries.</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="overflow-hidden rounded-md border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="px-3 py-2 text-left font-medium">Status</th>
-                  <th className="px-3 py-2 text-left font-medium">Color</th>
-                </tr>
-              </thead>
-              <tbody>
-                {VISIT_STATUS_COLORS.map((item) => (
-                  <tr key={item.status} className="border-t">
-                    <td className="px-3 py-2">{item.status}</td>
-                    <td className="px-3 py-2">
-                      <span className={`inline-flex rounded-md border px-2 py-1 text-xs font-medium ${item.className}`}>
-                        {item.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader className="pb-3">
@@ -488,7 +451,10 @@ export default function AdminSlotsPage() {
                         }}
                         className="flex min-w-0 flex-1 items-center gap-2 text-left"
                       >
-                        <span className="truncate">{p.title}</span>
+                        <div className="min-w-0">
+                          <span className="block truncate">{p.title}</span>
+                          <span className="block text-[11px] text-muted-foreground">Property ID: {p.property_ref || p.id}</span>
+                        </div>
                         <span className="ml-auto text-xs text-muted-foreground capitalize">{p.status}</span>
                       </button>
                     </div>
@@ -496,7 +462,10 @@ export default function AdminSlotsPage() {
                 })}
               </div>
               {selectedPropertyId && (
-                <p className="text-sm font-medium text-primary">{selectedLabel}</p>
+                <div className="text-sm font-medium text-primary">
+                  <p>{selectedLabel}</p>
+                  <p className="text-xs text-muted-foreground">Property ID: {selectedPropertyRef}</p>
+                </div>
               )}
             </>
           )}
@@ -698,7 +667,7 @@ export default function AdminSlotsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
-                {selectedLabel} — {dateStr ? format(new Date(`${dateStr}T12:00:00`), "EEEE, MMM d, yyyy") : "—"}
+                {selectedLabel} (Property ID: {selectedPropertyRef}) — {dateStr ? format(new Date(`${dateStr}T12:00:00`), "EEEE, MMM d, yyyy") : "—"}
               </CardTitle>
               <CardDescription>
                 Click a slot to toggle block/unblock for this date. Red = blocked.

@@ -10,22 +10,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate, formatTime, formatMessageDate, formatMessageTime } from "@/lib/format";
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Pending",
-  assigned: "Assigned",
-  confirmed: "Confirmed",
-  cancelled: "Cancelled",
-  completed: "Completed",
-};
-
-const STATUS_BADGE_CLASSES: Record<string, string> = {
-  pending: "border-amber-200 bg-amber-50 text-amber-800",
-  assigned: "border-blue-200 bg-blue-50 text-blue-800",
-  confirmed: "border-green-200 bg-green-50 text-green-800",
-  cancelled: "border-red-200 bg-red-50 text-red-800",
-  completed: "border-emerald-200 bg-emerald-50 text-emerald-800",
-};
+import { VISIT_STATUS_LABELS, getVisitStatusBadgeClass } from "@/lib/visit-status";
 
 type VisitRow = {
   id: string;
@@ -282,8 +267,8 @@ export default async function AdminVisitsPage({
                   {Object.entries(summaryCounts).map(([status, count]) => (
                     <tr key={status} className="border-t">
                       <td className="px-3 py-2">
-                        <Badge variant="outline" className={STATUS_BADGE_CLASSES[status] || ""}>
-                          {STATUS_LABELS[status] || status}
+                        <Badge variant="outline" className={getVisitStatusBadgeClass(status)}>
+                          {VISIT_STATUS_LABELS[status] || status}
                         </Badge>
                       </td>
                       <td className="px-3 py-2 text-right font-semibold">{count}</td>
@@ -306,14 +291,14 @@ export default async function AdminVisitsPage({
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.keys(STATUS_LABELS).map((status) => (
+                  {Object.keys(VISIT_STATUS_LABELS).map((status) => (
                     <tr key={status} className="border-t">
                       <td className="px-3 py-2">
-                        <Badge variant="outline" className={STATUS_BADGE_CLASSES[status] || ""}>
-                          {STATUS_LABELS[status]}
+                        <Badge variant="outline" className={getVisitStatusBadgeClass(status)}>
+                          {VISIT_STATUS_LABELS[status]}
                         </Badge>
                       </td>
-                      <td className="px-3 py-2 text-muted-foreground">{STATUS_LABELS[status]} visits</td>
+                      <td className="px-3 py-2 text-muted-foreground">{VISIT_STATUS_LABELS[status]} visits</td>
                     </tr>
                   ))}
                 </tbody>
@@ -429,8 +414,8 @@ export default async function AdminVisitsPage({
             key: "status",
             title: "Status",
             render: (row) => (
-              <Badge variant="outline" className={STATUS_BADGE_CLASSES[row.status] || ""}>
-                {STATUS_LABELS[row.status] || row.status}
+              <Badge variant="outline" className={getVisitStatusBadgeClass(row.status)}>
+                {VISIT_STATUS_LABELS[row.status] || row.status}
               </Badge>
             )
           },

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { VisitRequestDialog } from "@/components/admin/visit-request-dialog";
 import { formatDate, formatTime } from "@/lib/format";
+import { getVisitStatusBadgeClass } from "@/lib/visit-status";
 
 type VisitingAgent = {
   id: string;
@@ -146,7 +147,11 @@ export default async function VisitTeamPerformancePage({
             {
               key: "status",
               title: "Visit Status",
-              render: (row) => <Badge className="capitalize">{row.status}</Badge>,
+              render: (row) => (
+                <Badge variant="outline" className={`${getVisitStatusBadgeClass(row.status)} capitalize`}>
+                  {row.status}
+                </Badge>
+              ),
             },
             {
               key: "deal",

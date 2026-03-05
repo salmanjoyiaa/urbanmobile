@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Building2, Calendar, Clock, Phone, User, Trash2, Send, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/format";
+import { getVisitStatusBadgeClass } from "@/lib/visit-status";
 
 type CommentRow = {
     id: string;
@@ -196,7 +197,10 @@ export function VisitRequestDialog({ visit, visitingAgents, busyAgentIds = [], t
                         <div>
                             <DialogTitle className="text-xl flex items-center gap-2">
                                 Visit details
-                                <Badge variant={visit.status === "confirmed" ? "default" : "secondary"} className="capitalize">
+                                <Badge
+                                    variant={visit.status === "confirmed" ? "default" : "secondary"}
+                                    className={`${getVisitStatusBadgeClass(visit.status)} capitalize`}
+                                >
                                     {visit.status}
                                 </Badge>
                             </DialogTitle>

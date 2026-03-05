@@ -6,6 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate, formatTime } from "@/lib/format";
+import { getVisitStatusBadgeClass } from "@/lib/visit-status";
 
 type VisitRow = {
     id: string;
@@ -85,7 +86,10 @@ export function AgentVisitsClient({ rows }: { rows: VisitRow[] }) {
                                                 )}
                                             </CardDescription>
                                         </div>
-                                        <Badge variant={visit.status === "confirmed" ? "default" : visit.status === "cancelled" ? "destructive" : "secondary"} className="capitalize">
+                                        <Badge
+                                            variant={visit.status === "confirmed" ? "default" : visit.status === "cancelled" ? "destructive" : "secondary"}
+                                            className={`${getVisitStatusBadgeClass(visit.status)} capitalize`}
+                                        >
                                             {visit.status === "assigned" ? "Dispatched" : visit.status}
                                         </Badge>
                                     </div>
