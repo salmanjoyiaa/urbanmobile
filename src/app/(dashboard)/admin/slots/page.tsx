@@ -44,6 +44,8 @@ const defaultSchedule = (): VisitHourRow[] =>
 export default function AdminSlotsPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
+  const [selectedPropertyIds, setSelectedPropertyIds] = useState<Set<string>>(new Set());
+  const [applyMode, setApplyMode] = useState<"selected" | "filtered">("selected");
   const [schedule, setSchedule] = useState<VisitHourRow[]>(defaultSchedule());
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [blocked, setBlocked] = useState<Set<string>>(new Set());
@@ -60,6 +62,8 @@ export default function AdminSlotsPage() {
   const [bulkEndTime, setBulkEndTime] = useState("19:00");
   const [bookingWindowDays, setBookingWindowDays] = useState<number>(VISIT_BOOKING_WINDOW_DAYS);
   const [savingBookingWindow, setSavingBookingWindow] = useState(false);
+  const [batchApplying, setBatchApplying] = useState(false);
+  const [batchFailures, setBatchFailures] = useState<Array<{ property_id: string; title?: string; reason: string }>>([]);
 
   const dateStr = date ? format(date, "yyyy-MM-dd") : "";
 
@@ -83,6 +87,7 @@ export default function AdminSlotsPage() {
         setProperties(list);
         if (list.length > 0) {
           setSelectedPropertyId(list[0].id);
+          setSelectedPropertyIds(new Set([list[0].id]));
         }
       } catch {
         toast.error("Failed to load properties");
@@ -191,6 +196,18 @@ export default function AdminSlotsPage() {
     setSchedule((prev) => prev.map((row) => row.weekday === weekday ? { ...row, ...patch } : row));
   };
 
+  const togglePropertySelection = (propertyId: string) => {
+    setSelectedPropertyIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(propertyId)) {
+        next.delete(propertyId);
+      } else {
+        next.add(propertyId);
+      }
+      return next;
+    });
+  };
+
   const saveSchedule = async () => {
     if (!selectedPropertyId) return;
     setSavingSchedule(true);
@@ -286,6 +303,60 @@ export default function AdminSlotsPage() {
     return matchSearch && matchStatus;
   });
 
+  const batchTargetCount = applyMode === "filtered"
+    ? filteredProperties.length
+    : selectedPropertyIds.size;
+
+  const selectAllFiltered = () => {
+    setSelectedPropertyIds(new Set(filteredProperties.map((property) => property.id)));
+  };
+
+  const clearSelected = () => {
+    setSelectedPropertyIds(new Set());
+  };
+
+  const batchApplySchedule = async () => {
+    const targetIds = applyMode === "filtered"
+      ? filteredProperties.map((property) => property.id)
+      : Array.from(selectedPropertyIds);
+
+    if (targetIds.length === 0) {
+      toast.error(applyMode === "filtered"
+        ? "No properties match current filters"
+        : "Select at least one property for batch apply");
+      return;
+    }
+
+    setBatchApplying(true);
+    setBatchFailures([]);
+    try {
+      const res = await fetch("/api/admin/visit-hours/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          property_ids: targetIds,
+          schedule,
+          status_scope: Array.from(statusFilter),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to apply schedule in bulk");
+
+      const failedList = (data.failed || []) as Array<{ property_id: string; title?: string; reason: string }>;
+      setBatchFailures(failedList);
+
+      if (failedList.length > 0) {
+        toast.warning(`Updated ${data.updated}/${data.attempted} properties. ${failedList.length} blocked by conflicts.`);
+      } else {
+        toast.success(`Updated ${data.updated} ${data.updated === 1 ? "property" : "properties"} successfully`);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to apply schedule in bulk");
+    } finally {
+      setBatchApplying(false);
+    }
+  };
+
   const selectedLabel = properties.find((p) => p.id === selectedPropertyId)?.title || "";
 
   return (
@@ -336,25 +407,52 @@ export default function AdminSlotsPage() {
                   );
                 })}
               </div>
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" size="sm" variant="outline" onClick={selectAllFiltered}>
+                  Select All Filtered
+                </Button>
+                <Button type="button" size="sm" variant="outline" onClick={clearSelected}>
+                  Clear Selected
+                </Button>
+                <span className="text-xs text-muted-foreground self-center">
+                  Selected: {selectedPropertyIds.size}
+                </span>
+              </div>
               <div className="max-h-60 overflow-y-auto rounded-md border p-2 space-y-1">
                 {filteredProperties.map((p) => {
                   const checked = selectedPropertyId === p.id;
+                  const picked = selectedPropertyIds.has(p.id);
                   return (
-                    <button
+                    <div
                       key={p.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedPropertyId(p.id);
-                        setBlocked(new Set());
-                      }}
                       className={`flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors ${checked
-                          ? "bg-primary/10 border border-primary text-foreground"
-                          : "border border-transparent hover:bg-muted"
+                        ? "bg-primary/10 border border-primary text-foreground"
+                        : "border border-transparent hover:bg-muted"
                         }`}
                     >
-                      <span className="truncate">{p.title}</span>
-                      <span className="ml-auto text-xs text-muted-foreground capitalize">{p.status}</span>
-                    </button>
+                      <input
+                        type="checkbox"
+                        checked={picked}
+                        onChange={() => togglePropertySelection(p.id)}
+                        className="h-4 w-4"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedPropertyId(p.id);
+                          setBlocked(new Set());
+                          setSelectedPropertyIds((prev) => {
+                            const next = new Set(prev);
+                            next.add(p.id);
+                            return next;
+                          });
+                        }}
+                        className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                      >
+                        <span className="truncate">{p.title}</span>
+                        <span className="ml-auto text-xs text-muted-foreground capitalize">{p.status}</span>
+                      </button>
+                    </div>
                   );
                 })}
               </div>
@@ -487,6 +585,54 @@ export default function AdminSlotsPage() {
                   {savingSchedule ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   Save Weekly Schedule
                 </Button>
+
+                <div className="rounded-md border p-3 space-y-3 bg-muted/20">
+                  <div>
+                    <p className="text-sm font-medium">Batch Apply to Multiple Properties</p>
+                    <p className="text-xs text-muted-foreground">Apply current weekly schedule to selected properties or all filtered properties.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant={applyMode === "selected" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setApplyMode("selected")}
+                    >
+                      Selected Properties
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={applyMode === "filtered" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setApplyMode("filtered")}
+                    >
+                      All Filtered Properties
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {applyMode === "filtered"
+                      ? `Will apply to ${batchTargetCount} filtered ${batchTargetCount === 1 ? "property" : "properties"}.`
+                      : `Will apply to ${batchTargetCount} selected ${batchTargetCount === 1 ? "property" : "properties"}.`}
+                  </p>
+                  <Button type="button" onClick={batchApplySchedule} disabled={batchApplying}>
+                    {batchApplying ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Apply Schedule in Bulk
+                  </Button>
+
+                  {batchFailures.length > 0 && (
+                    <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3">
+                      <p className="text-sm font-medium text-destructive mb-2">Blocked properties ({batchFailures.length})</p>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {batchFailures.map((item) => (
+                          <div key={`${item.property_id}-${item.reason}`} className="text-xs text-foreground">
+                            <span className="font-medium">{item.title || item.property_id}</span>
+                            <span className="text-muted-foreground"> — {item.reason}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </CardContent>
