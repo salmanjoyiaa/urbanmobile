@@ -32,6 +32,7 @@ type VisitRow = {
     visitor_name: string;
     visitor_email: string;
     visitor_phone: string;
+    visitor_message?: string | null;
     visit_date: string;
     visit_time: string;
     status: string;
@@ -249,6 +250,12 @@ export function VisitRequestDialog({ visit, visitingAgents, busyAgentIds = [], t
                                 <Phone className="h-4 w-4 shrink-0" />
                                 <span>{visit.visitor_phone}</span>
                             </div>
+                            {visit.visitor_message?.trim() ? (
+                                <div className="mt-3 rounded-md border bg-muted/40 p-3">
+                                    <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Customer Message</Label>
+                                    <p className="mt-1 text-sm text-foreground">{visit.visitor_message.trim()}</p>
+                                </div>
+                            ) : null}
                         </div>
                         <Separator />
                         <div>
@@ -279,6 +286,12 @@ export function VisitRequestDialog({ visit, visitingAgents, busyAgentIds = [], t
 
                 <div className="border-t pt-4 mt-2 space-y-3">
                     <Label className="text-sm font-semibold">Comments</Label>
+                    {visit.visitor_message?.trim() ? (
+                        <div className="bg-blue-50/60 border border-blue-200 rounded-md p-2.5 text-sm">
+                            <div className="text-xs text-blue-700 font-medium mb-1">Customer message from request</div>
+                            <p className="text-foreground">{visit.visitor_message.trim()}</p>
+                        </div>
+                    ) : null}
                     {comments.length > 0 ? (
                         <div className="space-y-2 max-h-40 overflow-y-auto">
                             {comments.map((c) => (

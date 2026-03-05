@@ -105,8 +105,6 @@ export default async function AdminOverviewPage() {
         </div>
       </div>
 
-      <ActivityFeed entries={activityRows} />
-
       {/* Site Traffic */}
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -119,6 +117,8 @@ export default async function AdminOverviewPage() {
           <StatCard title="All Time" value={totalUnique || 0} description={`Unique visitors • ${totalViews.toLocaleString()} page views`} />
         </div>
       </div>
+
+      <ActivityFeed entries={activityRows} />
     </div>
   );
 }

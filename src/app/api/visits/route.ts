@@ -4,7 +4,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyAdmins } from "@/lib/admin";
 import { cacheAside, cacheDel } from "@/lib/redis";
-import { buildAvailabilitySlots, isFutureDate } from "@/lib/slots";
+import { buildAvailabilitySlots, generateSlotsInTimeframe, isFutureDate } from "@/lib/slots";
 import { visitRequestSchema } from "@/lib/validators";
 
 const redisEnabled =
@@ -69,12 +69,31 @@ export async function GET(request: NextRequest) {
   const cacheKey = `slots:${propertyId}:${date}`;
 
   const supabase = createAdminClient();
+  const weekday = parsedDate.getDay();
   try {
     const slots = await cacheAside({
       key: cacheKey,
       ttlSeconds: 10,
       label: "slots:availability",
       fetcher: async () => {
+        const { data: hoursData } = (await supabase
+          .from("property_visit_hours")
+          .select("is_open, start_time, end_time")
+          .eq("property_id", propertyId)
+          .eq("weekday", weekday)
+          .maybeSingle()) as {
+            data: { is_open: boolean; start_time: string; end_time: string } | null;
+          };
+
+        if (!hoursData || !hoursData.is_open) {
+          return [];
+        }
+
+        const slotWindow = generateSlotsInTimeframe(hoursData.start_time, hoursData.end_time);
+        if (slotWindow.length === 0) {
+          return [];
+        }
+
         const { data, error } = (await supabase
           .from("visit_requests")
           .select("visit_time")
@@ -105,7 +124,7 @@ export async function GET(request: NextRequest) {
             return raw.length > 5 ? raw.slice(0, 5) : raw;
           });
 
-        const slots = buildAvailabilitySlots(bookedTimes)
+        const slots = buildAvailabilitySlots(bookedTimes, slotWindow)
           .map((s) => adminBlockedTimes.has(s.time) ? { ...s, available: false } : s);
 
         const today = new Date().toISOString().slice(0, 10);
@@ -129,7 +148,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
   const limit = await enforceRateLimit(ip);
-
   if (!limit.allowed) {
     return NextResponse.json(
       { error: "Too many requests. Limit is 3 visit requests per hour." },

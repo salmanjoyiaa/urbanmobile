@@ -6,6 +6,17 @@ export interface TimeSlot {
   available: boolean;
 }
 
+function toMinutes(time: string): number {
+  const [hours, minutes] = time.slice(0, 5).split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+function toTimeString(totalMinutes: number): string {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
+
 export function generateDailySlots(): string[] {
   const slots: string[] = [];
   const { startHour, endHour, breakStartHour, breakEndHour, slotDurationMinutes } =
@@ -49,6 +60,24 @@ export function generateDailySlots(): string[] {
   return slots;
 }
 
+export function generateSlotsInTimeframe(startTime: string, endTime: string, slotDurationMinutes = SLOT_CONFIG.slotDurationMinutes): string[] {
+  const slots: string[] = [];
+  const start = toMinutes(startTime);
+  const end = toMinutes(endTime);
+
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start >= end) {
+    return slots;
+  }
+
+  let pointer = start;
+  while (pointer + slotDurationMinutes <= end) {
+    slots.push(toTimeString(pointer));
+    pointer += slotDurationMinutes;
+  }
+
+  return slots;
+}
+
 export function isWeekday(date: Date): boolean {
   const day = date.getDay(); // 0=Sun, 6=Sat
   return day >= 1 && day <= 5;
@@ -69,9 +98,9 @@ export function formatSlotLabel(time: string): string {
   return `${displayHours}:${minutes.toString().padStart(2, "0")} ${period}`;
 }
 
-export function buildAvailabilitySlots(bookedTimes: string[]): TimeSlot[] {
+export function buildAvailabilitySlots(bookedTimes: string[], allSlots: string[] = generateDailySlots()): TimeSlot[] {
   const blocked = new Set(bookedTimes);
-  return generateDailySlots().map((time) => ({
+  return allSlots.map((time) => ({
     time,
     label: formatSlotLabel(time),
     available: !blocked.has(time),

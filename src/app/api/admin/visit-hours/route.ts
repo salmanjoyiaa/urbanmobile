@@ -1,0 +1,90 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { getAdminRouteContext } from "@/lib/admin";
+
+const scheduleItemSchema = z.object({
+  weekday: z.number().int().min(0).max(6),
+  is_open: z.boolean(),
+  start_time: z.string().regex(/^\d{2}:\d{2}$/),
+  end_time: z.string().regex(/^\d{2}:\d{2}$/),
+});
+
+const updateSchema = z.object({
+  property_id: z.string().uuid(),
+  schedule: z.array(scheduleItemSchema).length(7),
+});
+
+export async function GET(request: Request) {
+  const admin = await getAdminRouteContext();
+  if (admin.error || !admin.profile) {
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const propertyId = searchParams.get("property_id");
+
+  if (!propertyId) {
+    return NextResponse.json({ error: "property_id is required" }, { status: 400 });
+  }
+
+  const { data, error } = await admin.supabase
+    .from("property_visit_hours")
+    .select("weekday, is_open, start_time, end_time")
+    .eq("property_id", propertyId)
+    .order("weekday", { ascending: true });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ schedule: data || [] });
+}
+
+export async function PUT(request: Request) {
+  const admin = await getAdminRouteContext();
+  if (admin.error || !admin.profile) {
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const parsed = updateSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
+  }
+
+  const seen = new Set<number>();
+  for (const item of parsed.data.schedule) {
+    if (seen.has(item.weekday)) {
+      return NextResponse.json({ error: "Duplicate weekday in schedule" }, { status: 400 });
+    }
+    seen.add(item.weekday);
+
+    if (item.start_time >= item.end_time) {
+      return NextResponse.json({ error: `Start time must be before end time for weekday ${item.weekday}` }, { status: 400 });
+    }
+  }
+
+  const rows = parsed.data.schedule.map((item) => ({
+    property_id: parsed.data.property_id,
+    weekday: item.weekday,
+    is_open: item.is_open,
+    start_time: item.start_time,
+    end_time: item.end_time,
+  }));
+
+  const { error } = await admin.supabase
+    .from("property_visit_hours")
+    .upsert(rows as never, { onConflict: "property_id,weekday" });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}

@@ -16,7 +16,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { SlotGrid } from "@/components/visit/slot-grid";
 import { useVisitSlots, useCreateVisitRequest } from "@/queries/visits";
 import { useRealtimeSlots } from "@/hooks/use-realtime-slots";
-import { isFutureDate, isWeekday } from "@/lib/slots";
+import { isFutureDate } from "@/lib/slots";
 import { SuccessState } from "@/components/ui/success-state";
 import { toast } from "sonner";
 
@@ -73,7 +73,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
     setSlot(null);
   }, [dateKey]);
 
-  const isDateDisabled = (day: Date) => !isFutureDate(day) || !isWeekday(day);
+  const isDateDisabled = (day: Date) => !isFutureDate(day);
 
   const onContactSubmit = async (values: ContactInput) => {
     if (!date || !slot) {
@@ -87,6 +87,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
         visitor_name: values.visitor_name,
         visitor_email: values.visitor_email,
         visitor_phone: values.visitor_phone,
+        visitor_message: values.visitor_message,
         visit_date: dateKey,
         visit_time: slot,
       });
@@ -143,7 +144,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
         {step === 1 && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              We&apos;re open Mon–Fri. Select a day to see available times.
+              Select a day to see available times.
             </p>
             <Calendar
               mode="single"

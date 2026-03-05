@@ -16,6 +16,7 @@ type VisitRow = {
   visitor_name: string;
   visitor_email: string;
   visitor_phone: string;
+  visitor_message?: string | null;
   visit_date: string;
   visit_time: string;
   status: string;
@@ -153,7 +154,7 @@ export default async function AdminVisitsPage({
     .from("visit_requests")
     .select(
       `
-      id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status, visiting_status, customer_remarks, admin_notes,
+      id, visitor_name, visitor_email, visitor_phone, visitor_message, visit_date, visit_time, status, visiting_status, customer_remarks, admin_notes,
       visiting_agent:visiting_agent_id(id, full_name, phone),
       properties:property_id (
         id, title, property_ref, location_url, visiting_agent_image, visiting_agent_instructions,

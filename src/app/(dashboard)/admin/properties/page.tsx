@@ -66,6 +66,36 @@ export default async function AdminPropertiesPage({
         </p>
       </div>
 
+      <form className="flex flex-wrap gap-3 items-end" action="/admin/properties" method="get">
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-1">Status</label>
+          <select
+            name="status"
+            defaultValue={searchParams.status || ""}
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="available">Available</option>
+            <option value="rented">Rented</option>
+            <option value="reserved">Reserved</option>
+            <option value="sold">Sold</option>
+          </select>
+        </div>
+        <button
+          type="submit"
+          className="h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          Filter
+        </button>
+        <a
+          href="/admin/properties"
+          className="h-9 rounded-md border border-input bg-background px-4 text-sm font-medium inline-flex items-center hover:bg-muted"
+        >
+          Reset
+        </a>
+      </form>
+
       <DataTable
         rows={rows}
         columns={[

@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getAdminRouteContext } from "@/lib/admin";
-import { sendWhatsAppTemplate } from "@/lib/twilio";
+import { sendWhatsApp } from "@/lib/twilio";
 import { sendEmail } from "@/lib/resend";
-import {
-  visitAssignedVisitingAgentContent,
-  visitAssignedPropertyAgentContent,
-} from "@/lib/whatsapp-templates";
 import { dayVisitsSummaryEmail } from "@/lib/email-templates";
 
 const bodySchema = z
@@ -32,13 +28,82 @@ const RICH_SELECT = `
   id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time,
   visiting_agent:visiting_agent_id (full_name, phone, email),
   properties:property_id (
-    id, title, location_url, visiting_agent_instructions, visiting_agent_image,
+    id, title, property_ref, location_url, visiting_agent_instructions, visiting_agent_image,
     agents:agent_id (
       profile_id,
       profiles:profile_id (full_name, phone, email)
     )
   )
 `;
+
+type SummaryVisit = {
+  visit_time: string;
+  visitor_name: string;
+  visitor_phone: string | null;
+  visiting_agent: {
+    full_name: string | null;
+    phone: string | null;
+    email: string | null;
+  } | null;
+  properties: {
+    title: string | null;
+    property_ref: string | null;
+    agents: {
+      profiles: {
+        full_name: string | null;
+        phone: string | null;
+        email: string | null;
+      } | null;
+    } | null;
+  } | null;
+};
+
+function buildDigestText({
+  recipientType,
+  agentName,
+  date,
+  visits,
+}: {
+  recipientType: "visiting_agent" | "property_agent";
+  agentName: string;
+  date: string;
+  visits: SummaryVisit[];
+}): string {
+  const lines = visits.map((visit, index: number) => {
+    const visitTime = String(visit.visit_time || "").slice(0, 5) || "—";
+    const propertyTitle = visit.properties?.title || "Property";
+    const propertyRef = visit.properties?.property_ref || "N/A";
+    const ownerAgent = visit.properties?.agents?.profiles;
+    const visitingAgent = visit.visiting_agent;
+    const visitor = visit.visitor_phone
+      ? `${visit.visitor_name} (${visit.visitor_phone})`
+      : visit.visitor_name;
+
+    if (recipientType === "property_agent") {
+      const va = visitingAgent?.phone
+        ? `${visitingAgent?.full_name || "—"} (${visitingAgent.phone})`
+        : visitingAgent?.full_name || "—";
+      return `${index + 1}) ${visitTime} — ${propertyTitle} [${propertyRef}]\n   Visitor: ${visitor}\n   Visiting Agent: ${va}`;
+    }
+
+    const owner = ownerAgent?.phone
+      ? `${ownerAgent?.full_name || "—"} (${ownerAgent.phone})`
+      : ownerAgent?.full_name || "—";
+    return `${index + 1}) ${visitTime} — ${propertyTitle} [${propertyRef}]\n   Visitor: ${visitor}\n   Property Agent: ${owner}`;
+  });
+
+  return [
+    `Hello ${agentName},`,
+    "",
+    `Daily visit summary for ${date}:`,
+    "",
+    ...lines,
+    "",
+    "Please be prepared for all scheduled visits. Contact admin if any slot needs rescheduling.",
+    "",
+    "— UrbanSaudi",
+  ].join("\n");
+}
 
 export async function POST(request: Request) {
   const admin = await getAdminRouteContext();
@@ -63,8 +128,7 @@ export async function POST(request: Request) {
 
   const { date, recipientType, profileId, agentId, preview, emailOnly } = parsed.data;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let visits: any[] = [];
+  let visits: SummaryVisit[] = [];
 
   if (recipientType === "visiting_agent") {
     const { data } = await admin.supabase
@@ -112,14 +176,9 @@ export async function POST(request: Request) {
   if (preview) {
     let agentPhone: string | null = null;
     let agentNameP = "Agent";
-    const lines: string[] = [];
-
-    for (const v of visits) {
-      const visitTime = (v.visit_time as string)?.slice(0, 5) || "";
-      const propertyTitle = v.properties?.title || "Property";
-      const ownerAgent = v.properties?.agents?.profiles;
-      const visitingAgent = v.visiting_agent;
-
+    for (const visit of visits) {
+      const ownerAgent = visit.properties?.agents?.profiles;
+      const visitingAgent = visit.visiting_agent;
       if (recipientType === "visiting_agent") {
         agentNameP = visitingAgent?.full_name || "Agent";
         agentPhone = agentPhone || visitingAgent?.phone || null;
@@ -127,18 +186,9 @@ export async function POST(request: Request) {
         agentNameP = ownerAgent?.full_name || "Agent";
         agentPhone = agentPhone || ownerAgent?.phone || null;
       }
-
-      let line: string;
-      if (recipientType === "property_agent") {
-        line = `• ${propertyTitle} — ${visitTime}\n  Visiting Agent: ${visitingAgent?.full_name ?? "—"}${visitingAgent?.phone ? ` (${visitingAgent.phone})` : ""}`;
-      } else {
-        line = `• ${propertyTitle} — ${visitTime}\n  Visitor: ${v.visitor_name}`;
-        if (v.visitor_phone) line += ` (${v.visitor_phone})`;
-      }
-      lines.push(line);
     }
 
-    const text = `Hello ${agentNameP},\n\nHere are your visits for ${date}:\n\n${lines.join("\n\n")}\n\nPlease be prepared. Contact admin if you need to reschedule.\n\n— UrbanSaudi`;
+    const text = buildDigestText({ recipientType, agentName: agentNameP, date, visits });
 
     return NextResponse.json({
       success: true,
@@ -163,6 +213,7 @@ export async function POST(request: Request) {
   let agentName = "Agent";
 
   const whatsAppJobs: Promise<unknown>[] = [];
+  let agentPhone: string | null = null;
 
   for (const v of visits) {
     const visitTime = (v.visit_time as string)?.slice(0, 5) || "";
@@ -182,52 +233,21 @@ export async function POST(request: Request) {
     if (recipientType === "visiting_agent") {
       agentName = visitingAgent?.full_name || "Agent";
       agentEmail = agentEmail || visitingAgent?.email || null;
-
-      if (!emailOnly && visitingAgent?.phone) {
-        const content = visitAssignedVisitingAgentContent({
-          visitingAgentName: visitingAgent.full_name,
-          propertyTitle,
-          visitDate: v.visit_date,
-          visitTime,
-          visitorName: v.visitor_name,
-          visitorPhone: v.visitor_phone || "",
-          ownerName: ownerAgent?.full_name || "Agent",
-          ownerPhone: ownerAgent?.phone || "N/A",
-          instructions: v.properties?.visiting_agent_instructions ?? "",
-          image: v.properties?.visiting_agent_image ?? null,
-        });
-        whatsAppJobs.push(
-          sendWhatsAppTemplate(
-            visitingAgent.phone,
-            content.contentSid,
-            content.contentVariables
-          ).then(() => {
-            whatsAppCount++;
-          })
-        );
-      }
+      agentPhone = agentPhone || visitingAgent?.phone || null;
     } else {
       agentName = ownerAgent?.full_name || "Agent";
       agentEmail = agentEmail || ownerAgent?.email || null;
-
-      if (!emailOnly && ownerAgent?.phone) {
-        const content = visitAssignedPropertyAgentContent({
-          ownerName: ownerAgent.full_name || "Agent",
-          visitorName: v.visitor_name,
-          visitingAgentName: visitingAgent?.full_name || "N/A",
-          visitingAgentPhone: visitingAgent?.phone || "N/A",
-        });
-        whatsAppJobs.push(
-          sendWhatsAppTemplate(
-            ownerAgent.phone,
-            content.contentSid,
-            content.contentVariables
-          ).then(() => {
-            whatsAppCount++;
-          })
-        );
-      }
+      agentPhone = agentPhone || ownerAgent?.phone || null;
     }
+  }
+
+  if (!emailOnly && agentPhone) {
+    const digestBody = buildDigestText({ recipientType, agentName, date, visits });
+    whatsAppJobs.push(
+      sendWhatsApp(agentPhone, digestBody).then((result) => {
+        if (result.success) whatsAppCount += 1;
+      })
+    );
   }
 
   await Promise.allSettled(whatsAppJobs);

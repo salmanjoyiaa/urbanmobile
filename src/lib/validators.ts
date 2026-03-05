@@ -176,6 +176,10 @@ export const visitRequestSchema = z.object({
   visitor_phone: z
     .string()
     .regex(/^\+\d{10,15}$/, "Invalid phone number format"),
+  visitor_message: z
+    .string()
+    .max(5000, "Message must not exceed 5000 characters")
+    .optional(),
   visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
   visit_time: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format"),
 });

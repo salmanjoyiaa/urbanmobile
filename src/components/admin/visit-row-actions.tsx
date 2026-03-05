@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Trash2, Eye, Ban, Clock, Pencil, CheckCircle2 } from "lucide-react";
+import { MoreHorizontal, Trash2, Eye, Ban, Pencil, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -56,7 +56,7 @@ export function VisitRowActions({ visit, visitingAgents, busyAgentIds }: VisitRo
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleAction = async (action: "confirmed" | "cancelled" | "delete" | "pending") => {
+    const handleAction = async (action: "confirmed" | "cancelled" | "delete") => {
         if (action === "delete" && !confirm("Are you sure you want to permanently delete this visit request? This cannot be undone.")) return;
 
         setIsLoading(true);
@@ -123,12 +123,6 @@ export function VisitRowActions({ visit, visitingAgents, busyAgentIds }: VisitRo
                 {visit.status === "assigned" && (
                     <DropdownMenuItem onClick={() => handleAction("confirmed")} className="cursor-pointer text-green-600 focus:text-green-600">
                         <CheckCircle2 className="mr-2 h-4 w-4" /> Confirm & Notify
-                    </DropdownMenuItem>
-                )}
-
-                {(visit.status === "confirmed" || visit.status === "assigned") && (
-                    <DropdownMenuItem onClick={() => handleAction("pending")} className="cursor-pointer">
-                        <Clock className="mr-2 h-4 w-4 text-blue-600" /> Mark as Pending
                     </DropdownMenuItem>
                 )}
 
