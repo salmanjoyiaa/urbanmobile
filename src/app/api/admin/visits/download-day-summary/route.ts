@@ -123,9 +123,11 @@ export async function POST(request: Request) {
   const rows: DayVisitPdfRow[] = visits.map((visit, index) => {
     const ownerAgent = visit.properties?.agents?.profiles;
     const visitingAgent = visit.visiting_agent;
-    const visitor = visit.visitor_phone
-      ? `${visit.visitor_name} (${visit.visitor_phone})`
-      : visit.visitor_name;
+    const visitor = recipientType === "property_agent"
+      ? visit.visitor_name
+      : visit.visitor_phone
+        ? `${visit.visitor_name} (${visit.visitor_phone})`
+        : visit.visitor_name;
 
     const counterpart = recipientType === "visiting_agent"
       ? (ownerAgent?.phone

@@ -76,9 +76,11 @@ function buildDigestText({
     const propertyRef = visit.properties?.property_ref || "N/A";
     const ownerAgent = visit.properties?.agents?.profiles;
     const visitingAgent = visit.visiting_agent;
-    const visitor = visit.visitor_phone
-      ? `${visit.visitor_name} (${visit.visitor_phone})`
-      : visit.visitor_name;
+    const visitor = recipientType === "property_agent"
+      ? visit.visitor_name
+      : visit.visitor_phone
+        ? `${visit.visitor_name} (${visit.visitor_phone})`
+        : visit.visitor_name;
 
     if (recipientType === "property_agent") {
       const va = visitingAgent?.phone
@@ -227,7 +229,7 @@ export async function POST(request: Request) {
       propertyTitle,
       visitTime,
       visitorName: v.visitor_name,
-      visitorPhone: v.visitor_phone,
+      visitorPhone: recipientType === "property_agent" ? undefined : v.visitor_phone,
       visitingAgentName: visitingAgent?.full_name ?? null,
       visitingAgentPhone: visitingAgent?.phone ?? null,
     });
