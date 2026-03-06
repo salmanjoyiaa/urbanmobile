@@ -99,18 +99,41 @@ export function maintenanceRejected(params: { customerName: string; serviceType:
 // ----- WhatsApp Content Template (Twilio approved templates) -----
 // Used to send via contentSid + contentVariables to avoid error 63016.
 
-const DEFAULT_SID_VISIT_CONFIRMATION_CUSTOMER = "HX6e23b200047add8f129ffa4adcfc77cc";
-const DEFAULT_SID_VISIT_ASSIGNED_PROPERTY_AGENT = "HXa441955a0eadba3da289aa7deb88f8af";
-const DEFAULT_SID_VISIT_ASSIGNED_VISITING_AGENT = "HXc7193048915d62e308939c1033019656";
+const DEFAULT_SID_VISIT_CONFIRMATION_CUSTOMER = "HX68910b1b2d0a8ef427916ab56a70606a";
+const DEFAULT_SID_VISIT_ASSIGNED_PROPERTY_AGENT = "HX2a544304c912de7cd7aba8733a774e15";
+const DEFAULT_SID_VISIT_ASSIGNED_VISITING_AGENT = "HX6ff55189a698c948cfda4301dcd16764";
 
-/** visit_confirmation_customer: 1=visitorName, 2=propertyTitle, 3=visitDate, 4=visitTime, 5=visitingAgentName, 6=visitingAgentPhone */
+const EXPECTED_TEMPLATE_KEYS = {
+  customer: ["1", "2", "3", "4", "5", "6", "7", "8"],
+  property_agent: ["1", "2", "3", "4", "5", "6"],
+  visiting_agent: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+} as const;
+
+export function validateTwilioTemplateVariables(
+  kind: keyof typeof EXPECTED_TEMPLATE_KEYS,
+  variables: Record<string, string>
+): { valid: true } | { valid: false; error: string } {
+  const expected = [...EXPECTED_TEMPLATE_KEYS[kind]].sort();
+  const actual = Object.keys(variables).sort();
+  if (expected.length !== actual.length || expected.some((key, idx) => key !== actual[idx])) {
+    return {
+      valid: false,
+      error: `Template variable mismatch for ${kind}. Expected keys [${expected.join(", ")}], got [${actual.join(", ")}].`,
+    };
+  }
+  return { valid: true };
+}
+
+/** visit_confirmation_customer: 1=visitorName, 2=propertyTitle, 3=visitDate, 4=visitTime, 5=propertyId, 6=visitingAgentName, 7=visitingAgentPhone, 8=mapLink */
 export function visitConfirmationCustomerContent(params: {
   visitorName: string;
   propertyTitle: string;
   visitDate: string;
   visitTime: string;
+  propertyId: string;
   visitingAgentName?: string | null;
   visitingAgentPhone?: string | null;
+  locationUrl?: string | null;
 }): { contentSid: string; contentVariables: Record<string, string> } {
   const contentSid =
     process.env.TWILIO_TEMPLATE_VISIT_CONFIRMATION_CUSTOMER_SID || DEFAULT_SID_VISIT_CONFIRMATION_CUSTOMER;
@@ -121,18 +144,22 @@ export function visitConfirmationCustomerContent(params: {
       "2": params.propertyTitle,
       "3": params.visitDate,
       "4": params.visitTime,
-      "5": params.visitingAgentName || "Not yet assigned",
-      "6": params.visitingAgentPhone || "N/A",
+      "5": params.propertyId,
+      "6": params.visitingAgentName || "N/A",
+      "7": params.visitingAgentPhone || "N/A",
+      "8": params.locationUrl || "N/A",
     },
   };
 }
 
-/** visit_assigned_property_agent: 1=ownerName, 2=visitorName, 3=visitingAgentName, 4=visitingAgentPhone */
+/** visit_assigned_property_agent: 1=ownerName, 2=visitorName, 3=visitingAgentName, 4=visitingAgentPhone, 5=propertyId, 6=mapLink */
 export function visitAssignedPropertyAgentContent(params: {
   ownerName: string;
   visitorName: string;
   visitingAgentName: string;
   visitingAgentPhone: string;
+  propertyId: string;
+  locationUrl?: string | null;
 }): { contentSid: string; contentVariables: Record<string, string> } {
   const contentSid =
     process.env.TWILIO_TEMPLATE_VISIT_ASSIGNED_PROPERTY_AGENT_SID || DEFAULT_SID_VISIT_ASSIGNED_PROPERTY_AGENT;
@@ -143,11 +170,13 @@ export function visitAssignedPropertyAgentContent(params: {
       "2": params.visitorName,
       "3": params.visitingAgentName,
       "4": params.visitingAgentPhone,
+      "5": params.propertyId,
+      "6": params.locationUrl || "N/A",
     },
   };
 }
 
-/** visit_assigned_visiting_agent: 1=visitingAgentName, 2=propertyTitle, 3=visitDate, 4=visitTime, 5=visitorName, 6=visitorPhone, 7=ownerName, 8=ownerPhone, 9=instructions (step 5) */
+/** visit_assigned_visiting_agent: 1=visitingAgentName, 2=propertyTitle, 3=visitDate, 4=visitTime, 5=visitorName, 6=visitorPhone, 7=ownerName, 8=ownerPhone, 9=instructions, 10=propertyId, 11=mapLink, 12=frontDoorPhoto */
 export function visitAssignedVisitingAgentContent(params: {
   visitingAgentName: string;
   propertyTitle: string;
@@ -157,15 +186,13 @@ export function visitAssignedVisitingAgentContent(params: {
   visitorPhone: string;
   ownerName: string;
   ownerPhone: string;
+  propertyId: string;
+  locationUrl?: string | null;
   instructions?: string | null;
   image?: string | null;
 }): { contentSid: string; contentVariables: Record<string, string> } {
   const contentSid =
     process.env.TWILIO_TEMPLATE_VISIT_ASSIGNED_VISITING_AGENT_SID || DEFAULT_SID_VISIT_ASSIGNED_VISITING_AGENT;
-  const step5Parts = [
-    params.instructions,
-    params.image ? `Image/Layout: ${params.image}` : null,
-  ].filter(Boolean).join("\n");
   return {
     contentSid,
     contentVariables: {
@@ -177,7 +204,10 @@ export function visitAssignedVisitingAgentContent(params: {
       "6": params.visitorPhone,
       "7": params.ownerName,
       "8": params.ownerPhone,
-      "9": step5Parts || "No special instructions",
+      "9": params.instructions || "No special instructions",
+      "10": params.propertyId,
+      "11": params.locationUrl || "N/A",
+      "12": params.image || "N/A",
     },
   };
 }

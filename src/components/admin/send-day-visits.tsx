@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarDays, Send, Loader2, MessageCircle } from "lucide-react";
+import { CalendarDays, Send, Loader2, MessageCircle, FileDown } from "lucide-react";
 
 type Agent = { id: string; name: string };
 
@@ -32,6 +32,49 @@ export function SendDayVisits({ visitingAgents, propertyAgents }: Props) {
   const [propertyAgentId, setPropertyAgentId] = useState("");
   const [sending, setSending] = useState<"visiting" | "property" | null>(null);
   const [opening, setOpening] = useState<"visiting" | "property" | null>(null);
+  const [downloading, setDownloading] = useState<"visiting" | "property" | null>(null);
+
+  async function downloadPdf(
+    recipientType: "visiting_agent" | "property_agent",
+    id: string
+  ) {
+    const key = recipientType === "visiting_agent" ? "visiting" : "property";
+    setDownloading(key);
+    try {
+      const payload: Record<string, string> = {
+        date,
+        recipientType,
+      };
+      if (recipientType === "visiting_agent") payload.profileId = id;
+      else payload.agentId = id;
+
+      const res = await fetch("/api/admin/visits/download-day-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Failed to generate PDF" }));
+        throw new Error(data.error || "Failed to generate PDF");
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `theurbanrealestate-daily-visits-${recipientType}-${date}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success("PDF downloaded successfully");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to download PDF");
+    } finally {
+      setDownloading(null);
+    }
+  }
 
   async function openOnDevice(
     recipientType: "visiting_agent" | "property_agent",
@@ -192,6 +235,23 @@ export function SendDayVisits({ visitingAgents, propertyAgents }: Props) {
                   <MessageCircle className="h-4 w-4" />
                 )}
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!visitingAgentId || !date || downloading !== null}
+                onClick={() => downloadPdf("visiting_agent", visitingAgentId)}
+                title="Download professional summary PDF"
+                aria-label="Download visiting agent summary PDF"
+              >
+                {downloading === "visiting" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <FileDown className="mr-1 h-4 w-4" />
+                    Download PDF
+                  </>
+                )}
+              </Button>
             </div>
           </div>
 
@@ -237,6 +297,23 @@ export function SendDayVisits({ visitingAgents, propertyAgents }: Props) {
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <MessageCircle className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!propertyAgentId || !date || downloading !== null}
+                onClick={() => downloadPdf("property_agent", propertyAgentId)}
+                title="Download professional summary PDF"
+                aria-label="Download property agent summary PDF"
+              >
+                {downloading === "property" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <FileDown className="mr-1 h-4 w-4" />
+                    Download PDF
+                  </>
                 )}
               </Button>
             </div>

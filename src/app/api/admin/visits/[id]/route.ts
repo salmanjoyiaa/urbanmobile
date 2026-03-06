@@ -11,6 +11,7 @@ import {
   visitConfirmationCustomerContent,
   visitAssignedVisitingAgentContent,
   visitAssignedPropertyAgentContent,
+  validateTwilioTemplateVariables,
 } from "@/lib/whatsapp-templates";
 import {
   visitConfirmedCustomerEmail,
@@ -19,7 +20,7 @@ import {
   visitAssignedVisitingAgentEmail,
   visitAssignedPropertyAgentEmail,
 } from "@/lib/email-templates";
-import { formatMessageDate, formatMessageTime } from "@/lib/format";
+import { formatMessageDate, formatMessageTime, formatMonthDayYearWithComma } from "@/lib/format";
 
 function revalidateVisitSurfaces() {
   revalidatePath("/admin/visits", "page");
@@ -38,6 +39,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   if (admin.error || !admin.profile) {
     return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
+  const adminProfile = admin.profile;
 
   let body;
   try {
@@ -166,15 +168,33 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   const visitDetails = rawData as any;
 
   const notifyJobs: Array<Promise<unknown>> = [];
+
+  const failTemplateValidation = async (templateKind: "customer" | "property_agent" | "visiting_agent", errorMessage: string) => {
+    await writeAuditLog({
+      actorId: adminProfile.id,
+      action: "visit_template_validation_failed",
+      entityType: "visit_requests",
+      entityId: context.params.id,
+      metadata: {
+        template_kind: templateKind,
+        error: errorMessage,
+      },
+    });
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
+  };
+
   // Skip notifications if already sent for this visit request (dedup)
   if (visitDetails?.properties && !alreadyNotified) {
     const visitId = context.params.id;
+    const propertyId = visitDetails.properties.property_ref || String(visitDetails.properties.id);
     const templateParams = {
       visitorName: visitDetails.visitor_name,
       propertyTitle: visitDetails.properties.title,
-      visitDate: formatMessageDate(visitDetails.visit_date),
+      visitDate: formatMonthDayYearWithComma(visitDetails.visit_date),
       visitTime: formatMessageTime(visitDetails.visit_time),
       locationUrl: visitDetails.properties.location_url,
+      propertyId,
     };
 
     if (parsed.data.status === "confirmed" && visitDetails.visiting_agent) {
@@ -183,7 +203,6 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
       const ownerName = ownerAgentProfile?.full_name || "Agent";
       const ownerPhone = ownerAgentProfile?.phone || "N/A";
-      const propertyId = visitDetails.properties.property_ref || String(visitDetails.properties.id);
 
       // 1. WhatsApp + Email to Customer
       const custContent = visitConfirmationCustomerContent({
@@ -191,6 +210,10 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         visitingAgentName: visitingAgentProfile.full_name,
         visitingAgentPhone: visitingAgentProfile.phone ?? "",
       });
+      const customerTemplateValidation = validateTwilioTemplateVariables("customer", custContent.contentVariables);
+      if (!customerTemplateValidation.valid) {
+        return failTemplateValidation("customer", customerTemplateValidation.error);
+      }
       notifyJobs.push(
         sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables, visitId)
       );
@@ -208,8 +231,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       const visitingAgentParams = {
         visitingAgentName: visitingAgentProfile.full_name,
         propertyTitle: visitDetails.properties.title,
-        visitDate: formatMessageDate(visitDetails.visit_date),
-        visitTime: visitDetails.visit_time,
+        visitDate: formatMonthDayYearWithComma(visitDetails.visit_date),
+        visitTime: formatMessageTime(visitDetails.visit_time),
         visitorName: visitDetails.visitor_name,
         visitorPhone: visitDetails.visitor_phone,
         ownerName: ownerName,
@@ -222,6 +245,10 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
       if (visitingAgentProfile.phone) {
         const vaContent = visitAssignedVisitingAgentContent(visitingAgentParams);
+        const visitingTemplateValidation = validateTwilioTemplateVariables("visiting_agent", vaContent.contentVariables);
+        if (!visitingTemplateValidation.valid) {
+          return failTemplateValidation("visiting_agent", visitingTemplateValidation.error);
+        }
         notifyJobs.push(sendWhatsAppTemplate(visitingAgentProfile.phone, vaContent.contentSid, vaContent.contentVariables, visitId));
       }
       if (visitingAgentProfile.email) {
@@ -232,8 +259,8 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       const propertyAgentParams = {
         ownerName: ownerName,
         propertyTitle: visitDetails.properties.title,
-        visitDate: formatMessageDate(visitDetails.visit_date),
-        visitTime: visitDetails.visit_time,
+        visitDate: formatMonthDayYearWithComma(visitDetails.visit_date),
+        visitTime: formatMessageTime(visitDetails.visit_time),
         visitorName: visitDetails.visitor_name,
         visitingAgentName: visitingAgentProfile.full_name,
         visitingAgentPhone: visitingAgentProfile.phone || "N/A",
@@ -243,6 +270,10 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
       if (ownerAgentProfile?.phone) {
         const paContent = visitAssignedPropertyAgentContent(propertyAgentParams);
+        const propertyTemplateValidation = validateTwilioTemplateVariables("property_agent", paContent.contentVariables);
+        if (!propertyTemplateValidation.valid) {
+          return failTemplateValidation("property_agent", propertyTemplateValidation.error);
+        }
         notifyJobs.push(sendWhatsAppTemplate(ownerAgentProfile.phone, paContent.contentSid, paContent.contentVariables, visitId));
       }
       if (ownerAgentProfile?.email) {
@@ -252,6 +283,10 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
     if (parsed.data.status === "confirmed" && !visitDetails.visiting_agent) {
       const custContent = visitConfirmationCustomerContent(templateParams);
+      const customerTemplateValidation = validateTwilioTemplateVariables("customer", custContent.contentVariables);
+      if (!customerTemplateValidation.valid) {
+        return failTemplateValidation("customer", customerTemplateValidation.error);
+      }
       notifyJobs.push(
         sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables, visitId)
       );
@@ -307,7 +342,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   }
 
   await writeAuditLog({
-    actorId: admin.profile.id,
+    actorId: adminProfile.id,
     action: `visit_${parsed.data.status}`,
     entityType: "visit_requests",
     entityId: context.params.id,

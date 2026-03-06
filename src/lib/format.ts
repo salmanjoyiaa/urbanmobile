@@ -25,6 +25,12 @@ export function formatMonthDayYear(date: string | Date): string {
   return `${month} ${parsed.getDate()} ${parsed.getFullYear()}`;
 }
 
+export function formatMonthDayYearWithComma(date: string | Date): string {
+  const parsed = parseDateInput(date);
+  const month = parsed.toLocaleString("en-US", { month: "long" });
+  return `${month} ${parsed.getDate()}, ${parsed.getFullYear()}`;
+}
+
 export function formatDate(date: string | Date): string {
   return formatMonthDayYear(date);
 }
