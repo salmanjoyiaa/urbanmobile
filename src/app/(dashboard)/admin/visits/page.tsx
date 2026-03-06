@@ -220,7 +220,7 @@ export default async function AdminVisitsPage({
   const { data: assignedSlotsData } = await supabase
     .from("visit_requests")
     .select("id, visit_date, visit_time, visiting_agent_id")
-    .eq("status", "assigned")
+    .in("status", ["assigned", "confirmed"])
     .not("visiting_agent_id", "is", null);
 
   const assignedBySlot = new Map<string, Array<{ visitId: string; agentId: string }>>();

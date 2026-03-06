@@ -11,6 +11,7 @@ type RescheduleVisit = {
   id: string;
   parent_visit_id: string | null;
   property_id: string;
+  visiting_agent_id: string | null;
   visit_date: string;
   visit_time: string;
   status: string;
@@ -37,7 +38,7 @@ export async function POST(request: Request, context: { params: { id: string } }
 
   const { data: requestVisit } = (await admin.supabase
     .from("visit_requests")
-    .select("id, parent_visit_id, property_id, visit_date, visit_time, status, request_source")
+    .select("id, parent_visit_id, property_id, visiting_agent_id, visit_date, visit_time, status, request_source")
     .eq("id", context.params.id)
     .maybeSingle()) as { data: RescheduleVisit | null };
 
@@ -60,7 +61,52 @@ export async function POST(request: Request, context: { params: { id: string } }
       .neq("id", requestVisit.id);
 
     if ((conflictingCount || 0) > 0) {
+      await writeAuditLog({
+        actorId: admin.profile.id,
+        action: "visit_assignment_conflict_blocked",
+        entityType: "visit_requests",
+        entityId: requestVisit.id,
+        metadata: {
+          source: "reschedule_approve_property_slot",
+          property_id: requestVisit.property_id,
+          visit_date: requestVisit.visit_date,
+          visit_time: requestVisit.visit_time,
+        },
+      });
+
       return NextResponse.json({ error: "Slot conflict detected. Cannot approve this reschedule." }, { status: 409 });
+    }
+
+    if (requestVisit.visiting_agent_id) {
+      const { count: agentConflictingCount } = await admin.supabase
+        .from("visit_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("visiting_agent_id", requestVisit.visiting_agent_id)
+        .eq("visit_date", requestVisit.visit_date)
+        .eq("visit_time", requestVisit.visit_time)
+        .in("status", ["assigned", "confirmed"])
+        .neq("id", requestVisit.id);
+
+      if ((agentConflictingCount || 0) > 0) {
+        await writeAuditLog({
+          actorId: admin.profile.id,
+          action: "visit_assignment_conflict_blocked",
+          entityType: "visit_requests",
+          entityId: requestVisit.id,
+          metadata: {
+            source: "reschedule_approve_agent_slot",
+            visiting_agent_id: requestVisit.visiting_agent_id,
+            visit_date: requestVisit.visit_date,
+            visit_time: requestVisit.visit_time,
+            blocked_statuses: ["assigned", "confirmed"],
+          },
+        });
+
+        return NextResponse.json(
+          { error: "This visiting agent is already assigned on this slot." },
+          { status: 409 }
+        );
+      }
     }
 
     const { error: approveError } = await admin.supabase
@@ -77,6 +123,12 @@ export async function POST(request: Request, context: { params: { id: string } }
       .eq("id", requestVisit.id);
 
     if (approveError) {
+      if (approveError.code === "23505") {
+        return NextResponse.json(
+          { error: "This visiting agent is already assigned on this slot." },
+          { status: 409 }
+        );
+      }
       return NextResponse.json({ error: approveError.message }, { status: 500 });
     }
 

@@ -81,7 +81,7 @@ export async function POST(request: Request) {
         .select("visit_time")
         .eq("visit_date", parsed.data.date)
         .eq("visiting_agent_id", parsed.data.visiting_agent_id)
-        .eq("status", "assigned");
+        .in("status", ["assigned", "confirmed"]);
 
     const blockedTimes = new Set<string>((existingAssigned || []).map((row) => String((row as { visit_time: string }).visit_time).slice(0, 5)));
 
@@ -96,6 +96,20 @@ export async function POST(request: Request) {
                 visitId: v.id,
                 visitTime,
                 reason: "Already assigned on this slot",
+            });
+
+            await writeAuditLog({
+                actorId: admin.profile.id,
+                action: "visit_assignment_conflict_blocked",
+                entityType: "visit_requests",
+                entityId: v.id,
+                metadata: {
+                    visiting_agent_id: parsed.data.visiting_agent_id,
+                    visit_date: parsed.data.date,
+                    visit_time: visitTime,
+                    blocked_statuses: ["assigned", "confirmed"],
+                    source: "bulk_assign_precheck",
+                },
             });
             continue;
         }
@@ -119,6 +133,20 @@ export async function POST(request: Request) {
                     visitId: v.id,
                     visitTime,
                     reason: "Already assigned on this slot",
+                });
+
+                await writeAuditLog({
+                    actorId: admin.profile.id,
+                    action: "visit_assignment_conflict_blocked",
+                    entityType: "visit_requests",
+                    entityId: v.id,
+                    metadata: {
+                        visiting_agent_id: parsed.data.visiting_agent_id,
+                        visit_date: parsed.data.date,
+                        visit_time: visitTime,
+                        blocked_statuses: ["assigned", "confirmed"],
+                        source: "bulk_assign_db_constraint",
+                    },
                 });
             }
             continue;

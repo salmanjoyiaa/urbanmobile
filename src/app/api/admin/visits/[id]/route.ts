@@ -103,10 +103,23 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         .eq("visiting_agent_id", parsed.data.visiting_agent_id)
         .eq("visit_date", schedule.visit_date)
         .eq("visit_time", schedule.visit_time)
-        .eq("status", "assigned")
+        .in("status", ["assigned", "confirmed"])
         .neq("id", context.params.id);
 
       if ((conflictingCount || 0) > 0) {
+        await writeAuditLog({
+          actorId: adminProfile.id,
+          action: "visit_assignment_conflict_blocked",
+          entityType: "visit_requests",
+          entityId: context.params.id,
+          metadata: {
+            visiting_agent_id: parsed.data.visiting_agent_id,
+            visit_date: schedule.visit_date,
+            visit_time: schedule.visit_time,
+            blocked_statuses: ["assigned", "confirmed"],
+          },
+        });
+
         return NextResponse.json(
           { error: "This visiting agent is already assigned on this slot." },
           { status: 409 }
@@ -387,13 +400,53 @@ export async function PUT(request: Request, context: { params: { id: string } })
 
   const { data: currentVisit } = await admin.supabase
     .from("visit_requests")
-    .select("property_id, visit_date")
+    .select("property_id, visit_date, status, visiting_agent_id")
     .eq("id", context.params.id)
     .maybeSingle();
 
-  const existingVisit = currentVisit as { property_id: string | null; visit_date: string | null } | null;
+  const existingVisit = currentVisit as {
+    property_id: string | null;
+    visit_date: string | null;
+    status: string | null;
+    visiting_agent_id: string | null;
+  } | null;
   if (!existingVisit?.property_id) {
     return NextResponse.json({ error: "Visit not found" }, { status: 404 });
+  }
+
+  if (
+    existingVisit.visiting_agent_id &&
+    (existingVisit.status === "assigned" || existingVisit.status === "confirmed")
+  ) {
+    const { count: conflictingCount } = await admin.supabase
+      .from("visit_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("visiting_agent_id", existingVisit.visiting_agent_id)
+      .eq("visit_date", parsed.data.visit_date)
+      .eq("visit_time", parsed.data.visit_time)
+      .in("status", ["assigned", "confirmed"])
+      .neq("id", context.params.id);
+
+    if ((conflictingCount || 0) > 0) {
+      await writeAuditLog({
+        actorId: admin.profile.id,
+        action: "visit_assignment_conflict_blocked",
+        entityType: "visit_requests",
+        entityId: context.params.id,
+        metadata: {
+          visiting_agent_id: existingVisit.visiting_agent_id,
+          visit_date: parsed.data.visit_date,
+          visit_time: parsed.data.visit_time,
+          blocked_statuses: ["assigned", "confirmed"],
+          source: "visit_edit",
+        },
+      });
+
+      return NextResponse.json(
+        { error: "This visiting agent is already assigned on this slot." },
+        { status: 409 }
+      );
+    }
   }
 
   const { error } = await admin.supabase
@@ -409,6 +462,12 @@ export async function PUT(request: Request, context: { params: { id: string } })
     .eq("id", context.params.id);
 
   if (error) {
+    if (error.code === "23505") {
+      return NextResponse.json(
+        { error: "This visiting agent is already assigned on this slot." },
+        { status: 409 }
+      );
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
