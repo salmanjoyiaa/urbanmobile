@@ -16,8 +16,14 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { SlotGrid } from "@/components/visit/slot-grid";
 import { useVisitSlots, useCreateVisitRequest } from "@/queries/visits";
 import { useRealtimeSlots } from "@/hooks/use-realtime-slots";
-import { getVisitBookingMaxDate, getVisitBookingMinDate, isWithinVisitBookingWindow } from "@/lib/slots";
-import { VISIT_BOOKING_WINDOW_DAYS } from "@/lib/constants";
+import {
+  getSaudiTodayDateString,
+  getVisitBookingMaxDate,
+  getVisitBookingMinDate,
+  isSaudiToday,
+  isWithinVisitBookingWindow,
+} from "@/lib/slots";
+import { VISIT_BOOKING_LEAD_HOURS, VISIT_BOOKING_WINDOW_DAYS } from "@/lib/constants";
 import { SuccessState } from "@/components/ui/success-state";
 import { toast } from "sonner";
 
@@ -40,6 +46,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [slot, setSlot] = useState<string | null>(null);
   const [bookingWindowDays, setBookingWindowDays] = useState<number>(VISIT_BOOKING_WINDOW_DAYS);
+  const [bookingLeadHours, setBookingLeadHours] = useState<number>(VISIT_BOOKING_LEAD_HOURS);
 
   const dateKey = useMemo(() => (date ? format(date, "yyyy-MM-dd") : ""), [date]);
   const { data: slots = [], isLoading: loadingSlots } = useVisitSlots(propertyId, dateKey, !!dateKey);
@@ -83,6 +90,9 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
         if (res.ok && typeof data.booking_window_days === "number") {
           setBookingWindowDays(data.booking_window_days);
         }
+        if (res.ok && typeof data.booking_lead_hours === "number") {
+          setBookingLeadHours(data.booking_lead_hours);
+        }
       } catch {
         // keep fallback
       }
@@ -94,6 +104,8 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
   const minDate = getVisitBookingMinDate(new Date());
   const maxDate = getVisitBookingMaxDate(new Date(), bookingWindowDays);
   const isDateDisabled = (day: Date) => !isWithinVisitBookingWindow(day, new Date(), bookingWindowDays);
+  const isSelectedDateSaudiToday = dateKey ? isSaudiToday(dateKey, new Date()) : false;
+  const todaySaudiDateString = getSaudiTodayDateString(new Date());
 
   const onContactSubmit = async (values: ContactInput) => {
     if (!date || !slot) {
@@ -167,7 +179,7 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
               Select a day to see available times.
             </p>
             <p className="text-xs text-muted-foreground">
-              You can book from tomorrow up to {bookingWindowDays} day{bookingWindowDays === 1 ? "" : "s"} ahead.
+              Same-day visits are available when the slot starts at least {bookingLeadHours} hour{bookingLeadHours === 1 ? "" : "s"} from now. You can book up to {bookingWindowDays} day{bookingWindowDays === 1 ? "" : "s"} ahead.
             </p>
             <Calendar
               mode="single"
@@ -195,13 +207,17 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Loading slots...
               </div>
+            ) : availableSlots.length === 0 && isSelectedDateSaudiToday ? (
+              <p className="text-sm text-muted-foreground">
+                No eligible slots remain today. Same-day visits must be booked at least {bookingLeadHours} hour{bookingLeadHours === 1 ? "" : "s"} before the visit starts.
+              </p>
             ) : availableSlots.length === 0 && slots.length > 0 ? (
               <p className="text-sm text-muted-foreground">
                 No slots available on this day. Try another date.
               </p>
             ) : availableSlots.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No slots available for this date. Try another day in the booking window.
+                No slots available for this date. Try another day between today and {bookingWindowDays} day{bookingWindowDays === 1 ? "" : "s"} ahead.
               </p>
             ) : (
               <SlotGrid slots={availableSlots} selectedSlot={slot} onSelect={setSlot} />
@@ -223,6 +239,11 @@ export function VisitScheduler({ propertyId, propertyTitle }: VisitSchedulerProp
             {date && slot && (
               <p className="text-sm font-medium text-muted-foreground">
                 You&apos;re booking: {format(date, "EEEE, MMM d")} at {slot.slice(0, 5)}
+              </p>
+            )}
+            {dateKey === todaySaudiDateString && (
+              <p className="text-xs text-muted-foreground">
+                This is a same-day request, so the slot must start at least {bookingLeadHours} hour{bookingLeadHours === 1 ? "" : "s"} from now.
               </p>
             )}
             <div className="space-y-2">

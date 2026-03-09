@@ -60,10 +60,18 @@ export const SLOT_CONFIG = {
   workDays: [0, 1, 2, 3, 4, 5, 6] as number[],
 } as const;
 
+export const SAUDI_TIME_ZONE = "Asia/Riyadh";
+export const SAUDI_UTC_OFFSET = "+03:00";
+
 const rawVisitWindowDays = Number(process.env.NEXT_PUBLIC_VISIT_BOOKING_WINDOW_DAYS || "10");
 export const VISIT_BOOKING_WINDOW_DAYS = Number.isFinite(rawVisitWindowDays)
   ? Math.min(Math.max(Math.trunc(rawVisitWindowDays), 1), 60)
   : 10;
+
+const rawVisitLeadHours = Number(process.env.NEXT_PUBLIC_VISIT_BOOKING_LEAD_HOURS || "3");
+export const VISIT_BOOKING_LEAD_HOURS = Number.isFinite(rawVisitLeadHours)
+  ? Math.min(Math.max(Math.trunc(rawVisitLeadHours), 1), 72)
+  : 3;
 
 export const ROOM_COUNT_OPTIONS = ["0", "1", "2", "3", "4", "5+"] as const;
 

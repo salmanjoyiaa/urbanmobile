@@ -4,9 +4,15 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyAdmins } from "@/lib/admin";
 import { cacheAside, cacheDel } from "@/lib/redis";
-import { buildAvailabilitySlots, generateSlotsInTimeframe, isWithinVisitBookingWindow } from "@/lib/slots";
+import {
+  buildAvailabilitySlots,
+  filterSlotsByVisitLeadTime,
+  generateSlotsInTimeframe,
+  isVisitSlotBookable,
+  isWithinVisitBookingWindow,
+} from "@/lib/slots";
 import { visitRequestSchema } from "@/lib/validators";
-import { getVisitBookingWindowDays } from "@/lib/visit-settings";
+import { getVisitBookingLeadHours, getVisitBookingWindowDays } from "@/lib/visit-settings";
 
 const redisEnabled =
   Boolean(process.env.UPSTASH_REDIS_REST_URL) &&
@@ -62,7 +68,10 @@ export async function GET(request: NextRequest) {
   }
 
   const parsedDate = new Date(`${date}T00:00:00`);
-  const bookingWindowDays = await getVisitBookingWindowDays();
+  const [bookingWindowDays, bookingLeadHours] = await Promise.all([
+    getVisitBookingWindowDays(),
+    getVisitBookingLeadHours(),
+  ]);
 
   if (!isWithinVisitBookingWindow(parsedDate, new Date(), bookingWindowDays)) {
     return NextResponse.json({ slots: [] });
@@ -126,8 +135,13 @@ export async function GET(request: NextRequest) {
             return raw.length > 5 ? raw.slice(0, 5) : raw;
           });
 
-        const slots = buildAvailabilitySlots(bookedTimes, slotWindow)
-          .map((s) => adminBlockedTimes.has(s.time) ? { ...s, available: false } : s);
+        const slots = filterSlotsByVisitLeadTime(
+          date,
+          buildAvailabilitySlots(bookedTimes, slotWindow)
+            .map((s) => adminBlockedTimes.has(s.time) ? { ...s, available: false } : s),
+          new Date(),
+          bookingLeadHours,
+        );
 
         return slots;
       },
@@ -175,10 +189,21 @@ export async function POST(request: NextRequest) {
   }
 
   const payload = parsed.data;
-  const bookingWindowDays = await getVisitBookingWindowDays();
+  const now = new Date();
+  const [bookingWindowDays, bookingLeadHours] = await Promise.all([
+    getVisitBookingWindowDays(),
+    getVisitBookingLeadHours(),
+  ]);
   const visitDate = new Date(`${payload.visit_date}T00:00:00`);
-  if (!isWithinVisitBookingWindow(visitDate, new Date(), bookingWindowDays)) {
-    return NextResponse.json({ error: "Visit date must be from tomorrow and within booking window" }, { status: 400 });
+  if (!isWithinVisitBookingWindow(visitDate, now, bookingWindowDays)) {
+    return NextResponse.json({ error: "Visit date must be within the booking window" }, { status: 400 });
+  }
+
+  if (!isVisitSlotBookable(payload.visit_date, payload.visit_time, now, bookingLeadHours)) {
+    return NextResponse.json(
+      { error: `Visits must be booked at least ${bookingLeadHours} hours before the start time` },
+      { status: 400 }
+    );
   }
 
   const { data: existing } = (await supabase

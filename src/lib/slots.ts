@@ -1,9 +1,91 @@
-import { SLOT_CONFIG, VISIT_BOOKING_WINDOW_DAYS } from "./constants";
+import {
+  SAUDI_TIME_ZONE,
+  SAUDI_UTC_OFFSET,
+  SLOT_CONFIG,
+  VISIT_BOOKING_LEAD_HOURS,
+  VISIT_BOOKING_WINDOW_DAYS,
+} from "./constants";
 
 export interface TimeSlot {
   time: string; // "HH:MM"
   label: string; // "9:00 AM"
   available: boolean;
+}
+
+const saudiDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: SAUDI_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+function padDatePart(value: number): string {
+  return value.toString().padStart(2, "0");
+}
+
+function getFormatterPartMap(formatter: Intl.DateTimeFormat, value: Date): Record<string, string> {
+  return formatter.formatToParts(value).reduce<Record<string, string>>((parts, part) => {
+    if (part.type !== "literal") {
+      parts[part.type] = part.value;
+    }
+    return parts;
+  }, {});
+}
+
+export function formatCalendarDateString(date: Date): string {
+  return `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`;
+}
+
+export function getSaudiTodayDateString(now = new Date()): string {
+  const parts = getFormatterPartMap(saudiDateFormatter, now);
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+export function createCalendarDateFromDateString(dateString: string): Date {
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function normalizeVisitTime(time: string): string {
+  if (time.length >= 8) {
+    return time.slice(0, 8);
+  }
+  if (time.length >= 5) {
+    return `${time.slice(0, 5)}:00`;
+  }
+  return `${time.padEnd(5, "0")}:00`;
+}
+
+function normalizeVisitDateInput(date: Date | string): string {
+  return typeof date === "string" ? date : formatCalendarDateString(date);
+}
+
+export function parseVisitDateTimeInSaudiTime(date: Date | string, time: string): Date {
+  const dateString = normalizeVisitDateInput(date);
+  return new Date(`${dateString}T${normalizeVisitTime(time)}${SAUDI_UTC_OFFSET}`);
+}
+
+export function isVisitSlotBookable(
+  date: Date | string,
+  time: string,
+  now = new Date(),
+  leadHours = VISIT_BOOKING_LEAD_HOURS,
+): boolean {
+  const visitStart = parseVisitDateTimeInSaudiTime(date, time);
+  return visitStart.getTime() >= now.getTime() + leadHours * 60 * 60 * 1000;
+}
+
+export function filterSlotsByVisitLeadTime(
+  date: Date | string,
+  slots: TimeSlot[],
+  now = new Date(),
+  leadHours = VISIT_BOOKING_LEAD_HOURS,
+): TimeSlot[] {
+  return slots.filter((slot) => isVisitSlotBookable(date, slot.time, now, leadHours));
+}
+
+export function isSaudiToday(date: Date | string, now = new Date()): boolean {
+  return normalizeVisitDateInput(date) === getSaudiTodayDateString(now);
 }
 
 function toMinutes(time: string): number {
@@ -92,24 +174,19 @@ export function isFutureDate(date: Date): boolean {
 }
 
 export function getVisitBookingMinDate(now = new Date()): Date {
-  const minDate = new Date(now);
-  minDate.setHours(0, 0, 0, 0);
-  minDate.setDate(minDate.getDate() + 1);
-  return minDate;
+  return createCalendarDateFromDateString(getSaudiTodayDateString(now));
 }
 
 export function getVisitBookingMaxDate(now = new Date(), windowDays = VISIT_BOOKING_WINDOW_DAYS): Date {
-  const maxDate = new Date(now);
-  maxDate.setHours(0, 0, 0, 0);
+  const maxDate = getVisitBookingMinDate(now);
   maxDate.setDate(maxDate.getDate() + windowDays);
   return maxDate;
 }
 
 export function isWithinVisitBookingWindow(date: Date, now = new Date(), windowDays = VISIT_BOOKING_WINDOW_DAYS): boolean {
-  const normalized = new Date(date);
-  normalized.setHours(0, 0, 0, 0);
-  const minDate = getVisitBookingMinDate(now);
-  const maxDate = getVisitBookingMaxDate(now, windowDays);
+  const normalized = formatCalendarDateString(date);
+  const minDate = formatCalendarDateString(getVisitBookingMinDate(now));
+  const maxDate = formatCalendarDateString(getVisitBookingMaxDate(now, windowDays));
   return normalized >= minDate && normalized <= maxDate;
 }
 

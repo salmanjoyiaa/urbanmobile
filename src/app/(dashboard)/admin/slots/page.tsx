@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { generateSlotsInTimeframe, formatSlotLabel } from "@/lib/slots";
 import { createClient } from "@/lib/supabase/client";
-import { VISIT_BOOKING_WINDOW_DAYS } from "@/lib/constants";
+import { VISIT_BOOKING_LEAD_HOURS, VISIT_BOOKING_WINDOW_DAYS } from "@/lib/constants";
 
 type BlockedSlot = { id: string; date: string; time: string };
 type Property = { id: string; title: string; status: string; property_ref: string | null };
@@ -61,6 +61,7 @@ export default function AdminSlotsPage() {
   const [bulkStartTime, setBulkStartTime] = useState("08:00");
   const [bulkEndTime, setBulkEndTime] = useState("19:00");
   const [bookingWindowDays, setBookingWindowDays] = useState<number>(VISIT_BOOKING_WINDOW_DAYS);
+  const [bookingLeadHours, setBookingLeadHours] = useState<number>(VISIT_BOOKING_LEAD_HOURS);
   const [savingBookingWindow, setSavingBookingWindow] = useState(false);
   const [batchApplying, setBatchApplying] = useState(false);
   const [batchFailures, setBatchFailures] = useState<Array<{ property_id: string; title?: string; reason: string }>>([]);
@@ -137,6 +138,9 @@ export default function AdminSlotsPage() {
         if (!res.ok) throw new Error(data.error || "Failed to load booking settings");
         if (typeof data.booking_window_days === "number") {
           setBookingWindowDays(data.booking_window_days);
+        }
+        if (typeof data.booking_lead_hours === "number") {
+          setBookingLeadHours(data.booking_lead_hours);
         }
       } catch {
         // keep fallback
@@ -279,15 +283,20 @@ export default function AdminSlotsPage() {
     setSavingBookingWindow(true);
     try {
       const safeValue = Math.max(1, Math.min(60, Math.trunc(bookingWindowDays || 1)));
+      const safeLeadHours = Math.max(1, Math.min(72, Math.trunc(bookingLeadHours || 1)));
       const res = await fetch("/api/admin/visit-settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ booking_window_days: safeValue }),
+        body: JSON.stringify({
+          booking_window_days: safeValue,
+          booking_lead_hours: safeLeadHours,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save booking window");
       setBookingWindowDays(data.booking_window_days);
-      toast.success("Booking window updated");
+      setBookingLeadHours(data.booking_lead_hours);
+      toast.success("Booking settings updated");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to save booking window");
     } finally {
@@ -475,7 +484,7 @@ export default function AdminSlotsPage() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Customer Booking Window</CardTitle>
-          <CardDescription>Set how many days ahead customers can book (minimum is always tomorrow).</CardDescription>
+          <CardDescription>Set how far ahead customers can book and how many hours before a visit same-day requests must be made.</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex flex-wrap items-end gap-2">
@@ -490,9 +499,20 @@ export default function AdminSlotsPage() {
                 className="h-9 w-32 rounded-md border border-input bg-background px-3 text-sm"
               />
             </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1">Lead Hours</label>
+              <input
+                type="number"
+                min={1}
+                max={72}
+                value={bookingLeadHours}
+                onChange={(e) => setBookingLeadHours(Number(e.target.value || 1))}
+                className="h-9 w-32 rounded-md border border-input bg-background px-3 text-sm"
+              />
+            </div>
             <Button onClick={saveBookingWindow} disabled={savingBookingWindow}>
               {savingBookingWindow ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Save Window
+              Save Settings
             </Button>
           </div>
         </CardContent>
