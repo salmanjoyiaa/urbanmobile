@@ -64,6 +64,12 @@ export function HomepageNav() {
           >
             Team Login
           </Link>
+          <Link
+            href="/login?type=seller"
+            className="inline-flex items-center justify-center min-h-11 rounded-xl border-2 border-white bg-transparent text-white px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/10 dark:border-white/35 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+          >
+            Seller Login
+          </Link>
         </div>
 
         {/* Mobile: Hamburger */}
@@ -106,6 +112,13 @@ export function HomepageNav() {
                 className="block w-full text-center rounded-xl border-2 border-white text-white px-7 py-3.5 min-h-[44px] flex items-center justify-center text-[14px] font-bold transition-all hover:bg-white/10 dark:bg-white/10 dark:border-white/35 dark:text-white dark:hover:bg-white/15"
               >
                 Team Login
+              </Link>
+              <Link
+                href="/login?type=seller"
+                onClick={() => setOpen(false)}
+                className="block w-full text-center rounded-xl border-2 border-white text-white px-7 py-3.5 min-h-[44px] flex items-center justify-center text-[14px] font-bold transition-all hover:bg-white/10 dark:bg-white/10 dark:border-white/35 dark:text-white dark:hover:bg-white/15"
+              >
+                Seller Login
               </Link>
             </div>
           </nav>

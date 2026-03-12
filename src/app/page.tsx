@@ -395,6 +395,7 @@ export default async function HomePage() {
                   {[
                     { href: "/signup/agent?type=property", label: "Apply as Aqari" },
                     { href: "/signup/agent?type=visiting", label: "Apply as Team Agent" },
+                    { href: "/signup/agent?type=seller", label: "Apply as Seller" },
                   ].map((link) => (
                     <li key={link.href}>
                       <Link href={link.href} className="inline-flex items-center py-1.5 text-white/70 hover:text-white text-sm transition-colors min-h-[36px]">
