@@ -7,6 +7,7 @@ import { createRouteClient } from "@/lib/supabase/route";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const bodySchema = z.object({
+  agent_type: z.enum(["property", "visiting", "seller"]).default("property"),
   company_name: z.string().min(2).max(100),
   license_number: z.string().max(50).optional().nullable(),
   document_url: z.string().max(1000).optional().nullable(),
@@ -105,6 +106,7 @@ export async function POST(request: NextRequest) {
       .from("agents")
       .upsert({
         profile_id: user.id,
+        agent_type: parsed.data.agent_type,
         company_name: parsed.data.company_name,
         license_number: parsed.data.license_number ?? null,
         document_url: parsed.data.document_url ?? null,

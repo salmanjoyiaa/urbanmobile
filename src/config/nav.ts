@@ -24,9 +24,7 @@ export interface NavItem {
 export const agentNav: NavItem[] = [
   { title: "Overview", href: "/agent", icon: LayoutDashboard },
   { title: "My Properties", href: "/agent/properties", icon: Building2 },
-  { title: "My Products", href: "/agent/products", icon: Package },
   { title: "Visit Requests", href: "/agent/visits", icon: Calendar },
-  { title: "Buy Requests", href: "/agent/leads", icon: ShoppingBag },
 ];
 
 export const visitingAgentNav: NavItem[] = [
@@ -35,9 +33,16 @@ export const visitingAgentNav: NavItem[] = [
   { title: "My Properties", href: "/agent/properties-assigned", icon: Building2 },
 ];
 
+export const sellerNav: NavItem[] = [
+  { title: "Overview", href: "/agent", icon: LayoutDashboard },
+  { title: "My Products", href: "/agent/products", icon: Package },
+  { title: "Buy Requests", href: "/agent/leads", icon: ShoppingBag },
+];
+
 export const adminNav: NavItem[] = [
   { title: "Overview", href: "/admin", icon: LayoutDashboard },
   { title: "AQARI Team", href: "/admin/agents", icon: Users },
+  { title: "Sellers", href: "/admin/agents?agent_type=seller", icon: ShoppingBag },
   { title: "Visiting Team", href: "/admin/visiting-team", icon: MapPin },
   { title: "Properties", href: "/admin/properties", icon: Building2 },
   { title: "Products", href: "/admin/products", icon: Package },

@@ -1,16 +1,38 @@
 import { createRouteClient } from "@/lib/supabase/route";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@supabase/supabase-js";
+import { headers } from "next/headers";
 
 export async function getAdminRouteContext() {
   const supabase = await createRouteClient();
 
-  const {
+  let {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Fallback: Bearer token auth for mobile app
+  let mobileClient = supabase;
+  if (!user) {
+    const headersList = await headers();
+    const authHeader = headersList.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+      mobileClient = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+
+      const { data } = await mobileClient.auth.getUser(token);
+      user = data.user;
+    }
+  }
+
   if (!user) {
     return {
-      supabase,
+      supabase: mobileClient,
       user: null,
       profile: null,
       error: "Unauthorized",
@@ -18,7 +40,7 @@ export async function getAdminRouteContext() {
     };
   }
 
-  const { data: profile } = (await supabase
+  const { data: profile } = (await mobileClient
     .from("profiles")
     .select("id, role")
     .eq("id", user.id)
@@ -26,7 +48,7 @@ export async function getAdminRouteContext() {
 
   if (!profile || profile.role !== "admin") {
     return {
-      supabase,
+      supabase: mobileClient,
       user,
       profile,
       error: "Forbidden",
@@ -35,7 +57,7 @@ export async function getAdminRouteContext() {
   }
 
   return {
-    supabase,
+    supabase: mobileClient,
     user,
     profile,
     error: null,

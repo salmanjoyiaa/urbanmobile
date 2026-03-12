@@ -14,12 +14,16 @@ async function getApprovedAgent() {
 
   const { data: agent } = (await supabase
     .from("agents")
-    .select("id, status")
+    .select("id, status, agent_type")
     .eq("profile_id", user.id)
-    .single()) as { data: { id: string; status: string } | null };
+    .single()) as { data: { id: string; status: string; agent_type: string } | null };
 
   if (!agent || agent.status !== "approved") {
     return { supabase, agentId: null as string | null, error: "Agent not approved", status: 403 };
+  }
+
+  if (agent.agent_type !== "seller") {
+    return { supabase, agentId: null as string | null, error: "Only seller accounts can manage products", status: 403 };
   }
 
   return { supabase, agentId: agent.id, error: null, status: 200 };

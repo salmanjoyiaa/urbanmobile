@@ -1,12 +1,12 @@
 "use client";
 
-import { agentNav, visitingAgentNav } from "@/config/nav";
+import { agentNav, visitingAgentNav, sellerNav } from "@/config/nav";
 import { Sidebar } from "@/components/layout/sidebar";
 import { ThemeToggle } from "@/components/home/theme-toggle";
 
 export function AgentShell({ children, agentType = "property", userName }: { children: React.ReactNode, agentType?: string, userName?: string }) {
-    const nav = agentType === "visiting" ? visitingAgentNav : agentNav;
-    const title = agentType === "visiting" ? "Visiting Team" : "Agent Panel";
+    const nav = agentType === "visiting" ? visitingAgentNav : agentType === "seller" ? sellerNav : agentNav;
+    const title = agentType === "visiting" ? "Visiting Team" : agentType === "seller" ? "Seller Panel" : "Agent Panel";
 
     return (
         <div className="min-h-screen bg-muted/20 lg:grid lg:grid-cols-[16rem_1fr]">

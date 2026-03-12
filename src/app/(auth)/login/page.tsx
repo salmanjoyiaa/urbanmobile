@@ -18,7 +18,7 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const supabase = createClient();
 
-  const loginType = searchParams.get("type") as "property" | "visiting" | null;
+  const loginType = searchParams.get("type") as "property" | "visiting" | "seller" | null;
 
   const {
     register,
@@ -108,7 +108,9 @@ function LoginContent() {
             ? "AQARI Login"
             : loginType === "visiting"
               ? "Team Login"
-              : "Agent Login"}
+              : loginType === "seller"
+                ? "Seller Login"
+                : "Agent Login"}
         </CardTitle>
         <CardDescription className="text-muted-foreground">Access your UrbanSaudi account.</CardDescription>
       </CardHeader>
@@ -146,7 +148,7 @@ function LoginContent() {
                 Signing in...
               </>
             ) : (
-              `Sign In${loginType ? ` as ${loginType === "property" ? "AQARI" : "Team"} Agent` : ""}`
+              `Sign In${loginType ? ` as ${loginType === "property" ? "AQARI" : loginType === "visiting" ? "Team" : "Seller"} Agent` : ""}`
             )}
           </Button>
         </form>

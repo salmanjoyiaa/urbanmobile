@@ -71,7 +71,9 @@ export default async function AgentOverviewPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-navy">Agent Overview</h1>
+        <h1 className="text-2xl font-bold text-navy">
+          {agent.agent_type === 'seller' ? 'Seller Overview' : agent.agent_type === 'visiting' ? 'Visiting Team Overview' : 'Agent Overview'}
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">Track your listings, requests, and activity.</p>
       </div>
 
@@ -82,12 +84,15 @@ export default async function AgentOverviewPage() {
             <StatCard title="Confirmed Deals" value={outputLeads || 0} />
             <StatCard title="Failed Deals" value={failedDeals || 0} />
           </>
+        ) : agent.agent_type === 'seller' ? (
+          <>
+            <StatCard title="Products" value={productsCount || 0} />
+            <StatCard title="Confirmed Leads" value={propertyAgentLeads || 0} />
+          </>
         ) : (
           <>
             <StatCard title="Properties" value={propertiesCount || 0} />
-            <StatCard title="Products" value={productsCount || 0} />
             <StatCard title="Confirmed Visits" value={outputVisits || 0} />
-            <StatCard title="Confirmed Leads" value={outputLeads || 0} />
           </>
         )}
       </div>

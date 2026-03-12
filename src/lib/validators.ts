@@ -46,7 +46,7 @@ export const agentSignupSchema = signupSchema.extend({
     .string()
     .max(50, "License number must not exceed 50 characters")
     .optional(),
-  agent_type: z.enum(["property", "visiting"]),
+  agent_type: z.enum(["property", "visiting", "seller"]),
 });
 
 export const propertySchema = z.object({

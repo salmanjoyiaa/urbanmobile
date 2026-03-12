@@ -44,8 +44,8 @@ function AgentSignupPage() {
   const cities = country?.cities || [];
 
   const typeParam = searchParams.get("type");
-  const initialAgentType: "property" | "visiting" =
-    typeParam === "visiting" || typeParam === "property" ? typeParam : "property";
+  const initialAgentType: "property" | "visiting" | "seller" =
+    typeParam === "visiting" || typeParam === "property" || typeParam === "seller" ? typeParam : "property";
 
   const {
     register,
@@ -73,7 +73,7 @@ function AgentSignupPage() {
   // Pre-select agent type from URL params (e.g., /signup/agent?type=visiting)
   useEffect(() => {
     const typeParam = searchParams.get("type");
-    if (typeParam === "property" || typeParam === "visiting") {
+    if (typeParam === "property" || typeParam === "visiting" || typeParam === "seller") {
       setValue("agent_type", typeParam);
     }
   }, [searchParams, setValue]);
@@ -177,7 +177,7 @@ function AgentSignupPage() {
             <Label htmlFor="agent_type">Agent Program</Label>
             <Select
               value={agentTypeWatch}
-              onValueChange={(val: "property" | "visiting") => setValue("agent_type", val)}
+              onValueChange={(val: "property" | "visiting" | "seller") => setValue("agent_type", val)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select Agent Program" />
@@ -185,6 +185,7 @@ function AgentSignupPage() {
               <SelectContent>
                 <SelectItem value="property">Property Agent (Listings & Rentals)</SelectItem>
                 <SelectItem value="visiting">Visiting Team (Tours & Deals)</SelectItem>
+                <SelectItem value="seller">Seller (Products & Sales)</SelectItem>
               </SelectContent>
             </Select>
             {errors.agent_type && (

@@ -2,7 +2,7 @@ export type UserRole = "customer" | "agent" | "admin";
 
 export type AgentStatus = "pending" | "approved" | "rejected" | "suspended";
 
-export type AgentType = "property" | "visiting";
+export type AgentType = "property" | "visiting" | "seller";
 
 export type PropertyType =
   | "apartment"

@@ -23,11 +23,12 @@ export default async function AgentLeadsPage() {
 
   const { data: agent } = (await supabase
     .from("agents")
-    .select("id")
+    .select("id, agent_type")
     .eq("profile_id", user.id)
-    .single()) as { data: { id: string } | null };
+    .single()) as { data: { id: string; agent_type: string } | null };
 
   if (!agent) redirect("/pending-approval");
+  if (agent.agent_type !== "seller") redirect("/agent");
 
   const { data: productIds } = (await supabase
     .from("products")
