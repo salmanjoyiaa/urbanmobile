@@ -9,6 +9,7 @@ const createSchema = z.object({
     password: z.string().min(6),
     full_name: z.string().min(2),
     phone: z.string().optional(),
+    agent_type: z.enum(["property", "seller"]).default("property"),
 });
 
 export async function POST(req: Request) {
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
         }
 
-        const { email, password, full_name, phone } = parsed.data;
+        const { email, password, full_name, phone, agent_type } = parsed.data;
 
         // 1. Create User in Supabase Auth
         const { data: authData, error: authError } = await admin.auth.admin.createUser({
@@ -64,10 +65,10 @@ export async function POST(req: Request) {
         }
 
         // 2. The database trigger automatically creates the `profiles` row with role = 'agent'.
-        // 3. Immediately upsert the `agents` row, force `agent_type` = 'property' and 'approved'
+        // 3. Immediately upsert the `agents` row with the specified type and 'approved' status
         const payload = {
             profile_id: authData.user.id,
-            agent_type: "property",
+            agent_type,
             status: "approved",
             company_name: "Urbans Saudi Independent",
         };
@@ -80,7 +81,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Failed to create Admin Agent Profile" }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, message: "Property Agent created successfully." }, { status: 201 });
+        const label = agent_type === "seller" ? "Seller" : "Property Agent";
+        return NextResponse.json({ success: true, message: `${label} created successfully.` }, { status: 201 });
     } catch (error) {
         Sentry.captureException(error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

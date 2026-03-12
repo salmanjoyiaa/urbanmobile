@@ -28,7 +28,13 @@ const createSchema = z.object({
 
 type CreateValues = z.infer<typeof createSchema>;
 
-export function CreatePropertyAgentDialog() {
+interface CreateAgentDialogProps {
+    agentType?: "property" | "seller";
+}
+
+export function CreatePropertyAgentDialog({ agentType = "property" }: CreateAgentDialogProps) {
+    const isSeller = agentType === "seller";
+    const label = isSeller ? "Seller" : "Property Agent";
     const router = useRouter();
     const [open, setOpen] = useState(false);
 
@@ -47,7 +53,7 @@ export function CreatePropertyAgentDialog() {
             const res = await fetch("/api/admin/agents", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
+                body: JSON.stringify({ ...data, agent_type: agentType }),
             });
 
             const json = await res.json();
@@ -56,7 +62,7 @@ export function CreatePropertyAgentDialog() {
                 throw new Error(json.error || "Failed to create agent");
             }
 
-            toast.success("Property Agent created successfully");
+            toast.success(`${label} created successfully`);
             setOpen(false);
             reset();
             router.refresh();
@@ -74,14 +80,14 @@ export function CreatePropertyAgentDialog() {
             <DialogTrigger asChild>
                 <Button>
                     <Plus className="mr-2 h-4 w-4" />
-                    Create Property Agent
+                    Create {label}
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Create Property Agent</DialogTitle>
+                    <DialogTitle>Create {label}</DialogTitle>
                     <DialogDescription>
-                        This forcefully provisions a new Property Agent with an approved status. They will receive an email confirmation.
+                        This provisions a new {label} with an approved status. They will receive an email confirmation.
                     </DialogDescription>
                 </DialogHeader>
 

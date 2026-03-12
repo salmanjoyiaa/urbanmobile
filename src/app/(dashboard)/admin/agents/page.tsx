@@ -87,7 +87,7 @@ export default async function AdminAgentsPage({ searchParams }: { searchParams: 
           <p className="text-sm text-muted-foreground">{pageDescription}</p>
         </div>
         <div className="flex items-center gap-3">
-          {!isSeller && <CreatePropertyAgentDialog />}
+          <CreatePropertyAgentDialog agentType={isSeller ? "seller" : "property"} />
           <form method="get" className="flex items-center gap-2">
             <input type="hidden" name="agent_type" value={typeFilter} />
             <select
