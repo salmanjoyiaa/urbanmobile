@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 import { isSameDay, parseISO } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate, formatTime } from "@/lib/format";
 import { getVisitStatusBadgeClass } from "@/lib/visit-status";
 
+const PAGE_SIZE = 10;
+
 type VisitRow = {
     id: string;
     visitor_name: string;
-    visitor_email: string;
-    visitor_phone: string;
     visit_date: string;
     visit_time: string;
     status: string;
@@ -26,10 +28,20 @@ type VisitRow = {
 
 export function AgentVisitsClient({ rows }: { rows: VisitRow[] }) {
     const [date, setDate] = useState<Date | undefined>(new Date());
+    const [page, setPage] = useState(1);
 
     const selectedDateVisits = rows.filter((row) =>
         date ? isSameDay(parseISO(row.visit_date), date) : false
     );
+
+    const totalPages = Math.max(1, Math.ceil(selectedDateVisits.length / PAGE_SIZE));
+    const safePage = Math.min(page, totalPages);
+    const paginatedVisits = selectedDateVisits.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+    const handleDateSelect = (d: Date | undefined) => {
+        setDate(d);
+        setPage(1);
+    };
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -43,7 +55,7 @@ export function AgentVisitsClient({ rows }: { rows: VisitRow[] }) {
                         <Calendar
                             mode="single"
                             selected={date}
-                            onSelect={setDate}
+                            onSelect={handleDateSelect}
                             className="rounded-md border shadow"
                             modifiers={{
                                 booked: rows.map(r => parseISO(r.visit_date))
@@ -70,44 +82,72 @@ export function AgentVisitsClient({ rows }: { rows: VisitRow[] }) {
                         No visits scheduled for this date.
                     </div>
                 ) : (
-                    <div className="space-y-4">
-                        {selectedDateVisits.map((visit) => (
-                            <Card key={visit.id}>
-                                <CardHeader className="pb-3 border-b bg-muted/20">
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <CardTitle className="text-lg text-primary">{visit.properties?.title || "Unknown Property"}</CardTitle>
-                                            <CardDescription className="mt-1 flex flex-col gap-1">
-                                                <span>{formatTime(visit.visit_time)}</span>
-                                                {visit.visiting_agent && (
-                                                    <span className="text-secondary-foreground flex items-center gap-1 font-medium bg-secondary w-max px-2 py-0.5 rounded text-xs">
-                                                        Assigned: {visit.visiting_agent.full_name}
-                                                    </span>
-                                                )}
-                                            </CardDescription>
+                    <>
+                        <div className="space-y-4">
+                            {paginatedVisits.map((visit) => (
+                                <Card key={visit.id}>
+                                    <CardHeader className="pb-3 border-b bg-muted/20">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <CardTitle className="text-lg text-primary">{visit.properties?.title || "Unknown Property"}</CardTitle>
+                                                <CardDescription className="mt-1 flex flex-col gap-1">
+                                                    <span>{formatTime(visit.visit_time)}</span>
+                                                    {visit.visiting_agent && (
+                                                        <span className="text-secondary-foreground flex items-center gap-1 font-medium bg-secondary w-max px-2 py-0.5 rounded text-xs">
+                                                            Assigned: {visit.visiting_agent.full_name}
+                                                        </span>
+                                                    )}
+                                                </CardDescription>
+                                            </div>
+                                            <Badge
+                                                variant={visit.status === "confirmed" ? "default" : visit.status === "cancelled" ? "destructive" : "secondary"}
+                                                className={`${getVisitStatusBadgeClass(visit.status)} capitalize`}
+                                            >
+                                                {visit.status === "assigned" ? "Dispatched" : visit.status}
+                                            </Badge>
                                         </div>
-                                        <Badge
-                                            variant={visit.status === "confirmed" ? "default" : visit.status === "cancelled" ? "destructive" : "secondary"}
-                                            className={`${getVisitStatusBadgeClass(visit.status)} capitalize`}
-                                        >
-                                            {visit.status === "assigned" ? "Dispatched" : visit.status}
-                                        </Badge>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <p className="font-semibold text-foreground">Visitor</p>
-                                        <p className="text-muted-foreground">{visit.visitor_name}</p>
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-foreground">Contact</p>
-                                        <p className="text-muted-foreground">{visit.visitor_email}</p>
-                                        <p className="text-muted-foreground">{visit.visitor_phone}</p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                                    </CardHeader>
+                                    <CardContent className="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <p className="font-semibold text-foreground">Visitor</p>
+                                            <p className="text-muted-foreground">{visit.visitor_name}</p>
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-foreground">Date &amp; Time</p>
+                                            <p className="text-muted-foreground">{formatDate(parseISO(visit.visit_date))}</p>
+                                            <p className="text-muted-foreground">{formatTime(visit.visit_time)}</p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-end gap-2 mt-6">
+                                <span className="text-sm text-muted-foreground mr-2">
+                                    Page {safePage} of {totalPages}
+                                </span>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                    disabled={safePage <= 1}
+                                    aria-label="Previous page"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                    disabled={safePage >= totalPages}
+                                    aria-label="Next page"
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>

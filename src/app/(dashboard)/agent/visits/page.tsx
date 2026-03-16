@@ -5,8 +5,6 @@ import { AgentVisitsClient } from "@/components/visit/agent-visits-client";
 export type VisitRow = {
   id: string;
   visitor_name: string;
-  visitor_email: string;
-  visitor_phone: string;
   visit_date: string;
   visit_time: string;
   status: string;
@@ -45,7 +43,7 @@ export default async function AgentVisitsPage() {
       .from("visit_requests")
       .select(
         `
-      id, visitor_name, visitor_email, visitor_phone, visit_date, visit_time, status,
+      id, visitor_name, visit_date, visit_time, status,
       visiting_agent:visiting_agent_id (full_name),
       properties:property_id (title)
     `

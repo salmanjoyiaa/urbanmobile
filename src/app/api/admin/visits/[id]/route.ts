@@ -4,15 +4,9 @@ import { z } from "zod";
 import { getAdminRouteContext, writeAuditLog } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cacheDel } from "@/lib/redis";
-import { sendWhatsApp, sendWhatsAppTemplate } from "@/lib/twilio";
+import { sendWhatsApp } from "@/lib/twilio";
 import { sendEmail } from "@/lib/resend";
-import {
-  visitCancelled,
-  visitConfirmationCustomerContent,
-  visitAssignedVisitingAgentContent,
-  visitAssignedPropertyAgentContent,
-  validateTwilioTemplateVariables,
-} from "@/lib/whatsapp-templates";
+import { visitCancelled } from "@/lib/whatsapp-templates";
 import {
   visitConfirmedCustomerEmail,
   visitConfirmedAgentEmail,
@@ -182,21 +176,6 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 
   const notifyJobs: Array<Promise<unknown>> = [];
 
-  const failTemplateValidation = async (templateKind: "customer" | "property_agent" | "visiting_agent", errorMessage: string) => {
-    await writeAuditLog({
-      actorId: adminProfile.id,
-      action: "visit_template_validation_failed",
-      entityType: "visit_requests",
-      entityId: context.params.id,
-      metadata: {
-        template_kind: templateKind,
-        error: errorMessage,
-      },
-    });
-
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
-  };
-
   // Skip notifications if already sent for this visit request (dedup)
   if (visitDetails?.properties && !alreadyNotified) {
     const visitId = context.params.id;
@@ -217,19 +196,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       const ownerName = ownerAgentProfile?.full_name || "Agent";
       const ownerPhone = ownerAgentProfile?.phone || "N/A";
 
-      // 1. WhatsApp + Email to Customer
-      const custContent = visitConfirmationCustomerContent({
-        ...templateParams,
-        visitingAgentName: visitingAgentProfile.full_name,
-        visitingAgentPhone: visitingAgentProfile.phone ?? "",
-      });
-      const customerTemplateValidation = validateTwilioTemplateVariables("customer", custContent.contentVariables);
-      if (!customerTemplateValidation.valid) {
-        return failTemplateValidation("customer", customerTemplateValidation.error);
-      }
-      notifyJobs.push(
-        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables, visitId)
-      );
+      // 1. Email to Customer
       if (visitDetails.visitor_email) {
         const emailTpl = visitConfirmedCustomerEmail({
           ...templateParams,
@@ -240,7 +207,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl, visitId }));
       }
 
-      // 2. WhatsApp + Email to Visiting Agent
+      // 2. Email to Visiting Agent
       const visitingAgentParams = {
         visitingAgentName: visitingAgentProfile.full_name,
         propertyTitle: visitDetails.properties.title,
@@ -256,19 +223,11 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         propertyId,
       };
 
-      if (visitingAgentProfile.phone) {
-        const vaContent = visitAssignedVisitingAgentContent(visitingAgentParams);
-        const visitingTemplateValidation = validateTwilioTemplateVariables("visiting_agent", vaContent.contentVariables);
-        if (!visitingTemplateValidation.valid) {
-          return failTemplateValidation("visiting_agent", visitingTemplateValidation.error);
-        }
-        notifyJobs.push(sendWhatsAppTemplate(visitingAgentProfile.phone, vaContent.contentSid, vaContent.contentVariables, visitId));
-      }
       if (visitingAgentProfile.email) {
         notifyJobs.push(sendEmail({ to: visitingAgentProfile.email, ...visitAssignedVisitingAgentEmail(visitingAgentParams), visitId }));
       }
 
-      // 3. WhatsApp + Email to Property Agent Owner
+      // 3. Email to Property Agent Owner
       const propertyAgentParams = {
         ownerName: ownerName,
         propertyTitle: visitDetails.properties.title,
@@ -281,28 +240,12 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         propertyId,
       };
 
-      if (ownerAgentProfile?.phone) {
-        const paContent = visitAssignedPropertyAgentContent(propertyAgentParams);
-        const propertyTemplateValidation = validateTwilioTemplateVariables("property_agent", paContent.contentVariables);
-        if (!propertyTemplateValidation.valid) {
-          return failTemplateValidation("property_agent", propertyTemplateValidation.error);
-        }
-        notifyJobs.push(sendWhatsAppTemplate(ownerAgentProfile.phone, paContent.contentSid, paContent.contentVariables, visitId));
-      }
       if (ownerAgentProfile?.email) {
         notifyJobs.push(sendEmail({ to: ownerAgentProfile.email, ...visitAssignedPropertyAgentEmail(propertyAgentParams), visitId }));
       }
     }
 
     if (parsed.data.status === "confirmed" && !visitDetails.visiting_agent) {
-      const custContent = visitConfirmationCustomerContent(templateParams);
-      const customerTemplateValidation = validateTwilioTemplateVariables("customer", custContent.contentVariables);
-      if (!customerTemplateValidation.valid) {
-        return failTemplateValidation("customer", customerTemplateValidation.error);
-      }
-      notifyJobs.push(
-        sendWhatsAppTemplate(visitDetails.visitor_phone, custContent.contentSid, custContent.contentVariables, visitId)
-      );
       if (visitDetails.visitor_email) {
         const emailTpl = visitConfirmedCustomerEmail(templateParams);
         notifyJobs.push(sendEmail({ to: visitDetails.visitor_email, ...emailTpl, visitId }));

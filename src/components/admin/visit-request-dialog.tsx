@@ -330,7 +330,7 @@ export function VisitRequestDialog({ visit, visitingAgents, busyAgentIds = [], t
                         {visit.status === "pending" ? "Step 1: Assign Visiting Team Agent" : "Visiting Team Agent"}
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                        Assigning an agent will not send WhatsApp/email. Messages send only after Step 2: Confirm & Notify.
+                        Assigning an agent will not send email. Messages send only after Step 2: Confirm & Notify.
                     </p>
                     <div className="flex flex-col gap-2 sm:flex-row">
                         <Select value={selectedAgentId} onValueChange={setSelectedAgentId}>
@@ -356,7 +356,7 @@ export function VisitRequestDialog({ visit, visitingAgents, busyAgentIds = [], t
                         <div className="mt-2 pt-3 border-t border-border/60">
                             <Label className="text-sm font-semibold mb-2 block">Step 2: Confirm & Send Notifications</Label>
                             <p className="text-xs text-muted-foreground mb-2">
-                                Confirming will send auto-notification via email/WhatsApp to the customer, property agent, and visiting agent.
+                                Confirming will send auto-notification via email to the customer, property agent, and visiting agent.
                             </p>
                             <Button
                                 onClick={handleConfirm}
