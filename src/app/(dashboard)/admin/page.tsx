@@ -41,6 +41,7 @@ export default async function AdminOverviewPage() {
     { count: pendingMaintenance },
     { count: totalCustomers },
     { data: activity },
+    { count: totalConfirmedVisits },
   ] = await Promise.all([
     supabase.from("agents").select("id", { count: "exact", head: true }).eq("status", "pending").neq("agent_type", "visiting"),
     supabase.from("agents").select("id", { count: "exact", head: true }).eq("status", "pending").eq("agent_type", "visiting"),
@@ -58,6 +59,7 @@ export default async function AdminOverviewPage() {
       .select("id, action, entity_type, created_at, profiles:actor_id(full_name)")
       .order("created_at", { ascending: false })
       .limit(10),
+    supabase.from("visit_requests").select("id", { count: "exact", head: true }).eq("status", "confirmed"),
   ]);
 
   const activityRows = (activity as ActivityRow[] | null) || [];
@@ -97,11 +99,14 @@ export default async function AdminOverviewPage() {
       {/* Totals */}
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Platform Totals</h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <StatCard title="Active Properties" value={activeProperties || 0} description={`${totalProperties || 0} total`} />
           <StatCard title="Property Agents" value={approvedPropertyAgents || 0} description="Approved" />
           <StatCard title="Visiting Team" value={approvedVisitingAgents || 0} description="Approved" />
           <StatCard title="Customers" value={totalCustomers || 0} />
+          <Link href="/admin/visits?status=confirmed" className="block">
+            <StatCard title="Confirmed Visits" value={totalConfirmedVisits || 0} description="All time" />
+          </Link>
         </div>
       </div>
 
