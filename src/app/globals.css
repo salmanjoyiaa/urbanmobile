@@ -232,6 +232,31 @@ select {
   animation: gradient-shine 8s ease-in-out infinite;
 }
 
+/* Hero headline: shimmer sweep across gradient text */
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.animate-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Hero headline "Find Your": subtle white glow pulse */
+@keyframes hero-text-glow {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.15), 0 0 32px rgba(147, 130, 255, 0.08);
+  }
+  50% {
+    text-shadow: 0 0 16px rgba(255, 255, 255, 0.3), 0 0 48px rgba(147, 130, 255, 0.18);
+  }
+}
+
+.animate-hero-text-glow {
+  animation: hero-text-glow 3s ease-in-out infinite;
+}
+
 /* Hero badge: very subtle glow pulse */
 @keyframes soft-glow {
   0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.08); }
@@ -277,6 +302,8 @@ select {
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
   .animate-gradient-shine,
+  .animate-shimmer,
+  .animate-hero-text-glow,
   .animate-soft-glow,
   .animate-hero-card-float,
   .animate-hero-card-glow {

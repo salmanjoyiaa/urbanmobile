@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HomepageNav } from "@/components/home/homepage-nav";
+import { HeroHeadline } from "@/components/home/hero-headline";
 import { PropertySlider } from "@/components/home/property-slider";
 import { ProductSlider } from "@/components/home/product-slider";
 import { MaintenanceSlider } from "@/components/home/maintenance-slider";
@@ -182,22 +183,19 @@ export default async function HomePage() {
           <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-indigo-400 rounded-full blur-3xl animate-float" style={{ animationDelay: "1.5s" }} />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 lg:py-28">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <div className="max-w-xl flex flex-col">
-              <div className="animate-fade-in-up inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-[13px] mb-6 animate-soft-glow">
+              <div className="animate-fade-in-up inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-[12px] sm:text-[13px] mb-5 sm:mb-6 animate-soft-glow">
                 <Star className="h-3.5 w-3.5 text-yellow-400 shrink-0" />
                 Trusted by 500+ tenants
               </div>
 
-              <h1 className="animate-fade-in-up font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6" style={{ animationDelay: "0.1s" }}>
-                Find Your
-                <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-shine">
-                  Perfect Rental
-                </span>
-              </h1>
+              <div className="mb-5 sm:mb-6">
+                <HeroHeadline />
+              </div>
 
-              <p className="animate-fade-in-up text-lg sm:text-xl text-white/70 max-w-xl mb-10" style={{ animationDelay: "0.2s" }}>
+              <p className="animate-fade-in-up text-[15px] sm:text-lg lg:text-xl text-white/70 max-w-xl mb-8 sm:mb-10 leading-relaxed" style={{ animationDelay: "0.2s" }}>
                 Discover premium apartments, houses, and flats from verified
                 agents. Book directly via WhatsApp — no middlemen, no hassle.
               </p>

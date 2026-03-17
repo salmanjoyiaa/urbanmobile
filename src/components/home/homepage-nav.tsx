@@ -23,17 +23,20 @@ export function HomepageNav() {
 
   return (
     <header
-      className={`w-full py-4 sm:py-5 sticky top-0 z-50 transition-all duration-300 border-b border-white/10 ${
+      className={`w-full py-3 sm:py-4 lg:py-5 sticky top-0 z-50 transition-all duration-300 border-b border-white/10 ${
         scrolled
           ? "bg-[#1a1a2e]/95 backdrop-blur-md shadow-sm border-white/5"
           : "gradient-primary"
       }`}
     >
-      <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 sm:px-5 lg:px-12">
-        {/* Logo */}
-        <Link href="/" className="flex items-center group">
-          <span className="text-[22px] md:text-[26px] font-black tracking-tight leading-none text-white dark:text-foreground">
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between px-3 sm:px-5 lg:px-12">
+        {/* Logo — compact on mobile */}
+        <Link href="/" className="flex items-center group shrink-0">
+          <span className="hidden sm:inline text-[22px] md:text-[26px] font-black tracking-tight leading-none text-white dark:text-foreground">
             TheUrbanRealEstate<span className="text-[26px] md:text-[30px] font-black">Saudi</span>
+          </span>
+          <span className="sm:hidden text-[18px] font-black tracking-tight leading-none text-white">
+            Urban<span className="text-[20px] font-black">Saudi</span>
           </span>
         </Link>
 
@@ -73,50 +76,50 @@ export function HomepageNav() {
         </div>
 
         {/* Mobile: Hamburger */}
-        <div className="md:hidden flex items-center gap-2">
+        <div className="md:hidden flex items-center">
           <button
-            className="p-2 -mr-2 text-white dark:text-foreground rounded-lg hover:bg-white/10 active:scale-95 transition-transform duration-150"
+            className="flex items-center justify-center w-10 h-10 -mr-1 text-white rounded-xl hover:bg-white/10 active:scale-95 transition-all duration-150"
             onClick={() => setOpen(!open)}
             aria-label="Toggle menu"
           >
-            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu — glassmorphism dropdown */}
       {open && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-[#1a1a2e] border-b border-white/10 shadow-lg z-50 pb-4 animate-slide-down origin-top">
-          <nav className="flex flex-col px-4 py-4 gap-0">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-[#1a1a2e]/95 backdrop-blur-xl border-b border-white/10 shadow-2xl z-50 pb-5 animate-slide-down origin-top">
+          <nav className="flex flex-col px-4 pt-3 pb-1 gap-0.5">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="min-h-[44px] flex items-center py-3 px-4 text-[16px] font-semibold rounded-xl text-white hover:bg-white/10 dark:text-foreground dark:hover:bg-muted transition-colors active:scale-[0.98] touch-manipulation"
+                className="min-h-[48px] flex items-center py-3 px-4 text-[15px] font-semibold rounded-xl text-white/90 hover:bg-white/10 hover:text-white transition-colors active:scale-[0.98] touch-manipulation"
               >
                 {link.title}
               </Link>
             ))}
-            <div className="pt-4 border-t border-white/10 dark:border-border mt-2 flex flex-col gap-3">
+            <div className="pt-4 border-t border-white/10 mt-3 flex flex-col gap-2.5">
               <Link
                 href="/login?type=property"
                 onClick={() => setOpen(false)}
-                className="block w-full text-center rounded-xl bg-white text-primary px-7 py-3.5 min-h-[44px] flex items-center justify-center text-[14px] font-bold transition-all hover:bg-white/90 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
+                className="flex w-full items-center justify-center rounded-xl bg-white text-primary px-6 py-3 min-h-[48px] text-[14px] font-bold transition-all hover:bg-white/90 active:scale-[0.98] shadow-md"
               >
                 AQARI Login
               </Link>
               <Link
                 href="/login?type=visiting"
                 onClick={() => setOpen(false)}
-                className="block w-full text-center rounded-xl border-2 border-white text-white px-7 py-3.5 min-h-[44px] flex items-center justify-center text-[14px] font-bold transition-all hover:bg-white/10 dark:bg-white/10 dark:border-white/35 dark:text-white dark:hover:bg-white/15"
+                className="flex w-full items-center justify-center rounded-xl border border-white/30 text-white/90 px-6 py-3 min-h-[48px] text-[14px] font-bold transition-all hover:bg-white/10 hover:border-white/50 active:scale-[0.98]"
               >
                 Team Login
               </Link>
               <Link
                 href="/login?type=seller"
                 onClick={() => setOpen(false)}
-                className="block w-full text-center rounded-xl border-2 border-white text-white px-7 py-3.5 min-h-[44px] flex items-center justify-center text-[14px] font-bold transition-all hover:bg-white/10 dark:bg-white/10 dark:border-white/35 dark:text-white dark:hover:bg-white/15"
+                className="flex w-full items-center justify-center rounded-xl border border-white/30 text-white/90 px-6 py-3 min-h-[48px] text-[14px] font-bold transition-all hover:bg-white/10 hover:border-white/50 active:scale-[0.98]"
               >
                 Seller Login
               </Link>

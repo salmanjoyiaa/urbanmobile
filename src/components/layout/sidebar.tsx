@@ -58,6 +58,41 @@ function SidebarNav({ items, onNavigate }: { items: NavItem[]; onNavigate?: () =
   );
 }
 
+function getInitials(name?: string) {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function UserProfileFooter({ userName, onSignOut }: { userName?: string; onSignOut: () => void }) {
+  return (
+    <div className="mt-auto pt-4 border-t border-border">
+      <div className="flex items-center gap-3 px-2 py-2 mb-2">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
+          {getInitials(userName)}
+        </div>
+        <div className="min-w-0 flex-1">
+          {userName && (
+            <p className="text-sm font-semibold text-foreground truncate">{userName}</p>
+          )}
+          <p className="text-[11px] text-muted-foreground">Logged in</p>
+        </div>
+      </div>
+      <button
+        onClick={onSignOut}
+        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive min-h-[44px]"
+      >
+        <LogOut className="h-4 w-4" />
+        Sign out
+      </button>
+    </div>
+  );
+}
+
 export function Sidebar({ items, title, userName }: SidebarProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -74,17 +109,7 @@ export function Sidebar({ items, title, userName }: SidebarProps) {
         <div className="flex h-full flex-col p-4">
           <div className="mb-6 px-2 text-lg font-bold text-foreground">{title}</div>
           <SidebarNav items={items} />
-          <div className="mt-auto pt-4 flex flex-col gap-2 border-t border-border">
-            {userName && (
-              <div className="px-2 pb-1 text-sm font-medium text-muted-foreground truncate">
-                {userName}
-              </div>
-            )}
-            <Button variant="outline" className="w-full justify-start" onClick={signOut}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign out
-            </Button>
-          </div>
+          <UserProfileFooter userName={userName} onSignOut={signOut} />
         </div>
       </aside>
 
@@ -100,19 +125,9 @@ export function Sidebar({ items, title, userName }: SidebarProps) {
               <SheetHeader>
                 <SheetTitle className="text-foreground">{title}</SheetTitle>
               </SheetHeader>
-              <div className="mt-6">
+              <div className="mt-6 flex h-[calc(100%-4rem)] flex-col">
                 <SidebarNav items={items} onNavigate={() => setOpen(false)} />
-                <div className="mt-6 flex flex-col gap-2 border-t border-border pt-4">
-                  {userName && (
-                    <div className="px-2 text-sm font-medium text-muted-foreground truncate">
-                      {userName}
-                    </div>
-                  )}
-                  <Button variant="outline" className="w-full justify-start" onClick={signOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign out
-                  </Button>
-                </div>
+                <UserProfileFooter userName={userName} onSignOut={signOut} />
               </div>
             </SheetContent>
           </Sheet>
@@ -122,3 +137,4 @@ export function Sidebar({ items, title, userName }: SidebarProps) {
     </>
   );
 }
+
