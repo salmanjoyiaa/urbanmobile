@@ -18,6 +18,7 @@ import {
 type SidebarProps = {
   items: NavItem[];
   title: string;
+  headerActions?: React.ReactNode;
 };
 
 function SidebarNav({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
@@ -56,7 +57,7 @@ function SidebarNav({ items, onNavigate }: { items: NavItem[]; onNavigate?: () =
   );
 }
 
-export function Sidebar({ items, title }: SidebarProps) {
+export function Sidebar({ items, title, headerActions }: SidebarProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -68,11 +69,11 @@ export function Sidebar({ items, title }: SidebarProps) {
         </div>
       </aside>
 
-      <div className="border-b bg-card dark:bg-slate-950 px-4 py-3 lg:hidden">
+      <div className="sticky top-0 z-20 border-b bg-card dark:bg-slate-950 px-4 py-2.5 backdrop-blur lg:hidden">
         <div className="flex items-center gap-3">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button size="icon" variant="outline">
+              <Button size="icon" variant="outline" className="shrink-0">
                 <Menu className="h-4 w-4" />
               </Button>
             </SheetTrigger>
@@ -85,11 +86,14 @@ export function Sidebar({ items, title }: SidebarProps) {
               </div>
             </SheetContent>
           </Sheet>
-          <p className="font-semibold text-foreground">{title}</p>
+          <p className="font-semibold text-foreground truncate">{title}</p>
+          {headerActions && (
+            <div className="ml-auto flex items-center gap-2">
+              {headerActions}
+            </div>
+          )}
         </div>
       </div>
     </>
   );
 }
-
-
