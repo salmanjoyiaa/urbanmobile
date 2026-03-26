@@ -1,21 +1,5 @@
 
 
-## 1. CSS Keyframe (add to [globals.css](file:///d:/Vibe/demo/src/app/globals.css))
-
-```css
-@keyframes shimmer {
-  0% { background-position: 200% center; }
-  100% { background-position: -200% center; }
-}
-```
-
----
-
-## 2. Component Code
-
-```tsx
-"use client";
-
 import { motion } from "motion/react";
 
 export function AnimatedHeadline() {
