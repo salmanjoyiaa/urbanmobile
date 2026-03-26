@@ -35,8 +35,8 @@ export function HomepageNav() {
           <span className="hidden sm:inline text-[22px] md:text-[26px] font-black tracking-tight leading-none text-white dark:text-foreground">
             TheUrbanRealEstate<span className="text-[26px] md:text-[30px] font-black">Saudi</span>
           </span>
-          <span className="sm:hidden text-[18px] font-black tracking-tight leading-none text-white">
-            Urban<span className="text-[20px] font-black">Saudi</span>
+          <span className="sm:hidden text-[14px] font-black tracking-tight leading-none text-white">
+            TheUrbanRealEstate<span className="text-[16px] font-black">Saudi</span>
           </span>
         </Link>
 

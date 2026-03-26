@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: "UrbanSaudi",
+  name: "TheUrbanRealEstateSaudi",
   description:
     "Premium property listings and used household items marketplace in Saudi Arabia",
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
