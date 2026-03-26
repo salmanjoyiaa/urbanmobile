@@ -30,13 +30,10 @@ export function HomepageNav() {
       }`}
     >
       <div className="max-w-[1400px] mx-auto flex items-center justify-between px-3 sm:px-5 lg:px-12">
-        {/* Logo — compact on mobile */}
+        {/* Logo */}
         <Link href="/" className="flex items-center group shrink-0">
-          <span className="hidden sm:inline text-[22px] md:text-[26px] font-black tracking-tight leading-none text-white dark:text-foreground">
-            TheUrbanRealEstate<span className="text-[26px] md:text-[30px] font-black">Saudi</span>
-          </span>
-          <span className="sm:hidden text-[14px] font-black tracking-tight leading-none text-white">
-            TheUrbanRealEstate<span className="text-[16px] font-black">Saudi</span>
+          <span className="text-[17px] sm:text-[22px] md:text-[26px] font-black tracking-tight leading-none text-white dark:text-foreground whitespace-nowrap">
+            TheUrbanRealEstateSaudi
           </span>
         </Link>
 
