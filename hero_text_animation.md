@@ -1,11 +1,4 @@
-# Hero Headline Animation — Reusable Guide
 
-## Overview
-Two-part staggered headline with **slide-up fade-in** on the first line and a **gradient shimmer** on the second line.
-
-**Stack:** React + Framer Motion (`motion/react`) + Tailwind CSS
-
----
 
 ## 1. CSS Keyframe (add to [globals.css](file:///d:/Vibe/demo/src/app/globals.css))
 
