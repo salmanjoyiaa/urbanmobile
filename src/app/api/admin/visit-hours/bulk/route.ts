@@ -81,11 +81,14 @@ export async function POST(request: Request) {
   const titleById = new Map(candidateProperties.map((property) => [property.id, property.title]));
   const scheduleByWeekday = new Map(parsed.data.schedule.map((item) => [item.weekday, item]));
 
+  const todayStr = new Date().toISOString().slice(0, 10);
+
   const { data: activeVisits, error: activeVisitsError } = (await admin.supabase
     .from("visit_requests")
     .select("id, property_id, visit_date, visit_time")
     .in("property_id", candidateIds)
-    .in("status", ["pending", "assigned", "confirmed"])) as {
+    .in("status", ["pending", "assigned", "confirmed"])
+    .gte("visit_date", todayStr)) as {
       data: ActiveVisit[] | null;
       error: { message: string } | null;
     };
