@@ -86,10 +86,7 @@ export default function AdminSlotsPage() {
           .order("title");
         const list = (data || []) as Property[];
         setProperties(list);
-        if (list.length > 0) {
-          setSelectedPropertyId(list[0].id);
-          setSelectedPropertyIds(new Set([list[0].id]));
-        }
+        // Don't auto-select — let admin choose explicitly
       } catch {
         toast.error("Failed to load properties");
       } finally {
@@ -111,11 +108,21 @@ export default function AdminSlotsPage() {
       if (rows.length === 0) {
         setSchedule(defaultSchedule());
       } else {
-        const merged = WEEK_DAYS.map((day) => rows.find((r) => r.weekday === day.key) || {
-          weekday: day.key,
-          is_open: false,
-          start_time: "08:00",
-          end_time: "19:00",
+        const merged = WEEK_DAYS.map((day) => {
+          const found = rows.find((r) => r.weekday === day.key);
+          if (found) {
+            return {
+              ...found,
+              start_time: found.start_time.slice(0, 5),
+              end_time: found.end_time.slice(0, 5),
+            };
+          }
+          return {
+            weekday: day.key,
+            is_open: false,
+            start_time: "08:00",
+            end_time: "19:00",
+          };
         });
         setSchedule(merged);
       }
@@ -216,10 +223,15 @@ export default function AdminSlotsPage() {
     if (!selectedPropertyId) return;
     setSavingSchedule(true);
     try {
+      const normalizedSchedule = schedule.map((row) => ({
+        ...row,
+        start_time: row.start_time.slice(0, 5),
+        end_time: row.end_time.slice(0, 5),
+      }));
       const res = await fetch("/api/admin/visit-hours", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ property_id: selectedPropertyId, schedule }),
+        body: JSON.stringify({ property_id: selectedPropertyId, schedule: normalizedSchedule }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save schedule");
@@ -339,12 +351,17 @@ export default function AdminSlotsPage() {
     setBatchApplying(true);
     setBatchFailures([]);
     try {
+      const normalizedSchedule = schedule.map((row) => ({
+        ...row,
+        start_time: row.start_time.slice(0, 5),
+        end_time: row.end_time.slice(0, 5),
+      }));
       const res = await fetch("/api/admin/visit-hours/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           property_ids: targetIds,
-          schedule,
+          schedule: normalizedSchedule,
           status_scope: Array.from(statusFilter),
         }),
       });
@@ -474,6 +491,11 @@ export default function AdminSlotsPage() {
                 <div className="text-sm font-medium text-primary">
                   <p>{selectedLabel}</p>
                   <p className="text-xs text-muted-foreground">Property ID: {selectedPropertyRef}</p>
+                </div>
+              )}
+              {!selectedPropertyId && properties.length > 0 && (
+                <div className="rounded-md border border-dashed border-muted-foreground/30 p-4 text-center">
+                  <p className="text-sm text-muted-foreground">Click on a property above to view and configure its visit hours.</p>
                 </div>
               )}
             </>

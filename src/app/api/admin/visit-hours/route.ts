@@ -5,9 +5,12 @@ import { getAdminRouteContext } from "@/lib/admin";
 const scheduleItemSchema = z.object({
   weekday: z.number().int().min(0).max(6),
   is_open: z.boolean(),
-  start_time: z.string().regex(/^\d{2}:\d{2}$/),
-  end_time: z.string().regex(/^\d{2}:\d{2}$/),
+  start_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+  end_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
 });
+
+/** Strips seconds if present: "08:00:00" → "08:00" */
+const toHHMM = (t: string) => t.slice(0, 5);
 
 const updateSchema = z.object({
   property_id: z.string().uuid(),
@@ -58,8 +61,15 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
   }
 
+  // Normalize to HH:MM (DB may return HH:MM:SS)
+  const normalizedSchedule = parsed.data.schedule.map((item) => ({
+    ...item,
+    start_time: toHHMM(item.start_time),
+    end_time: toHHMM(item.end_time),
+  }));
+
   const seen = new Set<number>();
-  for (const item of parsed.data.schedule) {
+  for (const item of normalizedSchedule) {
     if (seen.has(item.weekday)) {
       return NextResponse.json({ error: "Duplicate weekday in schedule" }, { status: 400 });
     }
@@ -70,7 +80,7 @@ export async function PUT(request: Request) {
     }
   }
 
-  const rows = parsed.data.schedule.map((item) => ({
+  const rows = normalizedSchedule.map((item) => ({
     property_id: parsed.data.property_id,
     weekday: item.weekday,
     is_open: item.is_open,
