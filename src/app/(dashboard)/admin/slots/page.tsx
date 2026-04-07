@@ -545,7 +545,7 @@ export default function AdminSlotsPage() {
           <CardHeader>
             <CardTitle className="text-base">Weekly Visit Schedule</CardTitle>
             <CardDescription>
-              Set open/closed day status and visit hours. Customer slots will be generated every 20 minutes within the selected timeframe.
+              Set open/closed day status and visit hours. Customer slots will be generated every 30 minutes within the selected timeframe.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -589,12 +589,14 @@ export default function AdminSlotsPage() {
                     </label>
                     <input
                       type="time"
+                      step="1800"
                       className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                       value={bulkStartTime}
                       onChange={(e) => setBulkStartTime(e.target.value)}
                     />
                     <input
                       type="time"
+                      step="1800"
                       className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                       value={bulkEndTime}
                       onChange={(e) => setBulkEndTime(e.target.value)}
@@ -617,6 +619,7 @@ export default function AdminSlotsPage() {
                     </label>
                     <input
                       type="time"
+                      step="1800"
                       className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                       value={row.start_time.slice(0, 5)}
                       disabled={!row.is_open}
@@ -624,6 +627,7 @@ export default function AdminSlotsPage() {
                     />
                     <input
                       type="time"
+                      step="1800"
                       className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                       value={row.end_time.slice(0, 5)}
                       disabled={!row.is_open}

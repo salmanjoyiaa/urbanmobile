@@ -56,7 +56,7 @@ export const SLOT_CONFIG = {
   endHour: 24,
   breakStartHour: 0,
   breakEndHour: 0,
-  slotDurationMinutes: 20,
+  slotDurationMinutes: 30,
   workDays: [0, 1, 2, 3, 4, 5, 6] as number[],
 } as const;
 

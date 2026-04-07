@@ -60,6 +60,14 @@ export async function POST(request: Request) {
     if (item.start_time >= item.end_time) {
       return NextResponse.json({ error: `Start time must be before end time for weekday ${item.weekday}` }, { status: 400 });
     }
+
+    // Validate 30-minute boundaries
+    for (const t of [item.start_time, item.end_time]) {
+      const mins = parseInt(t.slice(3, 5), 10);
+      if (mins !== 0 && mins !== 30) {
+        return NextResponse.json({ error: `Times must be on 30-minute boundaries (:00 or :30). Got "${t}" for weekday ${item.weekday}` }, { status: 400 });
+      }
+    }
   }
 
   let propertiesQuery = admin.supabase
