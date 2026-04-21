@@ -3,6 +3,8 @@ import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { Eye } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { VISIT_STATUS_LABELS, getVisitStatusBadgeClass } from "@/lib/visit-status";
 
 export const revalidate = 0;
 
@@ -42,6 +44,7 @@ export default async function AdminOverviewPage() {
     { count: totalCustomers },
     { data: activity },
     { count: totalConfirmedVisits },
+    { data: allVisitsData },
   ] = await Promise.all([
     supabase.from("agents").select("id", { count: "exact", head: true }).eq("status", "pending").neq("agent_type", "visiting"),
     supabase.from("agents").select("id", { count: "exact", head: true }).eq("status", "pending").eq("agent_type", "visiting"),
@@ -60,9 +63,19 @@ export default async function AdminOverviewPage() {
       .order("created_at", { ascending: false })
       .limit(10),
     supabase.from("visit_requests").select("id", { count: "exact", head: true }).eq("status", "confirmed"),
+    supabase.from("visit_requests").select("status"),
   ]);
 
   const activityRows = (activity as ActivityRow[] | null) || [];
+
+  const allTimeRows = (allVisitsData || []) as { status: string }[];
+  const summaryCounts = {
+    pending: allTimeRows.filter((row) => row.status === "pending").length,
+    assigned: allTimeRows.filter((row) => row.status === "assigned").length,
+    confirmed: allTimeRows.filter((row) => row.status === "confirmed").length,
+    cancelled: allTimeRows.filter((row) => row.status === "cancelled").length,
+    completed: allTimeRows.filter((row) => row.status === "completed").length,
+  };
 
   const { data: trafficSummary } = await supabase.rpc("get_site_traffic_summary");
   const traffic = (Array.isArray(trafficSummary) ? trafficSummary[0] : trafficSummary) as SiteTrafficSummary | null;
@@ -120,6 +133,62 @@ export default async function AdminOverviewPage() {
           <StatCard title="Today" value={todayUnique || 0} description={`Unique visitors • ${todayViews.toLocaleString()} page views`} />
           <StatCard title="Last 7 Days" value={weekUnique || 0} description={`Unique visitors • ${weekViews.toLocaleString()} page views`} />
           <StatCard title="All Time" value={totalUnique || 0} description={`Unique visitors • ${totalViews.toLocaleString()} page views`} />
+        </div>
+      </div>
+
+      {/* Visit Summary */}
+      <div>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">All-time Visit Summary</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+            <div className="overflow-hidden rounded-md border bg-card shadow-sm">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-medium">Status</th>
+                    <th className="px-4 py-3 text-right font-medium">Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(summaryCounts).map(([status, count]) => (
+                    <tr key={status} className="border-t">
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className={getVisitStatusBadgeClass(status)}>
+                          {VISIT_STATUS_LABELS[status] || status}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold">{count}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-t bg-muted/20">
+                    <td className="px-4 py-3 font-semibold">Total</td>
+                    <td className="px-4 py-3 text-right font-semibold">{allTimeRows.length}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="overflow-hidden rounded-md border bg-card shadow-sm">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-medium">Color</th>
+                    <th className="px-4 py-3 text-left font-medium">Meaning</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.keys(VISIT_STATUS_LABELS).map((status) => (
+                    <tr key={status} className="border-t">
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className={getVisitStatusBadgeClass(status)}>
+                          {VISIT_STATUS_LABELS[status]}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{VISIT_STATUS_LABELS[status]} visits</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
         </div>
       </div>
 

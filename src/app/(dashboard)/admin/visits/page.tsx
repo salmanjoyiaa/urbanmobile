@@ -5,7 +5,6 @@ import { SendDayVisits } from "@/components/admin/send-day-visits";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 import { createAdminClient } from "@/lib/supabase/admin";
-import { formatDate } from "@/lib/format";
 import { VISIT_STATUS_LABELS, getVisitStatusBadgeClass } from "@/lib/visit-status";
 
 type VisitRow = {
@@ -124,14 +123,16 @@ export default async function AdminVisitsPage({
 
   const rowsWithBusy = rows.map((r) => ({ ...r, busyAgentIds: busyAgentIdsForVisit(r) }));
 
-  const summaryDate = searchParams.date_from || new Date().toISOString().slice(0, 10);
-  const summaryRows = rows.filter((row) => row.visit_date === summaryDate);
+  // Fetch all statuses for the all-time summary
+  const { data: allStatuses } = await supabase.from("visit_requests").select("status");
+  const allTimeRows = (allStatuses || []) as { status: string }[];
+
   const summaryCounts = {
-    pending: summaryRows.filter((row) => row.status === "pending").length,
-    assigned: summaryRows.filter((row) => row.status === "assigned").length,
-    confirmed: summaryRows.filter((row) => row.status === "confirmed").length,
-    cancelled: summaryRows.filter((row) => row.status === "cancelled").length,
-    completed: summaryRows.filter((row) => row.status === "completed").length,
+    pending: allTimeRows.filter((row) => row.status === "pending").length,
+    assigned: allTimeRows.filter((row) => row.status === "assigned").length,
+    confirmed: allTimeRows.filter((row) => row.status === "confirmed").length,
+    cancelled: allTimeRows.filter((row) => row.status === "cancelled").length,
+    completed: allTimeRows.filter((row) => row.status === "completed").length,
   };
 
   const { data: agentsData } = await supabase
@@ -169,8 +170,8 @@ export default async function AdminVisitsPage({
         <SendDayVisits visitingAgents={visitingAgents} propertyAgents={propertyAgents} />
         <div className="rounded-xl border bg-card p-4 shadow-sm">
           <div className="mb-3">
-            <h2 className="text-base font-semibold text-navy">Day Visit Summary</h2>
-            <p className="text-xs text-muted-foreground">Status breakdown for {formatDate(summaryDate)} and required color legend.</p>
+            <h2 className="text-base font-semibold text-navy">All-time Visit Summary</h2>
+            <p className="text-xs text-muted-foreground">Overall status breakdown across all visit requests.</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -195,7 +196,7 @@ export default async function AdminVisitsPage({
                   ))}
                   <tr className="border-t bg-muted/20">
                     <td className="px-3 py-2 font-semibold">Total</td>
-                    <td className="px-3 py-2 text-right font-semibold">{summaryRows.length}</td>
+                    <td className="px-3 py-2 text-right font-semibold">{allTimeRows.length}</td>
                   </tr>
                 </tbody>
               </table>
