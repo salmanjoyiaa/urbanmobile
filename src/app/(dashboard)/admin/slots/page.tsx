@@ -43,8 +43,8 @@ const defaultSchedule = (): VisitHourRow[] =>
 
 export default function AdminSlotsPage() {
   const [properties, setProperties] = useState<Property[]>([]);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
   const [selectedPropertyIds, setSelectedPropertyIds] = useState<Set<string>>(new Set());
+  const primaryPropertyId = Array.from(selectedPropertyIds)[0] || null;
   const [applyMode, setApplyMode] = useState<"selected" | "filtered">("selected");
   const [schedule, setSchedule] = useState<VisitHourRow[]>(defaultSchedule());
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -97,10 +97,10 @@ export default function AdminSlotsPage() {
   }, []);
 
   const fetchSchedule = useCallback(async () => {
-    if (!selectedPropertyId) return;
+    if (!primaryPropertyId) return;
     setLoadingSchedule(true);
     try {
-      const res = await fetch(`/api/admin/visit-hours?property_id=${selectedPropertyId}`);
+      const res = await fetch(`/api/admin/visit-hours?property_id=${primaryPropertyId}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load schedule");
 
@@ -131,7 +131,7 @@ export default function AdminSlotsPage() {
     } finally {
       setLoadingSchedule(false);
     }
-  }, [selectedPropertyId]);
+  }, [primaryPropertyId]);
 
   useEffect(() => {
     fetchSchedule();
@@ -158,10 +158,10 @@ export default function AdminSlotsPage() {
   }, []);
 
   const fetchBlocked = useCallback(async () => {
-    if (!dateStr || !selectedPropertyId) return;
+    if (!dateStr || !primaryPropertyId) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/slots?date=${dateStr}&property_id=${selectedPropertyId}`);
+      const res = await fetch(`/api/admin/slots?date=${dateStr}&property_id=${primaryPropertyId}`);
       const data = await res.json();
       const set = new Set<string>();
       (data.blocked || []).forEach((s: BlockedSlot) => set.add(s.time));
@@ -171,33 +171,48 @@ export default function AdminSlotsPage() {
     } finally {
       setLoading(false);
     }
-  }, [dateStr, selectedPropertyId]);
+  }, [dateStr, primaryPropertyId]);
 
   useEffect(() => {
     fetchBlocked();
   }, [fetchBlocked]);
 
   const toggle = async (time: string) => {
-    if (!selectedPropertyId) return;
+    if (selectedPropertyIds.size === 0) return;
     setToggling(time);
     try {
       const isBlocked = blocked.has(time);
+      const targetIds = Array.from(selectedPropertyIds);
 
       if (isBlocked) {
-        await fetch(`/api/admin/slots?date=${dateStr}&time=${time}&property_id=${selectedPropertyId}`, { method: "DELETE" });
+        await fetch(`/api/admin/slots/bulk?date=${dateStr}&time=${time}&property_ids=${targetIds.join(',')}`, { method: "DELETE" });
         setBlocked((prev) => { const n = new Set(prev); n.delete(time); return n; });
-        toast.success(`${formatSlotLabel(time)} unblocked`);
+        toast.success(`${formatSlotLabel(time)} unblocked for selected properties`);
       } else {
-        await fetch("/api/admin/slots", {
+        const res = await fetch("/api/admin/slots/bulk", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ date: dateStr, time, property_id: selectedPropertyId }),
+          body: JSON.stringify({ date: dateStr, time, property_ids: targetIds }),
         });
-        setBlocked((prev) => new Set(prev).add(time));
-        toast.success(`${formatSlotLabel(time)} blocked`);
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || "Failed to update slot");
+        
+        if (data.failed && data.failed.length > 0) {
+          data.failed.forEach((f: { title?: string; reason: string }) => {
+            toast.error(`${f.title || 'Property'}: ${f.reason}`);
+          });
+          if (data.blocked > 0) {
+             setBlocked((prev) => new Set(prev).add(time));
+             toast.success(`${formatSlotLabel(time)} blocked for ${data.blocked} properties`);
+          }
+        } else {
+          setBlocked((prev) => new Set(prev).add(time));
+          toast.success(`${formatSlotLabel(time)} blocked for selected properties`);
+        }
       }
-    } catch {
-      toast.error("Failed to update slot");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to update slot");
     } finally {
       setToggling(null);
     }
@@ -220,7 +235,7 @@ export default function AdminSlotsPage() {
   };
 
   const saveSchedule = async () => {
-    if (!selectedPropertyId) return;
+    if (!primaryPropertyId) return;
     setSavingSchedule(true);
     try {
       const normalizedSchedule = schedule.map((row) => ({
@@ -231,7 +246,7 @@ export default function AdminSlotsPage() {
       const res = await fetch("/api/admin/visit-hours", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ property_id: selectedPropertyId, schedule: normalizedSchedule }),
+        body: JSON.stringify({ property_id: primaryPropertyId, schedule: normalizedSchedule }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save schedule");
@@ -383,7 +398,7 @@ export default function AdminSlotsPage() {
     }
   };
 
-  const selectedProperty = properties.find((p) => p.id === selectedPropertyId);
+  const selectedProperty = properties.find((p) => p.id === primaryPropertyId);
   const selectedLabel = selectedProperty?.title || "";
   const selectedPropertyRef = selectedProperty?.property_ref || selectedProperty?.id || "N/A";
 
@@ -448,7 +463,7 @@ export default function AdminSlotsPage() {
               </div>
               <div className="max-h-60 overflow-y-auto rounded-md border p-2 space-y-1">
                 {filteredProperties.map((p) => {
-                  const checked = selectedPropertyId === p.id;
+                  const checked = primaryPropertyId === p.id;
                   const picked = selectedPropertyIds.has(p.id);
                   return (
                     <div
@@ -466,15 +481,7 @@ export default function AdminSlotsPage() {
                       />
                       <button
                         type="button"
-                        onClick={() => {
-                          setSelectedPropertyId(p.id);
-                          setBlocked(new Set());
-                          setSelectedPropertyIds((prev) => {
-                            const next = new Set(prev);
-                            next.add(p.id);
-                            return next;
-                          });
-                        }}
+                        onClick={() => togglePropertySelection(p.id)}
                         className="flex min-w-0 flex-1 items-center gap-2 text-left"
                       >
                         <div className="min-w-0">
@@ -487,13 +494,13 @@ export default function AdminSlotsPage() {
                   );
                 })}
               </div>
-              {selectedPropertyId && (
+              {primaryPropertyId && (
                 <div className="text-sm font-medium text-primary">
-                  <p>{selectedLabel}</p>
+                  <p>{selectedLabel} {selectedPropertyIds.size > 1 ? `(+${selectedPropertyIds.size - 1} more selected)` : ''}</p>
                   <p className="text-xs text-muted-foreground">Property ID: {selectedPropertyRef}</p>
                 </div>
               )}
-              {!selectedPropertyId && properties.length > 0 && (
+              {!primaryPropertyId && properties.length > 0 && (
                 <div className="rounded-md border border-dashed border-muted-foreground/30 p-4 text-center">
                   <p className="text-sm text-muted-foreground">Click on a property above to view and configure its visit hours.</p>
                 </div>
@@ -540,7 +547,7 @@ export default function AdminSlotsPage() {
         </CardContent>
       </Card>
 
-      {selectedPropertyId && (
+      {primaryPropertyId && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Weekly Visit Schedule</CardTitle>
@@ -693,7 +700,7 @@ export default function AdminSlotsPage() {
         </Card>
       )}
 
-      {selectedPropertyId && (
+      {primaryPropertyId && (
         <div className="grid gap-6 lg:grid-cols-[auto_1fr]">
           <Card>
             <CardHeader className="pb-3">
