@@ -6,7 +6,16 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { generateSlotsInTimeframe, formatSlotLabel } from "@/lib/slots";
 import { createClient } from "@/lib/supabase/client";
 import { VISIT_BOOKING_LEAD_HOURS, VISIT_BOOKING_WINDOW_DAYS } from "@/lib/constants";
@@ -44,7 +53,10 @@ const defaultSchedule = (): VisitHourRow[] =>
 export default function AdminSlotsPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedPropertyIds, setSelectedPropertyIds] = useState<Set<string>>(new Set());
-  const primaryPropertyId = Array.from(selectedPropertyIds)[0] || null;
+  const [activePropertyIndex, setActivePropertyIndex] = useState(0);
+  const selectedArray = Array.from(selectedPropertyIds);
+  const validIndex = Math.max(0, Math.min(activePropertyIndex, selectedArray.length - 1));
+  const primaryPropertyId = selectedArray[validIndex] || null;
   const [applyMode, setApplyMode] = useState<"selected" | "filtered">("selected");
   const [schedule, setSchedule] = useState<VisitHourRow[]>(defaultSchedule());
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -54,6 +66,7 @@ export default function AdminSlotsPage() {
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [savingSchedule, setSavingSchedule] = useState(false);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [slotToToggle, setSlotToToggle] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<Set<string>>(new Set(DEFAULT_PROPERTY_STATUSES));
   const [bulkDays, setBulkDays] = useState<Set<number>>(new Set([1, 2, 3, 4, 5]));
@@ -75,6 +88,12 @@ export default function AdminSlotsPage() {
   const allSlots = selectedSchedule?.is_open
     ? generateSlotsInTimeframe(selectedSchedule.start_time, selectedSchedule.end_time)
     : [];
+
+  useEffect(() => {
+    if (selectedArray.length > 0 && activePropertyIndex !== validIndex) {
+      setActivePropertyIndex(validIndex);
+    }
+  }, [selectedArray.length, activePropertyIndex, validIndex]);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -179,15 +198,25 @@ export default function AdminSlotsPage() {
 
   const toggle = async (time: string) => {
     if (selectedPropertyIds.size === 0) return;
+    
+    if (selectedPropertyIds.size === 1) {
+      executeToggle(time, [Array.from(selectedPropertyIds)[0]]);
+    } else {
+      setSlotToToggle(time);
+    }
+  };
+
+  const executeToggle = async (time: string, targetIds: string[]) => {
     setToggling(time);
     try {
       const isBlocked = blocked.has(time);
-      const targetIds = Array.from(selectedPropertyIds);
 
       if (isBlocked) {
         await fetch(`/api/admin/slots/bulk?date=${dateStr}&time=${time}&property_ids=${targetIds.join(',')}`, { method: "DELETE" });
-        setBlocked((prev) => { const n = new Set(prev); n.delete(time); return n; });
-        toast.success(`${formatSlotLabel(time)} unblocked for selected properties`);
+        if (targetIds.includes(primaryPropertyId!)) {
+           setBlocked((prev) => { const n = new Set(prev); n.delete(time); return n; });
+        }
+        toast.success(`${formatSlotLabel(time)} unblocked for ${targetIds.length === 1 ? 'this property' : 'selected properties'}`);
       } else {
         const res = await fetch("/api/admin/slots/bulk", {
           method: "POST",
@@ -203,18 +232,23 @@ export default function AdminSlotsPage() {
             toast.error(`${f.title || 'Property'}: ${f.reason}`);
           });
           if (data.blocked > 0) {
-             setBlocked((prev) => new Set(prev).add(time));
+             if (targetIds.includes(primaryPropertyId!) && !data.failed.find((f: { property_id: string }) => f.property_id === primaryPropertyId)) {
+                setBlocked((prev) => new Set(prev).add(time));
+             }
              toast.success(`${formatSlotLabel(time)} blocked for ${data.blocked} properties`);
           }
         } else {
-          setBlocked((prev) => new Set(prev).add(time));
-          toast.success(`${formatSlotLabel(time)} blocked for selected properties`);
+          if (targetIds.includes(primaryPropertyId!)) {
+             setBlocked((prev) => new Set(prev).add(time));
+          }
+          toast.success(`${formatSlotLabel(time)} blocked for ${targetIds.length === 1 ? 'this property' : 'selected properties'}`);
         }
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to update slot");
     } finally {
       setToggling(null);
+      setSlotToToggle(null);
     }
   };
 
@@ -496,7 +530,7 @@ export default function AdminSlotsPage() {
               </div>
               {primaryPropertyId && (
                 <div className="text-sm font-medium text-primary">
-                  <p>{selectedLabel} {selectedPropertyIds.size > 1 ? `(+${selectedPropertyIds.size - 1} more selected)` : ''}</p>
+                  <p>{selectedLabel}</p>
                   <p className="text-xs text-muted-foreground">Property ID: {selectedPropertyRef}</p>
                 </div>
               )}
@@ -719,10 +753,44 @@ export default function AdminSlotsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">
-                {selectedLabel} (Property ID: {selectedPropertyRef}) — {dateStr ? format(new Date(`${dateStr}T12:00:00`), "EEEE, MMM d, yyyy") : "—"}
-              </CardTitle>
-              <CardDescription>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    {selectedLabel} 
+                    {selectedArray.length > 1 && (
+                      <span className="text-xs font-normal text-muted-foreground border rounded px-1.5 py-0.5 bg-muted/20 whitespace-nowrap">
+                        {validIndex + 1} of {selectedArray.length}
+                      </span>
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    Property ID: {selectedPropertyRef} — {dateStr ? format(new Date(`${dateStr}T12:00:00`), "EEEE, MMM d, yyyy") : "—"}
+                  </CardDescription>
+                </div>
+                {selectedArray.length > 1 && (
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      disabled={validIndex === 0}
+                      onClick={() => setActivePropertyIndex(validIndex - 1)}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      disabled={validIndex === selectedArray.length - 1}
+                      onClick={() => setActivePropertyIndex(validIndex + 1)}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <CardDescription className="mt-2">
                 Click a slot to toggle block/unblock for this date. Red = blocked.
               </CardDescription>
             </CardHeader>
@@ -758,6 +826,39 @@ export default function AdminSlotsPage() {
           </Card>
         </div>
       )}
+      
+      <AlertDialog open={!!slotToToggle} onOpenChange={(open) => !open && setSlotToToggle(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apply to all selected properties?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have {selectedPropertyIds.size} properties selected. Do you want to {slotToToggle && blocked.has(slotToToggle) ? 'unblock' : 'block'} the {slotToToggle ? formatSlotLabel(slotToToggle) : ''} slot for just {selectedLabel} or for all selected properties?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-start gap-2">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (slotToToggle && primaryPropertyId) {
+                  executeToggle(slotToToggle, [primaryPropertyId]);
+                }
+              }}
+            >
+              Only This Property
+            </Button>
+            <Button
+              onClick={() => {
+                if (slotToToggle) {
+                  executeToggle(slotToToggle, Array.from(selectedPropertyIds));
+                }
+              }}
+            >
+              All {selectedPropertyIds.size} Selected Properties
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
