@@ -99,6 +99,8 @@ export async function POST(request: Request) {
     installments: parsed.data.installments || null,
     visiting_agent_instructions: parsed.data.visiting_agent_instructions || null,
     visiting_agent_image: parsed.data.visiting_agent_image || null,
+    video_url: parsed.data.video_url || null,
+    is_video_featured: parsed.data.is_video_featured || false,
     agent_id: agentId,
     status: "pending",
     featured: false,

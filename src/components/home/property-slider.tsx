@@ -30,6 +30,8 @@ type Property = {
   location_url?: string | null;
   rental_period?: string | null;
   installments?: string | null;
+  video_url?: string | null;
+  is_video_featured?: boolean;
 };
 
 export function PropertySlider({ properties, showAmenitiesAndBuildingFeatures = false }: { properties: Property[]; showAmenitiesAndBuildingFeatures?: boolean }) {

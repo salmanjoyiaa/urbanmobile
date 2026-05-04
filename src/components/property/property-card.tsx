@@ -27,6 +27,8 @@ type Property = {
   location_url?: string | null;
   rental_period?: string | null;
   installments?: string | null;
+  video_url?: string | null;
+  is_video_featured?: boolean;
 };
 
 const RENTAL_LABELS: Record<string, string> = {
@@ -74,7 +76,16 @@ export function PropertyCard({
     <Link href={`/properties/${property.id}`}>
       <div className="group overflow-hidden rounded-2xl border border-border bg-background dark:bg-card transition-all duration-300 hover:bg-background/90 dark:hover:bg-card/90 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5">
         <div className="relative aspect-[4/3] overflow-hidden bg-muted dark:bg-muted/50">
-          {imgSrc ? (
+          {property.is_video_featured && property.video_url ? (
+            <video
+              src={property.video_url}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            />
+          ) : imgSrc ? (
             <Image
               src={imgSrc}
               alt={property.title}

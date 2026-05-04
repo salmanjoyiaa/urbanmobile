@@ -86,6 +86,8 @@ export interface Property {
   installments?: string | null;
   visiting_agent_instructions: string | null;
   visiting_agent_image: string | null;
+  video_url: string | null;
+  is_video_featured: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -250,7 +252,7 @@ export interface Database {
       };
       properties: {
         Row: Property;
-        Insert: Omit<Property, "id" | "created_at" | "updated_at" | "views_count" | "featured" | "building_features" | "apartment_features" | "nearby_places" | "cover_image_index" | "blocked_dates" | "dining_areas" | "two_entrance" | "building_condition"> & { id?: string; featured?: boolean; building_features?: string[]; apartment_features?: string[]; nearby_places?: string[]; cover_image_index?: number; blocked_dates?: string[]; dining_areas?: number; two_entrance?: number; building_condition?: string };
+        Insert: Omit<Property, "id" | "created_at" | "updated_at" | "views_count" | "featured" | "building_features" | "apartment_features" | "nearby_places" | "cover_image_index" | "blocked_dates" | "dining_areas" | "two_entrance" | "building_condition" | "is_video_featured"> & { id?: string; featured?: boolean; building_features?: string[]; apartment_features?: string[]; nearby_places?: string[]; cover_image_index?: number; blocked_dates?: string[]; dining_areas?: number; two_entrance?: number; building_condition?: string; is_video_featured?: boolean };
         Update: Partial<Omit<Property, "id" | "created_at">>;
       };
       products: {

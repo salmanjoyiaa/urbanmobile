@@ -90,6 +90,8 @@ type Property = {
   blocked_dates: string[];
   rental_period?: string | null;
   installments?: string | null;
+  video_url?: string | null;
+  is_video_featured?: boolean;
 };
 
 type Product = {
@@ -120,7 +122,7 @@ export default async function HomePage() {
     // Prefer admin-selected featured properties for homepage; fill with random available if needed
     const { data: featuredData, error: featuredError } = await supabase
       .from("properties")
-      .select("id, title, city, district, price, type, purpose, status, bedrooms, bathrooms, kitchens, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period, installments")
+      .select("id, title, city, district, price, type, purpose, status, bedrooms, bathrooms, kitchens, area_sqm, images, property_ref, address, amenities, building_features, office_fee, broker_fee, water_bill_included, cover_image_index, location_url, blocked_dates, rental_period, installments, video_url, is_video_featured")
       .eq("featured", true)
       .in("status", ["available", "rented", "reserved"])
       .order("created_at", { ascending: false })

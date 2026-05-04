@@ -30,6 +30,7 @@ import {
 } from "@/lib/constants";
 import type { Property } from "@/types/database";
 import { ImageUploader } from "@/components/dashboard/image-uploader";
+import { VideoUploader } from "@/components/dashboard/video-uploader";
 import { PropertyMap } from "@/components/property/property-map";
 import { toast } from "sonner";
 import { Loader2, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
@@ -74,6 +75,8 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [amenities, setAmenities] = useState<string[]>(initialData?.amenities || []);
   const [images, setImages] = useState<string[]>(initialData?.images || []);
   const [photoAltTexts, setPhotoAltTexts] = useState<Record<string, string>>({});
+  const [videoUrl, setVideoUrl] = useState<string | null>(initialData?.video_url || null);
+  const [isVideoFeatured, setIsVideoFeatured] = useState<boolean>(initialData?.is_video_featured || false);
 
   const [propertyRef, setPropertyRef] = useState(initialData?.property_ref || "");
   const [buildingFeatures, setBuildingFeatures] = useState<string[]>(initialData?.building_features || []);
@@ -146,6 +149,8 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         visiting_agent_instructions: visitingAgentInstructions || undefined,
         visiting_agent_image: visitingAgentImage[0] || undefined,
         photo_alt_texts: photoAltTexts,
+        video_url: videoUrl || undefined,
+        is_video_featured: isVideoFeatured,
       };
 
       const defaultEndpoint = mode === "create" ? "/api/agent/properties" : `/api/agent/properties/${initialData?.id}`;
@@ -618,6 +623,25 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                 placeholder="https://drive.google.com/..."
                 type="url"
               />
+            </div>
+
+            <div className="space-y-4 pt-6 border-t">
+              <div className="space-y-2">
+                <Label>Property Video (Optional)</Label>
+                <VideoUploader bucket="property-images" value={videoUrl} onChange={setVideoUrl} />
+              </div>
+              {videoUrl && (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="feature-video"
+                    checked={isVideoFeatured}
+                    onChange={(e) => setIsVideoFeatured(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <Label htmlFor="feature-video" className="cursor-pointer">Feature this video in the Homepage slider</Label>
+                </div>
+              )}
             </div>
           </div>
         )}
