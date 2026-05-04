@@ -57,9 +57,21 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
     }
 
+    const updatePayload = { ...parsed.data } as Record<string, unknown>;
+    const stringFields = [
+        "district", "address", "property_ref", "layout", "location_url",
+        "rental_period", "office_fee", "water_bill_included", "security_deposit", "drive_link",
+        "broker_fee", "visiting_agent_image", "payment_methods_accepted", "installments", "video_url"
+    ];
+    for (const field of stringFields) {
+        if (updatePayload[field] === "") {
+            updatePayload[field] = null;
+        }
+    }
+
     const { error: updateError } = await supabase
         .from("properties")
-        .update(parsed.data as never)
+        .update(updatePayload as never)
         .eq("id", context.params.id);
 
     if (updateError) {
