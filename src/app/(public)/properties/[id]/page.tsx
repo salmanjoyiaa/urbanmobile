@@ -207,14 +207,15 @@ export default async function PropertyDetailPage({ params }: PageProps) {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-        {/* Left Column: Media & Details */}
         <div className="space-y-6 min-w-0">
-          {property.video_url && (
-            <div className="rounded-2xl border border-[#eff3f4] overflow-hidden bg-black aspect-video flex items-center justify-center">
-              <video src={property.video_url} controls className="h-full w-full object-contain" />
-            </div>
-          )}
-          <PropertyGallery images={property.images || []} title={property.title} coverImageIndex={property.cover_image_index} imageAltTexts={property.photoAltTexts} />
+          <PropertyGallery
+            images={property.images || []}
+            title={property.title}
+            coverImageIndex={property.cover_image_index}
+            imageAltTexts={property.photoAltTexts}
+            videoUrl={property.video_url}
+            isVideoFeatured={property.is_video_featured}
+          />
 
           <div className="rounded-2xl border border-[#eff3f4] p-5 sm:p-6 bg-white">
             <h2 className="text-[18px] font-extrabold text-[#0f1419]">Property details</h2>
@@ -236,15 +237,25 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               {property.location_url && (
                 <>
                   <hr className="border-[#eff3f4]" />
-                  <a
-                    href={property.location_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#0f1419] px-6 py-3 text-[15px] font-bold text-white transition-all hover:bg-[#0f1419]/85 active:scale-[0.98] w-full sm:w-auto justify-center"
-                  >
-                    <MapPin className="h-5 w-5" />
-                    View on Google Maps
-                  </a>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <a
+                      href={property.location_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex flex-1 items-center gap-2 rounded-xl bg-[#eff3f4] px-6 py-3 text-[15px] font-bold text-[#0f1419] transition-all hover:bg-[#cfd9de] active:scale-[0.98] justify-center"
+                    >
+                      <MapPin className="h-5 w-5" />
+                      View on Google Maps
+                    </a>
+                    {isAvailable && (
+                      <a
+                        href="#visit-scheduler"
+                        className="inline-flex flex-1 items-center gap-2 rounded-xl bg-[#0f1419] px-6 py-3 text-[15px] font-bold text-white transition-all hover:bg-[#0f1419]/85 active:scale-[0.98] justify-center"
+                      >
+                        Schedule a Visit
+                      </a>
+                    )}
+                  </div>
                 </>
               )}
 
