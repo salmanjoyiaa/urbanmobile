@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import { LISTING_PURPOSES, PROPERTY_TYPES, SAUDI_CITIES } from "@/lib/constants"
 type PropertyFiltersProps = {
   initialValues: {
     city?: string;
+    district?: string;
     type?: string;
     purpose?: string;
     minPrice?: string;
@@ -32,6 +33,25 @@ export function PropertyFilters({ initialValues }: PropertyFiltersProps) {
   const [isPending, startTransition] = useTransition();
 
   const filterKey = searchParams.toString();
+  const selectedCity = searchParams.get("city") || "all";
+
+  const [districts, setDistricts] = useState<string[]>([]);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+
+  useEffect(() => {
+    if (selectedCity && selectedCity !== "all") {
+      setLoadingDistricts(true);
+      fetch(`/api/districts?city=${encodeURIComponent(selectedCity)}`)
+        .then(res => res.json())
+        .then(data => {
+          setDistricts(data.districts || []);
+        })
+        .catch(console.error)
+        .finally(() => setLoadingDistricts(false));
+    } else {
+      setDistricts([]);
+    }
+  }, [selectedCity]);
 
   const applyFilter = (updates: Record<string, string | null>) => {
     const next = new URLSearchParams(searchParams.toString());
@@ -68,12 +88,12 @@ export function PropertyFilters({ initialValues }: PropertyFiltersProps) {
         </span>
         {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </button>
-      <div className={`${open ? "mt-4 grid" : "hidden"} grid-cols-2 gap-4 lg:grid lg:grid-cols-7`} key={filterKey}>
+      <div className={`${open ? "mt-4 grid" : "hidden"} grid-cols-2 gap-4 lg:grid lg:grid-cols-4 xl:grid-cols-8`} key={filterKey}>
         <div className="space-y-1.5">
           <label className="text-[13px] font-bold text-[#0f1419]">City</label>
           <Select
             defaultValue={initialValues.city || "all"}
-            onValueChange={(value) => applyFilter({ city: value })}
+            onValueChange={(value) => applyFilter({ city: value, district: null })} // Reset district when city changes
           >
             <SelectTrigger className="rounded-lg border-[#cfd9de]">
               <SelectValue placeholder="All cities" />
@@ -82,6 +102,25 @@ export function PropertyFilters({ initialValues }: PropertyFiltersProps) {
               <SelectItem value="all">All cities</SelectItem>
               {SAUDI_CITIES.map((city) => (
                 <SelectItem key={city} value={city}>{city}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-[13px] font-bold text-[#0f1419]">District</label>
+          <Select
+            value={initialValues.district || "all"}
+            onValueChange={(value) => applyFilter({ district: value })}
+            disabled={selectedCity === "all" || loadingDistricts || districts.length === 0}
+          >
+            <SelectTrigger className="rounded-lg border-[#cfd9de]">
+              <SelectValue placeholder={loadingDistricts ? "Loading..." : "All districts"} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All districts</SelectItem>
+              {districts.map((d) => (
+                <SelectItem key={d} value={d}>{d}</SelectItem>
               ))}
             </SelectContent>
           </Select>

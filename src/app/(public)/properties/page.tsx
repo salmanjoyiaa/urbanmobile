@@ -9,6 +9,7 @@ export const revalidate = 60;
 
 type SearchParams = {
   city?: string;
+  district?: string;
   type?: string;
   purpose?: string;
   minPrice?: string;
@@ -44,6 +45,7 @@ async function fetchByStatus(
     .limit(limit);
 
   if (searchParams.city) query = query.eq("city", searchParams.city);
+  if (searchParams.district) query = query.eq("district", searchParams.district);
   if (searchParams.type) query = query.eq("type", searchParams.type);
   if (searchParams.purpose) query = query.eq("purpose", searchParams.purpose);
   if (searchParams.minPrice) query = query.gte("price", Number(searchParams.minPrice));

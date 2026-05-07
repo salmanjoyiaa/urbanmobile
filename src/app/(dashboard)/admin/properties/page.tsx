@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatSAR } from "@/lib/format";
 import { PropertyActions } from "@/components/admin/property-actions";
 import { FeaturedToggle } from "@/components/admin/featured-toggle";
+import { AdminPropertyFilters } from "@/components/admin/admin-property-filters";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -35,7 +36,7 @@ const STATUS_COLORS: Record<string, string> = {
 export default async function AdminPropertiesPage({
   searchParams,
 }: {
-  searchParams: { status?: string };
+  searchParams: { status?: string; city?: string; district?: string };
 }) {
   const supabase = createAdminClient();
   let query = supabase
@@ -45,6 +46,12 @@ export default async function AdminPropertiesPage({
 
   if (searchParams?.status) {
     query = query.eq("status", searchParams.status);
+  }
+  if (searchParams?.city) {
+    query = query.eq("city", searchParams.city);
+  }
+  if (searchParams?.district) {
+    query = query.eq("district", searchParams.district);
   }
 
   const { data } = (await query) as { data: Row[] | null };
@@ -66,35 +73,11 @@ export default async function AdminPropertiesPage({
         </p>
       </div>
 
-      <form className="flex flex-wrap gap-3 items-end" action="/admin/properties" method="get">
-        <div>
-          <label className="text-xs font-medium text-muted-foreground block mb-1">Status</label>
-          <select
-            name="status"
-            defaultValue={searchParams.status || ""}
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-          >
-            <option value="">All</option>
-            <option value="pending">Pending</option>
-            <option value="available">Available</option>
-            <option value="rented">Rented</option>
-            <option value="reserved">Reserved</option>
-            <option value="sold">Sold</option>
-          </select>
-        </div>
-        <button
-          type="submit"
-          className="h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          Filter
-        </button>
-        <a
-          href="/admin/properties"
-          className="h-9 rounded-md border border-input bg-background px-4 text-sm font-medium inline-flex items-center hover:bg-muted"
-        >
-          Reset
-        </a>
-      </form>
+      <AdminPropertyFilters
+        initialStatus={searchParams?.status}
+        initialCity={searchParams?.city}
+        initialDistrict={searchParams?.district}
+      />
 
       <DataTable
         rows={rows}

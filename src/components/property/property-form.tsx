@@ -15,6 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import {
   LISTING_PURPOSES,
   PROPERTY_TYPES,
@@ -33,7 +36,8 @@ import { ImageUploader } from "@/components/dashboard/image-uploader";
 import { VideoUploader } from "@/components/dashboard/video-uploader";
 import { PropertyMap } from "@/components/property/property-map";
 import { toast } from "sonner";
-import { Loader2, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, CheckCircle2, Check, ChevronsUpDown } from "lucide-react";
+import { useEffect } from "react";
 
 type PropertyFormProps = {
   mode: "create" | "edit";
@@ -57,6 +61,24 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
 
   const [city, setCity] = useState(initialData?.city || SAUDI_CITIES[0]);
   const [district, setDistrict] = useState(initialData?.district || "");
+  const [openDistrict, setOpenDistrict] = useState(false);
+  const [districtSearch, setDistrictSearch] = useState("");
+  const [fetchedDistricts, setFetchedDistricts] = useState<string[]>([]);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+
+  useEffect(() => {
+    if (city) {
+      setLoadingDistricts(true);
+      fetch(`/api/districts?city=${encodeURIComponent(city)}`)
+        .then(res => res.json())
+        .then(data => setFetchedDistricts(data.districts || []))
+        .catch(console.error)
+        .finally(() => setLoadingDistricts(false));
+    } else {
+      setFetchedDistricts([]);
+    }
+  }, [city]);
+
   const [address, setAddress] = useState(initialData?.address || "");
   const [visitingAgentInstructions, setVisitingAgentInstructions] = useState(initialData?.visiting_agent_instructions || "");
   const [visitingAgentImage, setVisitingAgentImage] = useState<string[]>(initialData?.visiting_agent_image ? [initialData.visiting_agent_image] : []);
@@ -355,14 +377,78 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 flex flex-col">
                 <Label>District</Label>
-                <Input
-                  value={district}
-                  onChange={(event) => setDistrict(event.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="e.g., Al Malaz"
-                />
+                <Popover open={openDistrict} onOpenChange={setOpenDistrict}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openDistrict}
+                      disabled={isSubmitting || loadingDistricts}
+                      className="w-full justify-between"
+                    >
+                      {district ? district : (loadingDistricts ? "Loading..." : "Select or type a district...")}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0" align="start">
+                    <Command>
+                      <CommandInput 
+                        placeholder="Search or add district..." 
+                        value={districtSearch}
+                        onValueChange={setDistrictSearch}
+                      />
+                      <CommandList>
+                        <CommandEmpty>
+                          {districtSearch.trim() !== "" ? (
+                            <Button 
+                              variant="ghost" 
+                              className="w-full justify-start font-normal text-sm h-auto py-2 px-2"
+                              onClick={() => {
+                                setDistrict(districtSearch.trim());
+                                setFetchedDistricts(prev => [...prev, districtSearch.trim()]);
+                                setOpenDistrict(false);
+                              }}
+                            >
+                              Create &quot;{districtSearch.trim()}&quot;
+                            </Button>
+                          ) : (
+                            "No district found."
+                          )}
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {fetchedDistricts.map((d) => (
+                            <CommandItem
+                              key={d}
+                              value={d}
+                              onSelect={() => {
+                                setDistrict(d);
+                                setOpenDistrict(false);
+                              }}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4", district === d ? "opacity-100" : "opacity-0")} />
+                              {d}
+                            </CommandItem>
+                          ))}
+                          {districtSearch.trim() !== "" && !fetchedDistricts.some(d => d.toLowerCase() === districtSearch.trim().toLowerCase()) && (
+                            <CommandItem
+                              value={districtSearch.trim()}
+                              onSelect={() => {
+                                setDistrict(districtSearch.trim());
+                                setFetchedDistricts(prev => [...prev, districtSearch.trim()]);
+                                setOpenDistrict(false);
+                              }}
+                            >
+                              <Check className="mr-2 h-4 w-4 opacity-0" />
+                              <span className="font-semibold text-primary">Create &quot;{districtSearch.trim()}&quot;</span>
+                            </CommandItem>
+                          )}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label>Address</Label>
