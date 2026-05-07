@@ -21,7 +21,6 @@ import { cn } from "@/lib/utils";
 import {
   LISTING_PURPOSES,
   PROPERTY_TYPES,
-  SAUDI_CITIES,
   BUILDING_FEATURES,
   APARTMENT_FEATURES,
   KITCHEN_FEATURES,
@@ -59,7 +58,21 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
   const [purpose, setPurpose] = useState(initialData?.purpose || "long_term");
   const [price, setPrice] = useState(String(initialData?.price || ""));
 
-  const [city, setCity] = useState(initialData?.city || SAUDI_CITIES[0]);
+  const [city, setCity] = useState(initialData?.city || "");
+  const [openCity, setOpenCity] = useState(false);
+  const [citySearch, setCitySearch] = useState("");
+  const [fetchedCities, setFetchedCities] = useState<string[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
+
+  useEffect(() => {
+    setLoadingCities(true);
+    fetch('/api/cities')
+      .then(res => res.json())
+      .then(data => setFetchedCities(data.cities || []))
+      .catch(console.error)
+      .finally(() => setLoadingCities(false));
+  }, []);
+
   const [district, setDistrict] = useState(initialData?.district || "");
   const [openDistrict, setOpenDistrict] = useState(false);
   const [districtSearch, setDistrictSearch] = useState("");
@@ -366,16 +379,78 @@ export function PropertyForm({ mode, initialData, submitEndpoint, redirectPath }
         {step === 2 && (
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-2 flex flex-col">
                 <Label>City</Label>
-                <Select value={city} onValueChange={(value) => setCity(value as typeof city)} disabled={isSubmitting}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {SAUDI_CITIES.map((item) => (
-                      <SelectItem key={item} value={item}>{item}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={openCity} onOpenChange={setOpenCity}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openCity}
+                      disabled={isSubmitting || loadingCities}
+                      className="w-full justify-between"
+                    >
+                      {city ? city : (loadingCities ? "Loading..." : "Select or type a city...")}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0" align="start">
+                    <Command>
+                      <CommandInput 
+                        placeholder="Search or add city..." 
+                        value={citySearch}
+                        onValueChange={setCitySearch}
+                      />
+                      <CommandList>
+                        <CommandEmpty>
+                          {citySearch.trim() !== "" ? (
+                            <Button 
+                              variant="ghost" 
+                              className="w-full justify-start font-normal text-sm h-auto py-2 px-2"
+                              onClick={() => {
+                                setCity(citySearch.trim());
+                                setFetchedCities(prev => [...prev, citySearch.trim()]);
+                                setOpenCity(false);
+                              }}
+                            >
+                              Create &quot;{citySearch.trim()}&quot;
+                            </Button>
+                          ) : (
+                            "No city found."
+                          )}
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {fetchedCities.map((c) => (
+                            <CommandItem
+                              key={c}
+                              value={c}
+                              onSelect={() => {
+                                setCity(c);
+                                setOpenCity(false);
+                              }}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4", city === c ? "opacity-100" : "opacity-0")} />
+                              {c}
+                            </CommandItem>
+                          ))}
+                          {citySearch.trim() !== "" && !fetchedCities.some(c => c.toLowerCase() === citySearch.trim().toLowerCase()) && (
+                            <CommandItem
+                              value={citySearch.trim()}
+                              onSelect={() => {
+                                setCity(citySearch.trim());
+                                setFetchedCities(prev => [...prev, citySearch.trim()]);
+                                setOpenCity(false);
+                              }}
+                            >
+                              <Check className="mr-2 h-4 w-4 opacity-0" />
+                              <span className="font-semibold text-primary">Create &quot;{citySearch.trim()}&quot;</span>
+                            </CommandItem>
+                          )}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-2 flex flex-col">
                 <Label>District</Label>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS, SAUDI_CITIES } from "@/lib/constants";
+import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS } from "@/lib/constants";
 import type { Product } from "@/types/database";
 import { ImageUploader } from "@/components/dashboard/image-uploader";
 import { toast } from "sonner";
@@ -36,7 +36,14 @@ export function ProductForm({ mode, initialData, submitEndpoint, redirectPath }:
   const [category, setCategory] = useState(initialData?.category || "furniture");
   const [condition, setCondition] = useState(initialData?.condition || "good");
   const [price, setPrice] = useState(String(initialData?.price || ""));
-  const [city, setCity] = useState(initialData?.city || SAUDI_CITIES[0]);
+  const [city, setCity] = useState(initialData?.city || "");
+  const [cities, setCities] = useState<string[]>([]);
+  useEffect(() => {
+    fetch('/api/cities')
+      .then(res => res.json())
+      .then(data => setCities(data.cities || []))
+      .catch(console.error);
+  }, []);
   const [images, setImages] = useState<string[]>(initialData?.images || []);
 
   const submit = async () => {
@@ -149,7 +156,7 @@ export function ProductForm({ mode, initialData, submitEndpoint, redirectPath }:
             <Select value={city} onValueChange={(value) => setCity(value as typeof city)} disabled={isSubmitting}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {SAUDI_CITIES.map((item) => (
+                {cities.map((item) => (
                   <SelectItem key={item} value={item}>{item}</SelectItem>
                 ))}
               </SelectContent>

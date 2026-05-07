@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { SAUDI_CITIES } from "@/lib/constants";
 
 export function AdminPropertyFilters({
   initialStatus,
@@ -13,8 +12,16 @@ export function AdminPropertyFilters({
   initialDistrict?: string;
 }) {
   const [city, setCity] = useState(initialCity || "");
+  const [cities, setCities] = useState<string[]>([]);
   const [districts, setDistricts] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/cities')
+      .then(res => res.json())
+      .then(data => setCities(data.cities || []))
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (city) {
@@ -58,7 +65,7 @@ export function AdminPropertyFilters({
           className="h-9 rounded-md border border-input bg-background px-3 text-sm"
         >
           <option value="">All Cities</option>
-          {SAUDI_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+          {cities.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
 

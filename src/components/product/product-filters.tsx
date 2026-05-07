@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS, SAUDI_CITIES } from "@/lib/constants";
+import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS } from "@/lib/constants";
 
 type ProductFiltersProps = {
   initialValues: {
@@ -33,6 +33,14 @@ export function ProductFilters({ initialValues }: ProductFiltersProps) {
   const [condition, setCondition] = useState(initialValues.condition || "all");
   const [minPrice, setMinPrice] = useState(initialValues.minPrice || "");
   const [maxPrice, setMaxPrice] = useState(initialValues.maxPrice || "");
+
+  const [cities, setCities] = useState<string[]>([]);
+  useEffect(() => {
+    fetch('/api/cities')
+      .then(res => res.json())
+      .then(data => setCities(data.cities || []))
+      .catch(console.error);
+  }, []);
 
   const apply = () => {
     const next = new URLSearchParams();
@@ -76,7 +84,7 @@ export function ProductFilters({ initialValues }: ProductFiltersProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All cities</SelectItem>
-              {SAUDI_CITIES.map((c) => (
+              {cities.map((c) => (
                 <SelectItem key={c} value={c}>{c}</SelectItem>
               ))}
             </SelectContent>

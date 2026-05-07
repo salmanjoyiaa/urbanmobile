@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LISTING_PURPOSES, PROPERTY_TYPES, SAUDI_CITIES } from "@/lib/constants";
+import { LISTING_PURPOSES, PROPERTY_TYPES } from "@/lib/constants";
 
 type PropertyFiltersProps = {
   initialValues: {
@@ -36,7 +36,15 @@ export function PropertyFilters({ initialValues }: PropertyFiltersProps) {
   const selectedCity = searchParams.get("city") || "all";
 
   const [districts, setDistricts] = useState<string[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
   const [loadingDistricts, setLoadingDistricts] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/cities')
+      .then(res => res.json())
+      .then(data => setCities(data.cities || []))
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (selectedCity && selectedCity !== "all") {
@@ -100,7 +108,7 @@ export function PropertyFilters({ initialValues }: PropertyFiltersProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All cities</SelectItem>
-              {SAUDI_CITIES.map((city) => (
+              {cities.map((city) => (
                 <SelectItem key={city} value={city}>{city}</SelectItem>
               ))}
             </SelectContent>

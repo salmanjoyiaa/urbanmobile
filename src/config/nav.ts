@@ -45,6 +45,7 @@ export const adminNav: NavItem[] = [
   { title: "Sellers", href: "/admin/agents?agent_type=seller", icon: ShoppingBag },
   { title: "Visiting Team", href: "/admin/visiting-team", icon: MapPin },
   { title: "Properties", href: "/admin/properties", icon: Building2 },
+  { title: "Locations", href: "/admin/locations", icon: MapPin },
   { title: "Products", href: "/admin/products", icon: Package },
   { title: "Visit Requests", href: "/admin/visits", icon: Calendar },
   { title: "Visit Team Performance", href: "/admin/visit-team-performance", icon: MapPin },

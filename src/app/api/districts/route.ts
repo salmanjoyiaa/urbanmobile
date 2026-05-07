@@ -11,23 +11,21 @@ export async function GET(request: Request) {
 
     const supabase = await createRouteClient();
 
-    // Query distinct districts for the given city
+    // Query districts from the dedicated table
     const { data, error } = (await supabase
-        .from("properties")
-        .select("district")
-        .eq("city", city)
-        .not("district", "is", null)
-        .neq("district", "")) as { data: { district: string }[] | null; error: { message: string } | null };
+        .from("districts")
+        .select("name")
+        .eq("city_name", city)
+        .order("name", { ascending: true })) as { data: { name: string }[] | null; error: { message: string } | null };
 
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Extract distinct non-null districts
-    const distinctDistricts = Array.from(new Set(data?.map(item => item.district).filter(Boolean) || []));
+    // Extract districts
+    const distinctDistricts = data?.map(item => item.name) || [];
     
-    // Sort alphabetically
-    distinctDistricts.sort();
+
 
     return NextResponse.json({ districts: distinctDistricts });
 }

@@ -14,6 +14,7 @@ type Row = {
   id: string;
   title: string;
   city: string;
+  district: string | null;
   status: string;
   price: number;
   property_ref: string | null;
@@ -41,7 +42,7 @@ export default async function AdminPropertiesPage({
   const supabase = createAdminClient();
   let query = supabase
     .from("properties")
-    .select("id, title, city, status, price, property_ref, featured, agents:agent_id(profiles:profile_id(full_name))")
+    .select("id, title, city, district, status, price, property_ref, featured, agents:agent_id(profiles:profile_id(full_name))")
     .order("created_at", { ascending: false });
 
   if (searchParams?.status) {
@@ -94,6 +95,7 @@ export default async function AdminPropertiesPage({
           },
           { key: "agent", title: "Listed By", render: (row) => row.agents?.profiles?.full_name || "—" },
           { key: "city", title: "City" },
+          { key: "district", title: "District", render: (row) => row.district || "—" },
           { key: "price", title: "Price", render: (row) => formatSAR(row.price) },
           {
             key: "status",
