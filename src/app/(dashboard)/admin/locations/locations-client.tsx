@@ -6,7 +6,14 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Loader2, Plus, Edit2, Trash2 } from "lucide-react";
+import { Loader2, Plus, Edit2, Trash2, Merge } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 type City = { name: string };
 type District = { id: string; city_name: string; name: string };
@@ -23,6 +30,9 @@ export function LocationsClient({
   const districts = initialDistricts;
   
   const [selectedCity, setSelectedCity] = useState<string | null>(initialCities[0]?.name || null);
+  const [selectedDistrictIds, setSelectedDistrictIds] = useState<string[]>([]);
+  const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
+  const [mergedDistrictName, setMergedDistrictName] = useState("");
   const [loading, setLoading] = useState(false);
   const [newCityName, setNewCityName] = useState("");
   const [newDistrictName, setNewDistrictName] = useState("");
@@ -158,6 +168,7 @@ export function LocationsClient({
       if (!res.ok) throw new Error((await res.json()).error);
       
       toast.success("District deleted");
+      setSelectedDistrictIds(prev => prev.filter(did => did !== id));
       router.refresh();
       window.location.reload();
     } catch (err: any) {
@@ -165,6 +176,45 @@ export function LocationsClient({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMergeDistricts = async () => {
+    if (!mergedDistrictName.trim() || selectedDistrictIds.length < 2 || !selectedCity) return;
+    setLoading(true);
+    try {
+      const selectedNames = districts
+        .filter(d => selectedDistrictIds.includes(d.id))
+        .map(d => d.name);
+
+      const res = await fetch("/api/admin/locations/merge-districts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          city_name: selectedCity,
+          oldDistrictIds: selectedDistrictIds,
+          oldDistrictNames: selectedNames,
+          newDistrictName: mergedDistrictName.trim()
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      
+      toast.success("Districts merged successfully");
+      setMergeDialogOpen(false);
+      setSelectedDistrictIds([]);
+      setMergedDistrictName("");
+      router.refresh();
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to merge districts");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleDistrictSelection = (id: string) => {
+    setSelectedDistrictIds(prev => 
+      prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
+    );
   };
 
   const filteredDistricts = districts.filter(d => d.city_name === selectedCity);
@@ -227,7 +277,23 @@ export function LocationsClient({
 
       {/* Districts Panel */}
       <div className="bg-white rounded-xl border border-[#eff3f4] p-5">
-        <h2 className="text-lg font-bold text-navy mb-1">Districts</h2>
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-lg font-bold text-navy">Districts</h2>
+          {selectedDistrictIds.length >= 2 && (
+            <Button 
+              size="sm" 
+              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              onClick={() => {
+                const firstSelected = districts.find(d => d.id === selectedDistrictIds[0])?.name || "";
+                setMergedDistrictName(firstSelected);
+                setMergeDialogOpen(true);
+              }}
+            >
+              <Merge className="h-4 w-4 mr-2" />
+              Merge Selected ({selectedDistrictIds.length})
+            </Button>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground mb-4">
           Showing districts for <strong className="text-navy">{selectedCity || "Select a city"}</strong>
         </p>
@@ -248,29 +314,37 @@ export function LocationsClient({
         <div className="space-y-2">
           {filteredDistricts.map((district) => (
             <div key={district.id} className="flex items-center justify-between p-3 rounded-lg border border-[#eff3f4] hover:bg-muted transition-colors">
-              {editingDistrict === district.id ? (
-                <div className="flex items-center gap-2 w-full mr-2">
-                  <Input 
-                    value={editDistrictName} 
-                    onChange={e => setEditDistrictName(e.target.value)} 
-                    autoFocus 
-                    className="h-8"
-                  />
-                  <Button size="sm" onClick={() => handleUpdateDistrict(district.id, district.name)} disabled={loading}>Save</Button>
-                  <Button size="sm" variant="ghost" onClick={() => setEditingDistrict(null)}>Cancel</Button>
-                </div>
-              ) : (
-                <>
-                  <span className="font-medium text-[14px]">{district.name}</span>
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-navy" onClick={() => { setEditingDistrict(district.id); setEditDistrictName(district.name); }}>
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleDeleteDistrict(district.id, district.name)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="checkbox" 
+                  className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                  checked={selectedDistrictIds.includes(district.id)}
+                  onChange={() => toggleDistrictSelection(district.id)}
+                />
+                {editingDistrict === district.id ? (
+                  <div className="flex items-center gap-2 w-full mr-2">
+                    <Input 
+                      value={editDistrictName} 
+                      onChange={e => setEditDistrictName(e.target.value)} 
+                      autoFocus 
+                      className="h-8"
+                    />
+                    <Button size="sm" onClick={() => handleUpdateDistrict(district.id, district.name)} disabled={loading}>Save</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingDistrict(null)}>Cancel</Button>
                   </div>
-                </>
+                ) : (
+                  <span className="font-medium text-[14px]" onClick={() => toggleDistrictSelection(district.id)}>{district.name}</span>
+                )}
+              </div>
+              {editingDistrict !== district.id && (
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-navy" onClick={() => { setEditingDistrict(district.id); setEditDistrictName(district.name); }}>
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleDeleteDistrict(district.id, district.name)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               )}
             </div>
           ))}
@@ -282,6 +356,38 @@ export function LocationsClient({
           )}
         </div>
       </div>
+
+      {/* Merge Dialog */}
+      <Dialog open={mergeDialogOpen} onOpenChange={setMergeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Merge Districts</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              You are about to merge {selectedDistrictIds.length} selected districts. 
+              Properties belonging to these districts will be updated to the new name.
+            </p>
+            <label className="text-sm font-semibold mb-2 block">Final District Name</label>
+            <Input 
+              value={mergedDistrictName} 
+              onChange={e => setMergedDistrictName(e.target.value)}
+              placeholder="e.g., Thuqbah"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMergeDialogOpen(false)} disabled={loading}>Cancel</Button>
+            <Button 
+              className="bg-indigo-600 hover:bg-indigo-700 text-white" 
+              onClick={handleMergeDistricts} 
+              disabled={loading || !mergedDistrictName.trim()}
+            >
+              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Confirm Merge
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
