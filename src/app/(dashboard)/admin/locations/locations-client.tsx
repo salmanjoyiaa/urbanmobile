@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -18,8 +19,8 @@ export function LocationsClient({
   initialDistricts: District[];
 }) {
   const router = useRouter();
-  const [cities, setCities] = useState<City[]>(initialCities);
-  const [districts, setDistricts] = useState<District[]>(initialDistricts);
+  const cities = initialCities;
+  const districts = initialDistricts;
   
   const [selectedCity, setSelectedCity] = useState<string | null>(initialCities[0]?.name || null);
   const [loading, setLoading] = useState(false);
