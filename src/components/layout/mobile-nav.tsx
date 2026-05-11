@@ -23,7 +23,7 @@ export function MobileNav() {
                         <Menu className="h-6 w-6 stroke-[2.5]" />
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[85vw] max-w-sm bg-background dark:bg-card p-6 border-r border-border">
+                <SheetContent side="left" className="w-[85vw] max-w-sm bg-background p-6 border-r border-border">
                     <SheetHeader>
                         <SheetTitle className="text-left py-4 border-b border-border">
                             <span className="text-[20px] font-black tracking-tight text-foreground leading-none">
@@ -65,16 +65,23 @@ export function MobileNav() {
                             <Link
                                 href="/login?type=property"
                                 onClick={() => setOpen(false)}
-                                className="flex w-full items-center justify-center rounded-xl bg-primary dark:bg-accent px-4 py-3.5 text-[15px] font-bold text-primary-foreground dark:text-foreground transition-all hover:bg-primary/90 dark:hover:bg-accent/90 active:scale-95 shadow-md"
+                                className="flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3.5 text-[15px] font-bold text-primary-foreground transition-all hover:bg-primary/90 active:scale-95 shadow-md"
                             >
                                 AQARI Login
                             </Link>
                             <Link
                                 href="/login?type=visiting"
                                 onClick={() => setOpen(false)}
-                                className="flex w-full items-center justify-center rounded-xl border-2 border-primary dark:border-accent px-4 py-3.5 text-[15px] font-bold text-primary dark:text-accent transition-all hover:bg-primary/5 dark:hover:bg-accent/10 active:scale-95 shadow-sm"
+                                className="flex w-full items-center justify-center rounded-xl border-2 border-primary px-4 py-3.5 text-[15px] font-bold text-primary transition-all hover:bg-primary/5 active:scale-95 shadow-sm"
                             >
                                 Team Login
+                            </Link>
+                            <Link
+                                href="/login?type=maintenance"
+                                onClick={() => setOpen(false)}
+                                className="flex w-full items-center justify-center rounded-xl border-2 border-primary px-4 py-3.5 text-[15px] font-bold text-primary transition-all hover:bg-primary/5 active:scale-95 shadow-sm"
+                            >
+                                Maintenance Login
                             </Link>
                         </div>
                     </nav>

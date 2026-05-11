@@ -110,6 +110,15 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               <Phone className="h-5 w-5" />
             </a>
           </div>
+          <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground">
+            <Link href="/signup/agent?type=property" className="hover:text-foreground transition-colors">Become an Aqari Agent</Link>
+            <span className="text-border">•</span>
+            <Link href="/signup/agent?type=visiting" className="hover:text-foreground transition-colors">Become a Team Agent</Link>
+            <span className="text-border">•</span>
+            <Link href="/signup/agent?type=seller" className="hover:text-foreground transition-colors">Become a Seller</Link>
+            <span className="text-border">•</span>
+            <Link href="/signup/agent?type=maintenance" className="hover:text-foreground transition-colors">Become a Maintenance Agent</Link>
+          </div>
           <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-widest">
             &copy; {new Date().getFullYear()} TheUrbanRealEstateSaudi. All rights reserved.
           </p>

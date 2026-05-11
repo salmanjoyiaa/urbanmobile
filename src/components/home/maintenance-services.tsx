@@ -29,7 +29,7 @@ const services = [
 
 export function MaintenanceServices() {
     return (
-        <section className="py-24 bg-section-cream dark:bg-[#0F0D0B] relative overflow-hidden">
+        <section className="py-24 bg-section-cream relative overflow-hidden">
             <div className="container mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16 gap-6 sm:gap-8">
                     <motion.div
@@ -47,11 +47,11 @@ export function MaintenanceServices() {
                             We provide end-to-end maintenance services managed by certified professionals. Keep your property in pristine condition effortlessly.
                         </p>
                         <div className="mt-6 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3">
-                            <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-card dark:bg-white/5 shadow-sm border border-border dark:border-white/10 px-5 py-2">
+                            <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-card shadow-sm border border-border px-5 py-2">
                                 <Clock className="w-4 h-4 text-red-500 animate-pulse" />
                                 <span className="text-[13px] font-bold text-foreground">Emergency: 1-Hour</span>
                             </div>
-                            <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-card dark:bg-white/5 shadow-sm border border-border dark:border-white/10 px-5 py-2">
+                            <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-card shadow-sm border border-border px-5 py-2">
                                 <Clock className="w-4 h-4 text-primary" />
                                 <span className="text-[13px] font-bold text-foreground">Standard: 24-Hour</span>
                             </div>
@@ -64,7 +64,7 @@ export function MaintenanceServices() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
                         <Link href="/maintenance" className="w-full md:w-auto">
-                            <button className="w-full md:w-auto h-14 bg-card dark:bg-white/10 border-2 border-border dark:border-white/35 text-foreground dark:text-white px-8 rounded-2xl font-bold flex items-center justify-center gap-2 hover:border-primary dark:hover:border-white/50 hover:bg-muted/50 dark:hover:bg-white/15 active:scale-[0.98] transition-all group shadow-sm">
+                            <button className="w-full md:w-auto h-14 bg-card border-2 border-border text-foreground px-8 rounded-2xl font-bold flex items-center justify-center gap-2 hover:border-primary hover:bg-muted/50 active:scale-[0.98] transition-all group shadow-sm">
                                 Request Service
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </button>
@@ -81,9 +81,9 @@ export function MaintenanceServices() {
                             viewport={{ once: true, margin: "-40px" }}
                             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: i * 0.1 }}
                             whileHover={{ y: -5, transition: { duration: 0.25 } }}
-                            className="bg-card/90 dark:bg-[#1A1614]/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border dark:border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:hover:shadow-[0_16px_40px_rgba(0,0,0,0.4)] transition-all text-center md:text-left group cursor-default"
+                            className="bg-card/90 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all text-center md:text-left group cursor-default"
                         >
-                            <div className="w-14 h-14 bg-muted dark:bg-white/5 border border-border dark:border-white/10 rounded-2xl mx-auto md:mx-0 flex items-center justify-center mb-5 md:mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <div className="w-14 h-14 bg-muted border border-border rounded-2xl mx-auto md:mx-0 flex items-center justify-center mb-5 md:mb-6 group-hover:scale-110 transition-transform duration-300">
                                 <service.icon className="w-6 h-6 text-primary" />
                             </div>
                             <h3 className="text-[18px] md:text-[20px] font-extrabold text-foreground mb-2">{service.title}</h3>
@@ -97,7 +97,7 @@ export function MaintenanceServices() {
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.4 }}
-                    className="mt-16 flex items-center justify-center gap-3 text-muted-foreground dark:text-white/40"
+                    className="mt-16 flex items-center justify-center gap-3 text-muted-foreground"
                 >
                     <ShieldCheck className="w-5 h-5" />
                     <span className="text-[14px] font-semibold uppercase tracking-widest">

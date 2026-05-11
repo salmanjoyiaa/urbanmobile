@@ -14,7 +14,7 @@ export default async function AdminMaintenancePage() {
 
     const { data: requestsData, error } = await supabase
         .from("maintenance_requests")
-        .select("*, maintenance_services(title, provider_type), agents!maintenance_requests_agent_id_fkey(company_name, profiles(full_name))")
+        .select("*, maintenance_services(title, provider_type)")
         .order("created_at", { ascending: false });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,11 +64,6 @@ export default async function AdminMaintenancePage() {
                                         </td>
                                         <td className="p-4 align-middle">
                                             <div className="font-medium text-emerald-700">{req.maintenance_services?.title || req.service_type}</div>
-                                            {req.agents && (
-                                                <div className="text-xs text-muted-foreground">
-                                                    Provider: {req.agents.company_name || req.agents.profiles?.full_name}
-                                                </div>
-                                            )}
                                         </td>
                                         <td className="p-4 align-middle">
                                             {req.visit_date ? (

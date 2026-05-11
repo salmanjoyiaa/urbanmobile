@@ -22,7 +22,7 @@ export default async function AgentOverviewPage() {
       data: { id: string; status: string; agent_type: string } | null;
     };
 
-  if (!agent) {
+  if (!agent || agent.status !== "approved") {
     redirect("/pending-approval");
   }
 

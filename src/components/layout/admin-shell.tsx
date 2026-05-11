@@ -1,6 +1,6 @@
 "use client";
 
-import { adminNav } from "@/config/nav";
+import { adminNavGroups } from "@/config/nav";
 import { Sidebar } from "@/components/layout/sidebar";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { UserMenu } from "@/components/layout/user-menu";
@@ -15,9 +15,9 @@ export function AdminShell({ children, userName }: { children: React.ReactNode, 
 
     return (
         <div className="min-h-screen bg-muted/20 lg:grid lg:grid-cols-[16rem_1fr]">
-            <Sidebar items={adminNav} title="Admin Panel" headerActions={actions} />
+            <Sidebar groups={adminNavGroups} title="Admin Panel" headerActions={actions} />
             <div>
-                <header className="sticky top-0 z-20 hidden border-b border-border bg-background/95 dark:bg-slate-950/95 px-4 py-2.5 backdrop-blur sm:py-3 lg:block lg:px-6">
+                <header className="sticky top-0 z-20 hidden border-b border-border bg-background/95 px-4 py-2.5 backdrop-blur sm:py-3 lg:block lg:px-6">
                     <div className="flex items-center justify-end gap-3">
                         <NotificationBell />
                         <UserMenu userName={userName} role="Admin" />
@@ -28,4 +28,3 @@ export function AdminShell({ children, userName }: { children: React.ReactNode, 
         </div>
     );
 }
-

@@ -32,7 +32,7 @@ export function HomepageNav() {
       <div className="max-w-[1400px] mx-auto flex items-center justify-between px-3 sm:px-5 lg:px-12">
         {/* Logo */}
         <Link href="/" className="flex items-center group shrink-0">
-          <span className="text-[17px] sm:text-[22px] md:text-[26px] font-black tracking-tight leading-none text-white dark:text-foreground whitespace-nowrap">
+          <span className="text-[17px] sm:text-[22px] md:text-[26px] font-black tracking-tight leading-none text-white whitespace-nowrap">
             TheUrbanRealEstateSaudi
           </span>
         </Link>
@@ -43,7 +43,7 @@ export function HomepageNav() {
             <Link
               key={link.href}
               href={link.href}
-              className="relative text-[15px] font-semibold tracking-wide text-white/90 hover:text-white dark:text-foreground/80 dark:hover:text-foreground transition-colors after:absolute after:left-0 after:bottom-[-2px] after:h-[2px] after:w-0 after:bg-current after:transition-[width] after:duration-200 hover:after:w-full"
+              className="relative text-[15px] font-semibold tracking-wide text-white/90 hover:text-white transition-colors after:absolute after:left-0 after:bottom-[-2px] after:h-[2px] after:w-0 after:bg-current after:transition-[width] after:duration-200 hover:after:w-full"
             >
               {link.title}
             </Link>
@@ -54,21 +54,27 @@ export function HomepageNav() {
         <div className="hidden md:flex items-center gap-3">
           <Link
             href="/login?type=property"
-            className="inline-flex items-center justify-center min-h-11 rounded-xl bg-white text-primary px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/90 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 shadow-sm"
+            className="inline-flex items-center justify-center min-h-11 rounded-xl bg-white text-primary px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/90 shadow-sm"
           >
             AQARI Login
           </Link>
           <Link
             href="/login?type=visiting"
-            className="inline-flex items-center justify-center min-h-11 rounded-xl border-2 border-white bg-transparent text-white px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/10 dark:border-white/35 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+            className="inline-flex items-center justify-center min-h-11 rounded-xl border-2 border-white bg-transparent text-white px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/10"
           >
             Team Login
           </Link>
           <Link
             href="/login?type=seller"
-            className="inline-flex items-center justify-center min-h-11 rounded-xl border-2 border-white bg-transparent text-white px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/10 dark:border-white/35 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+            className="inline-flex items-center justify-center min-h-11 rounded-xl border-2 border-white bg-transparent text-white px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/10"
           >
             Seller Login
+          </Link>
+          <Link
+            href="/login?type=maintenance"
+            className="inline-flex items-center justify-center min-h-11 rounded-xl border-2 border-white bg-transparent text-white px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/10"
+          >
+            Maintenance
           </Link>
         </div>
 
@@ -119,6 +125,13 @@ export function HomepageNav() {
                 className="flex w-full items-center justify-center rounded-xl border border-white/30 text-white/90 px-6 py-3 min-h-[48px] text-[14px] font-bold transition-all hover:bg-white/10 hover:border-white/50 active:scale-[0.98]"
               >
                 Seller Login
+              </Link>
+              <Link
+                href="/login?type=maintenance"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center justify-center rounded-xl border border-white/30 text-white/90 px-6 py-3 min-h-[48px] text-[14px] font-bold transition-all hover:bg-white/10 hover:border-white/50 active:scale-[0.98]"
+              >
+                Maintenance Login
               </Link>
             </div>
           </nav>

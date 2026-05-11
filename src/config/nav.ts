@@ -12,6 +12,9 @@ import {
   Star,
   Clock,
   type LucideIcon,
+  ClipboardList,
+  Settings,
+  FileText,
 } from "lucide-react";
 
 export interface NavItem {
@@ -19,6 +22,11 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   badge?: string;
+}
+
+export interface NavGroup {
+  label: string;
+  items: NavItem[];
 }
 
 export const agentNav: NavItem[] = [
@@ -45,24 +53,64 @@ export const maintenanceNav: NavItem[] = [
   { title: "Service Requests", href: "/agent/maintenance-requests", icon: ScrollText },
 ];
 
-export const adminNav: NavItem[] = [
-  { title: "Overview", href: "/admin", icon: LayoutDashboard },
-  { title: "AQARI Team", href: "/admin/agents", icon: Users },
-  { title: "Sellers", href: "/admin/agents?agent_type=seller", icon: ShoppingBag },
-  { title: "Visiting Team", href: "/admin/visiting-team", icon: MapPin },
-  { title: "Properties", href: "/admin/properties", icon: Building2 },
-  { title: "Locations", href: "/admin/locations", icon: MapPin },
-  { title: "Products", href: "/admin/products", icon: Package },
-  { title: "Visit Requests", href: "/admin/visits", icon: Calendar },
-  { title: "Visit Team Performance", href: "/admin/visit-team-performance", icon: MapPin },
-  { title: "Visit Hours", href: "/admin/slots", icon: Clock },
-  { title: "Buy Requests", href: "/admin/leads", icon: ShoppingBag },
-  { title: "Maintenance Requests", href: "/admin/maintenance", icon: ScrollText },
-  { title: "Maintenance Services", href: "/admin/maintenance-services", icon: Wrench },
-  { title: "Testimonials", href: "/admin/testimonials", icon: Star },
-  { title: "Message Logs", href: "/admin/logs", icon: MessageSquare },
-  { title: "Audit Log", href: "/admin/audit-log", icon: ScrollText },
+// Grouped admin navigation
+export const adminNavGroups: NavGroup[] = [
+  {
+    label: "Overview",
+    items: [
+      { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: "Team Management",
+    items: [
+      { title: "AQARI Team", href: "/admin/agents", icon: Users },
+      { title: "Sellers", href: "/admin/agents?agent_type=seller", icon: ShoppingBag },
+      { title: "Visiting Team", href: "/admin/visiting-team", icon: MapPin },
+      { title: "Maintenance Agents", href: "/admin/agents?agent_type=maintenance", icon: Wrench },
+    ],
+  },
+  {
+    label: "Listings",
+    items: [
+      { title: "Properties", href: "/admin/properties", icon: Building2 },
+      { title: "Products", href: "/admin/products", icon: Package },
+      { title: "Locations", href: "/admin/locations", icon: MapPin },
+      { title: "Maintenance Services", href: "/admin/maintenance-services", icon: Settings },
+    ],
+  },
+  {
+    label: "Requests",
+    items: [
+      { title: "Visit Requests", href: "/admin/visits", icon: Calendar },
+      { title: "Buy Requests", href: "/admin/leads", icon: ShoppingBag },
+      { title: "Maintenance Requests", href: "/admin/maintenance", icon: ClipboardList },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { title: "Visit Hours", href: "/admin/slots", icon: Clock },
+      { title: "Visit Performance", href: "/admin/visit-team-performance", icon: MapPin },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      { title: "Testimonials", href: "/admin/testimonials", icon: Star },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { title: "Message Logs", href: "/admin/logs", icon: MessageSquare },
+      { title: "Audit Log", href: "/admin/audit-log", icon: FileText },
+    ],
+  },
 ];
+
+// Flat version for backward compatibility
+export const adminNav: NavItem[] = adminNavGroups.flatMap((g) => g.items);
 
 export const publicNav = [
   { title: "Home", href: "/" },

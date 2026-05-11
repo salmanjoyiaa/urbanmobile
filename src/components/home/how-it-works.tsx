@@ -26,7 +26,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-20 lg:py-28 bg-background dark:bg-[#0F0D0B]">
+    <section className="py-20 lg:py-28 bg-background">
       <div className="container mx-auto px-5 lg:px-12 max-w-[1400px]">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -50,9 +50,9 @@ export function HowItWorks() {
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: i * 0.12 }}
               whileHover={{ y: -6, transition: { duration: 0.3, ease: "easeOut" } }}
-              className="relative bg-card dark:bg-[#1A1614] rounded-2xl p-8 border border-border dark:border-white/5 hover:shadow-xl dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-shadow duration-300 cursor-default"
+              className="relative bg-card rounded-2xl p-8 border border-border hover:shadow-xl transition-shadow duration-300 cursor-default"
             >
-              <div className="absolute -top-4 -right-2 text-[72px] font-black text-foreground/5 dark:text-white/5 leading-none select-none">
+              <div className="absolute -top-4 -right-2 text-[72px] font-black text-foreground/5 leading-none select-none">
                 {item.step}
               </div>
               <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mb-6">

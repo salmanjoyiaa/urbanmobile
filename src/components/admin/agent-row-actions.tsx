@@ -19,7 +19,7 @@ import { EditAgentDialog } from "@/components/admin/edit-agent-dialog";
 interface AgentRowActionsProps {
     id: string;
     status: string;
-    agentType: "property" | "visiting" | "seller";
+    agentType: "property" | "visiting" | "seller" | "maintenance";
     row: {
         company_name?: string | null;
         license_number?: string | null;
@@ -73,7 +73,7 @@ export function AgentRowActions({ id, status, agentType, row }: AgentRowActionsP
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                {(agentType === "property" || agentType === "seller") && (
+                {(agentType === "property" || agentType === "seller" || agentType === "maintenance") && (
                     <DropdownMenuItem asChild>
                         <Link href={`/admin/agents/${id}`} className="cursor-pointer">
                             <Eye className="mr-2 h-4 w-4" /> View Details

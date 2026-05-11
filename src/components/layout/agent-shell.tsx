@@ -20,7 +20,7 @@ export function AgentShell({ children, agentType = "property", userName }: { chi
         <div className="min-h-screen bg-muted/20 lg:grid lg:grid-cols-[16rem_1fr]">
             <Sidebar items={nav} title={title} headerActions={actions} />
             <div>
-                <header className="sticky top-0 z-20 hidden border-b border-border bg-background/95 dark:bg-slate-950/95 px-4 py-2.5 backdrop-blur sm:py-3 lg:block lg:px-6">
+                <header className="sticky top-0 z-20 hidden border-b border-border bg-background/95 px-4 py-2.5 backdrop-blur sm:py-3 lg:block lg:px-6">
                     <div className="flex items-center justify-end gap-3">
                         <UserMenu userName={userName} role={roleLabel} />
                     </div>

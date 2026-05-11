@@ -27,7 +27,7 @@ type AgentRow = {
 
 interface EditAgentDialogProps {
     agent: AgentRow;
-    agentType: "property" | "visiting" | "seller";
+    agentType: "property" | "visiting" | "seller" | "maintenance";
     triggerNode?: React.ReactNode;
 }
 
@@ -53,7 +53,7 @@ export function EditAgentDialog({ agent, agentType, triggerNode }: EditAgentDial
                 full_name: form.full_name,
                 phone: form.phone,
             };
-            if (agentType === "property" || agentType === "seller") {
+            if (agentType === "property" || agentType === "seller" || agentType === "maintenance") {
                 payload.company_name = form.company_name;
                 payload.license_number = form.license_number;
             }
@@ -98,7 +98,7 @@ export function EditAgentDialog({ agent, agentType, triggerNode }: EditAgentDial
                         <Label htmlFor="phone">Phone</Label>
                         <Input id="phone" name="phone" value={form.phone} onChange={handleChange} placeholder="+966..." />
                     </div>
-                    {(agentType === "property" || agentType === "seller") && (
+                    {(agentType === "property" || agentType === "seller" || agentType === "maintenance") && (
                         <>
                             <div className="space-y-1">
                                 <Label htmlFor="company_name">Company Name</Label>

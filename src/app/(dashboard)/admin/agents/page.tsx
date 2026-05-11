@@ -29,9 +29,19 @@ type AgentRow = {
   } | null;
 };
 
+const tabs = [
+  { key: "property", label: "AQARI Team" },
+  { key: "seller", label: "Sellers" },
+  { key: "maintenance", label: "Maintenance" },
+] as const;
+
+type AgentListType = (typeof tabs)[number]["key"];
+
 export default async function AdminAgentsPage({ searchParams }: { searchParams: SearchParams }) {
   const supabase = createAdminClient();
-  const typeFilter = searchParams.agent_type || "property";
+  const rawType = searchParams.agent_type;
+  const typeFilter: AgentListType =
+    rawType === "property" || rawType === "seller" || rawType === "maintenance" ? rawType : "property";
   const statusFilter = searchParams.status && searchParams.status !== "all" ? searchParams.status : undefined;
 
   let query = supabase
@@ -47,47 +57,44 @@ export default async function AdminAgentsPage({ searchParams }: { searchParams: 
   const { data } = (await query) as { data: AgentRow[] | null };
   const rows = data || [];
 
-  const isSeller = typeFilter === "seller";
-  const pageTitle = isSeller ? "Sellers" : "AQARI Team";
-  const pageDescription = isSeller
-    ? "Approve, reject, or suspend seller accounts."
-    : "Approve, reject, or suspend property agent accounts.";
+  const currentTab = tabs.find((t) => t.key === typeFilter) || tabs[0];
+  const pageTitle = currentTab.label;
+  const pageDescription =
+    typeFilter === "seller"
+      ? "Approve, reject, or suspend seller accounts."
+      : typeFilter === "maintenance"
+        ? "Approve, reject, or suspend maintenance agent accounts."
+        : "Approve, reject, or suspend property agent accounts.";
+
+  const entityLabel = typeFilter === "seller" ? "Seller" : typeFilter === "maintenance" ? "Agent" : "Agent";
 
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-border">
-        <Link
-          href="/admin/agents?agent_type=property"
-          className={cn(
-            "px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px",
-            typeFilter === "property"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          )}
-        >
-          AQARI Team
-        </Link>
-        <Link
-          href="/admin/agents?agent_type=seller"
-          className={cn(
-            "px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px",
-            typeFilter === "seller"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          )}
-        >
-          Sellers
-        </Link>
+      <div className="flex gap-1 border-b border-border overflow-x-auto">
+        {tabs.map((tab) => (
+          <Link
+            key={tab.key}
+            href={`/admin/agents?agent_type=${tab.key}`}
+            className={cn(
+              "px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap",
+              typeFilter === tab.key
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {tab.label}
+          </Link>
+        ))}
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-navy">{pageTitle}</h1>
           <p className="text-sm text-muted-foreground">{pageDescription}</p>
         </div>
         <div className="flex items-center gap-3">
-          <CreatePropertyAgentDialog agentType={isSeller ? "seller" : "property"} />
+          <CreatePropertyAgentDialog agentType={typeFilter} />
           <form method="get" className="flex items-center gap-2">
             <input type="hidden" name="agent_type" value={typeFilter} />
             <select
@@ -109,7 +116,7 @@ export default async function AdminAgentsPage({ searchParams }: { searchParams: 
       <DataTable
         rows={rows}
         columns={[
-          { key: "name", title: isSeller ? "Seller" : "Agent", render: (row) => row.profiles?.full_name || "—" },
+          { key: "name", title: entityLabel, render: (row) => row.profiles?.full_name || "—" },
           { key: "email", title: "Email", render: (row) => row.profiles?.email || "—" },
           {
             key: "phone",
@@ -139,7 +146,7 @@ export default async function AdminAgentsPage({ searchParams }: { searchParams: 
             key: "actions",
             title: "Actions",
             render: (row) => (
-              <AgentRowActions id={row.id} status={row.status} agentType={isSeller ? "seller" : "property"} row={row} />
+              <AgentRowActions id={row.id} status={row.status} agentType={typeFilter} row={row} />
             ),
           },
         ]}

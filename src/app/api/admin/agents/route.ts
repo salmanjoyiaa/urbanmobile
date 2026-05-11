@@ -9,7 +9,7 @@ const createSchema = z.object({
     password: z.string().min(6),
     full_name: z.string().min(2),
     phone: z.string().optional(),
-    agent_type: z.enum(["property", "seller"]).default("property"),
+    agent_type: z.enum(["property", "seller", "maintenance"]).default("property"),
 });
 
 export async function POST(req: Request) {

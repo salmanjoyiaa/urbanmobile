@@ -29,12 +29,13 @@ const createSchema = z.object({
 type CreateValues = z.infer<typeof createSchema>;
 
 interface CreateAgentDialogProps {
-    agentType?: "property" | "seller";
+    agentType?: "property" | "seller" | "maintenance";
 }
 
 export function CreatePropertyAgentDialog({ agentType = "property" }: CreateAgentDialogProps) {
     const isSeller = agentType === "seller";
-    const label = isSeller ? "Seller" : "Property Agent";
+    const isMaintenance = agentType === "maintenance";
+    const label = isSeller ? "Seller" : isMaintenance ? "Maintenance Agent" : "Property Agent";
     const router = useRouter();
     const [open, setOpen] = useState(false);
 
