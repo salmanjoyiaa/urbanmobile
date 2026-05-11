@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Calendar, Clock, Phone, Mail, Mic, Paperclip } from "lucide-react";
-import { isMaintenanceMediaVideoPath } from "@/lib/maintenance-request-paths";
+import { Calendar, Clock, Phone, Mail } from "lucide-react";
+import { MaintenanceRequestMediaCell } from "@/components/maintenance/maintenance-request-media-preview";
 
 export const metadata: Metadata = {
     title: "Service Requests - Agent Dashboard",
@@ -116,42 +116,15 @@ export default async function AgentMaintenanceRequestsPage() {
                                 )}
                             </div>
 
-                            <div className="flex flex-wrap gap-4 pt-4 border-t mt-auto">
-                                {req.audio_url && (
-                                    <div className="flex-1 min-w-[200px]">
-                                        <div className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
-                                            <Mic className="w-3.5 h-3.5" /> Voice Message
-                                        </div>
-                                        <audio controls src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/maintenance-media/${req.audio_url}`} className="h-8 w-full max-w-[250px]" />
-                                    </div>
-                                )}
-
-                                {req.media_urls && req.media_urls.length > 0 && (
-                                    <div className="flex-1">
-                                        <div className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
-                                            <Paperclip className="w-3.5 h-3.5" /> Photos & video
-                                        </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {req.media_urls.map((url: string, i: number) => {
-                                                const full = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/maintenance-media/${url}`;
-                                                return isMaintenanceMediaVideoPath(url) ? (
-                                                    <video
-                                                        key={i}
-                                                        src={full}
-                                                        controls
-                                                        className="w-28 h-20 rounded object-cover border bg-black"
-                                                        playsInline
-                                                    />
-                                                ) : (
-                                                    <a key={i} href={full} target="_blank" rel="noopener noreferrer">
-                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                        <img src={full} alt={`Attachment ${i + 1}`} className="w-12 h-12 rounded object-cover border hover:opacity-80 transition-opacity" />
-                                                    </a>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
+                            <div className="pt-4 border-t mt-auto space-y-2">
+                                <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
+                                    Attachments
+                                </h4>
+                                <MaintenanceRequestMediaCell
+                                    requestId={req.id}
+                                    audioUrl={req.audio_url}
+                                    mediaUrls={req.media_urls}
+                                />
                             </div>
                         </div>
                     ))}

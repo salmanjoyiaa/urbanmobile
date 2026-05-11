@@ -242,6 +242,27 @@ export const maintenanceRequestSchema = z.object({
   media_urls: z.array(maintenanceMediaStoragePath).max(15).optional(),
 });
 
+/** Admin-only PATCH fields for `maintenance_requests` (partial updates). */
+export const maintenanceRequestAdminUpdateSchema = z
+  .object({
+    status: z.enum(["pending", "approved", "completed", "rejected"]).optional(),
+    admin_notes: z.string().max(5000).nullable().optional(),
+    customer_name: z.string().min(2).max(100).optional(),
+    customer_email: z.string().min(1).max(255).regex(emailRegex, "Valid email is required").optional(),
+    customer_phone: z.string().regex(/^\+\d{10,15}$/, "Invalid phone number format").optional(),
+    details: z.string().max(5000).nullable().optional(),
+    visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").nullable().optional(),
+    visit_time: z.preprocess((v) => {
+      if (v === null || v === undefined || v === "") return null;
+      if (typeof v === "string" && v.length >= 5) return v.slice(0, 5);
+      return v;
+    }, z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format").nullable().optional()),
+    service_type: z.string().min(2).max(100).optional(),
+    service_id: z.string().uuid().nullable().optional(),
+    agent_id: z.string().uuid().nullable().optional(),
+  })
+  .strict();
+
 export const maintenanceServiceSchema = z.object({
   title: z
     .string()
@@ -274,6 +295,13 @@ export const adminMaintenanceServicePatchSchema = maintenanceServiceSchema
   .partial()
   .extend({
     status: z.enum(["active", "inactive", "suspended"]).optional(),
+  });
+
+/** Agent PATCH: same as partial listing fields plus only active/inactive (not suspended). */
+export const agentMaintenanceServicePatchSchema = maintenanceServiceSchema
+  .partial()
+  .extend({
+    status: z.enum(["active", "inactive"]).optional(),
   });
 
 export type LoginInput = z.infer<typeof loginSchema>;

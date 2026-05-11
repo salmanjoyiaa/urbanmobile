@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { maintenanceServiceSchema } from "@/lib/validators";
+import { agentMaintenanceServicePatchSchema } from "@/lib/validators";
 import { createRouteClient } from "@/lib/supabase/route";
 
 async function getApprovedMaintenanceAgent() {
@@ -60,7 +60,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const parsed = maintenanceServiceSchema.partial().safeParse(body);
+  const parsed = agentMaintenanceServicePatchSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid payload" }, { status: 400 });
   }

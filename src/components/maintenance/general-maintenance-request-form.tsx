@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { getMicrophoneAccessErrorMessage } from "@/lib/microphone-access";
 import {
   Select,
   SelectContent,
@@ -85,7 +86,9 @@ export function GeneralMaintenanceRequestForm() {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+      });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       const chunks: BlobPart[] = [];
@@ -107,8 +110,8 @@ export function GeneralMaintenanceRequestForm() {
           stopRecording();
         }
       }, 1000);
-    } catch {
-      toast.error("Could not access microphone.");
+    } catch (err) {
+      toast.error(getMicrophoneAccessErrorMessage(err));
     }
   };
 

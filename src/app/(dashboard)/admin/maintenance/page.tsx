@@ -1,7 +1,9 @@
 import { Metadata } from "next";
 import { MaintenanceActions } from "@/components/admin/maintenance-actions";
-import { Wrench, Paperclip, Mic, Calendar } from "lucide-react";
+import { MaintenanceRequestMediaCell } from "@/components/maintenance/maintenance-request-media-preview";
+import { Wrench, Calendar } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import type { MaintenanceRequest } from "@/types/database";
 
 export const metadata: Metadata = {
     title: "Admin - Maintenance Requests",
@@ -9,16 +11,45 @@ export const metadata: Metadata = {
 
 export const revalidate = 0;
 
+type AgentNameEmbed = {
+    company_name: string | null;
+    profiles?: { full_name: string | null } | null;
+} | null;
+
+type MaintenanceServiceRowEmbed = {
+    title?: string;
+    provider_type?: string;
+    agents?: AgentNameEmbed;
+} | null;
+
+type AdminMaintenanceRequestRow = MaintenanceRequest & {
+    maintenance_services?: MaintenanceServiceRowEmbed;
+    agents?: AgentNameEmbed;
+};
+
 export default async function AdminMaintenancePage() {
     const supabase = await createClient(); // Use regular client for fetching if admin RLS allows
 
     const { data: requestsData, error } = await supabase
         .from("maintenance_requests")
-        .select("*, maintenance_services(title, provider_type)")
+        .select(
+            `*,
+            maintenance_services!maintenance_requests_service_id_fkey(
+                title,
+                provider_type,
+                agents!maintenance_services_agent_id_fkey(
+                    company_name,
+                    profiles!agents_profile_id_fkey(full_name)
+                )
+            ),
+            agents!maintenance_requests_agent_id_fkey(
+                company_name,
+                profiles!agents_profile_id_fkey(full_name)
+            )`
+        )
         .order("created_at", { ascending: false });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const requests = requestsData as any[] | null;
+    const requests = requestsData as AdminMaintenanceRequestRow[] | null;
 
     if (error) {
         return <div className="p-6 text-destructive">Failed to load maintenance requests: {error.message}</div>;
@@ -64,6 +95,27 @@ export default async function AdminMaintenancePage() {
                                         </td>
                                         <td className="p-4 align-middle">
                                             <div className="font-medium text-emerald-700">{req.maintenance_services?.title || req.service_type}</div>
+                                            {(() => {
+                                                const ms = req.maintenance_services;
+                                                const direct = req.agents;
+                                                const fromService =
+                                                    ms?.agents?.company_name || ms?.agents?.profiles?.full_name;
+                                                const fromRequest =
+                                                    direct?.company_name || direct?.profiles?.full_name;
+                                                const label = fromRequest || fromService;
+                                                return (
+                                                    <div className="text-xs text-muted-foreground mt-1">
+                                                        {label ? (
+                                                            <>
+                                                                <span className="font-medium text-foreground/80">Provider: </span>
+                                                                {label}
+                                                            </>
+                                                        ) : (
+                                                            <span className="italic">Unassigned</span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="p-4 align-middle">
                                             {req.visit_date ? (
@@ -81,21 +133,11 @@ export default async function AdminMaintenancePage() {
                                             )}
                                         </td>
                                         <td className="p-4 align-middle">
-                                            <div className="flex gap-2">
-                                                {req.audio_url && (
-                                                    <a href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/maintenance-media/${req.audio_url}`} target="_blank" rel="noopener noreferrer" className="p-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors" title="Listen to Voice Message">
-                                                        <Mic className="w-4 h-4" />
-                                                    </a>
-                                                )}
-                                                {req.media_urls && req.media_urls.length > 0 && (
-                                                    <a href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/maintenance-media/${req.media_urls[0]}`} target="_blank" rel="noopener noreferrer" className="p-1.5 bg-amber-50 text-amber-600 rounded-md hover:bg-amber-100 transition-colors" title={`View ${req.media_urls.length} Photo(s)`}>
-                                                        <Paperclip className="w-4 h-4" />
-                                                    </a>
-                                                )}
-                                                {!req.audio_url && (!req.media_urls || req.media_urls.length === 0) && (
-                                                    <span className="text-muted-foreground text-xs">-</span>
-                                                )}
-                                            </div>
+                                            <MaintenanceRequestMediaCell
+                                                requestId={req.id}
+                                                audioUrl={req.audio_url}
+                                                mediaUrls={req.media_urls}
+                                            />
                                         </td>
                                         <td className="p-4 align-middle">
                                             <span
@@ -112,7 +154,7 @@ export default async function AdminMaintenancePage() {
                                             </span>
                                         </td>
                                         <td className="p-4 align-middle text-right">
-                                            <MaintenanceActions request={req} />
+                                            <MaintenanceActions key={req.id} request={req} />
                                         </td>
                                     </tr>
                                 ))}
