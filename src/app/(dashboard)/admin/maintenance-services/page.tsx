@@ -14,7 +14,9 @@ export default async function AdminMaintenanceServicesPage() {
 
     const { data: servicesData, error } = await supabase
         .from("maintenance_services")
-        .select("*, agents(company_name, profiles(full_name))")
+        .select(
+            "*, agents!maintenance_services_agent_id_fkey(company_name, profiles!agents_profile_id_fkey(full_name))"
+        )
         .order("created_at", { ascending: false });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -62,10 +62,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const companyName = session.user.user_metadata.company_name;
             const licenseNumber = session.user.user_metadata.license_number || null;
 
+            const meta = session.user.user_metadata as Record<string, unknown> | undefined;
+            const agentTypeRaw = meta?.agent_type;
+            const agent_type =
+              agentTypeRaw === "visiting" ||
+              agentTypeRaw === "seller" ||
+              agentTypeRaw === "maintenance" ||
+              agentTypeRaw === "property"
+                ? agentTypeRaw
+                : "property";
+
             const res = await fetch("/api/agents", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
+                agent_type,
                 company_name: companyName,
                 license_number: licenseNumber,
               }),

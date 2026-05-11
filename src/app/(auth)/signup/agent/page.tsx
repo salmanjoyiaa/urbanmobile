@@ -90,6 +90,7 @@ function AgentSignupPage() {
           full_name: values.full_name,
           phone: values.phone || null,
           role: "agent",
+          agent_type: values.agent_type,
           company_name: values.company_name,
           license_number: values.license_number || null,
         },
@@ -114,7 +115,27 @@ function AgentSignupPage() {
     // sign in to complete their agent application instead of failing with a DB error.
     const session = await supabase.auth.getSession();
     if (!session?.data?.session) {
-      toast.success("Account created. Please verify your email (if required) and sign in to complete your agent application.");
+      const afterRes = await fetch("/api/agents/after-signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId,
+          email: values.email,
+          agent_type: values.agent_type,
+          company_name: values.company_name,
+          license_number: values.license_number || null,
+          document_url: null,
+          bio: null,
+        }),
+      });
+      const afterJson = await afterRes.json().catch(() => ({}));
+      if (!afterRes.ok) {
+        toast.error(afterJson?.error || "Failed to submit agent application. Please contact support.");
+        return;
+      }
+      toast.success(
+        "Application submitted. Check your email to verify your account, then sign in. You can upload license documents later from your profile if needed."
+      );
       window.location.href = "/login";
       return;
     }

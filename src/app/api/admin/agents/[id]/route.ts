@@ -62,6 +62,16 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       } | null;
     };
 
+  if (parsed.data.status === "approved" && updatedAgent?.profile_id) {
+    const { error: profileRoleErr } = await admin.supabase
+      .from("profiles")
+      .update({ role: "agent" } as never)
+      .eq("id", updatedAgent.profile_id);
+    if (profileRoleErr) {
+      console.error("[api/admin/agents PATCH] profile role update:", profileRoleErr);
+    }
+  }
+
   if (updatedAgent?.profile_id) {
     await admin.supabase.from("notifications").insert({
       user_id: updatedAgent.profile_id,
