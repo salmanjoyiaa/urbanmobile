@@ -80,6 +80,7 @@ export async function POST(request: Request) {
     price: parsed.data.price ?? null,
     city: parsed.data.city,
     images: parsed.data.images?.length ? parsed.data.images : [],
+    videos: parsed.data.videos?.length ? parsed.data.videos : [],
     status: "active",
   };
 

@@ -19,7 +19,9 @@ export default async function MaintenanceMarketplacePage({
 
     let query = supabase
         .from("maintenance_services")
-        .select("*, agents(company_name, profiles(full_name, avatar_url))")
+        .select(
+            "*, agents!maintenance_services_agent_id_fkey(company_name, profiles!agents_profile_id_fkey(full_name, avatar_url))"
+        )
         .eq("status", "active");
 
     if (searchParams.category) {
@@ -35,6 +37,13 @@ export default async function MaintenanceMarketplacePage({
 
     if (error) {
         console.error("Error fetching maintenance services:", error);
+        return (
+            <div className="container mx-auto px-4 py-16 max-w-7xl">
+                <p className="text-center text-destructive font-medium">
+                    Could not load services: {error.message}
+                </p>
+            </div>
+        );
     }
 
     const categories = [
@@ -59,7 +68,10 @@ export default async function MaintenanceMarketplacePage({
             {/* Filters */}
             <div className="flex flex-wrap gap-3 justify-center mb-12">
                 {categories.map(cat => {
-                    const isActive = searchParams.category === cat || (!searchParams.category && cat === "All");
+                    const isActive =
+                        cat === "All"
+                            ? !searchParams.category
+                            : searchParams.category === cat;
                     const href = cat === "All" ? "/maintenance" : `/maintenance?category=${encodeURIComponent(cat)}`;
                     
                     return (
@@ -91,7 +103,15 @@ export default async function MaintenanceMarketplacePage({
                         <Link href={`/maintenance/${service.id}`} key={service.id} className="group block">
                             <div className="bg-card border rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
                                 <div className="aspect-[4/3] relative bg-muted overflow-hidden">
-                                    {service.images && service.images.length > 0 ? (
+                                    {service.videos && service.videos.length > 0 ? (
+                                        <video
+                                            src={service.videos[0]}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            muted
+                                            playsInline
+                                            preload="metadata"
+                                        />
+                                    ) : service.images && service.images.length > 0 ? (
                                         <img 
                                             src={service.images[0]} 
                                             alt={service.title}

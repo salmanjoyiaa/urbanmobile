@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2, Trash2, PowerOff, Power } from "lucide-react";
+import { Loader2, Trash2, PowerOff, Power, Pencil } from "lucide-react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function MaintenanceServiceActions({ service }: { service: any }) {
@@ -57,6 +58,11 @@ export function MaintenanceServiceActions({ service }: { service: any }) {
 
     return (
         <div className="flex justify-end gap-2">
+            <Button variant="outline" size="sm" asChild title="Edit listing">
+                <Link href={`/admin/maintenance-services/${service.id}/edit`} aria-label="Edit listing">
+                    <Pencil className="h-4 w-4" />
+                </Link>
+            </Button>
             <Button
                 variant="outline"
                 size="sm"

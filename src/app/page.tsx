@@ -13,6 +13,7 @@ import { HeroHeadline } from "@/components/home/hero-headline";
 import { PropertySlider } from "@/components/home/property-slider";
 import { ProductSlider } from "@/components/home/product-slider";
 import { MaintenanceSlider } from "@/components/home/maintenance-slider";
+import { GeneralMaintenanceRequestForm } from "@/components/maintenance/general-maintenance-request-form";
 import { AnimateSection, AnimateStagger, AnimateItem } from "@/components/home/animate-section";
 import { createClient } from "@/lib/supabase/server";
 
@@ -277,6 +278,21 @@ export default async function HomePage() {
       {/* ── Maintenance Slider ── */}
       <AnimateSection amount={0.12} duration={0.5} delay={0.05}>
         <MaintenanceSlider />
+      </AnimateSection>
+
+      {/* ── General maintenance request ── */}
+      <AnimateSection amount={0.12} duration={0.5} delay={0.05}>
+        <section className="py-12 lg:py-16 bg-muted/40 border-y border-border/60">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold mb-2">Need a hand with maintenance?</h2>
+              <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto">
+                Submit a general request with text, voice, photos, or a short video. We will route it to the right professional — you do not have to choose a provider first.
+              </p>
+            </div>
+            <GeneralMaintenanceRequestForm />
+          </div>
+        </section>
       </AnimateSection>
 
       {/* ── Value Props ── */}

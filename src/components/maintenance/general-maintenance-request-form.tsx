@@ -13,10 +13,29 @@ import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-// Validation Schema
+const SERVICE_CATEGORIES = [
+  "Plumbing",
+  "Electrical",
+  "HVAC",
+  "Appliance Repair",
+  "Painting",
+  "Deep Cleaning",
+  "Carpentry",
+  "Safety & Security",
+  "Landscaping",
+];
+
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const requestSchema = z.object({
+  service_type: z.string().min(2, "Choose a category"),
   customer_name: z.string().min(2, "Name must be at least 2 characters").max(100),
   customer_email: z.string().regex(emailRegex, "Valid email is required"),
   customer_phone: z.string().regex(/^\+\d{10,15}$/, "Invalid phone number"),
@@ -31,20 +50,21 @@ function sanitizeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function ServiceRequestForm({ service }: { service: any }) {
+function defaultVisitDate() {
+  return new Date().toISOString().split("T")[0];
+}
+
+export function GeneralMaintenanceRequestForm() {
   const supabase = createClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  
-  // Audio Recording State
+
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Photos & optional video
+
   const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
 
@@ -56,6 +76,11 @@ export function ServiceRequestForm({ service }: { service: any }) {
   } = useForm<RequestInput>({
     resolver: zodResolver(requestSchema),
     mode: "onTouched",
+    defaultValues: {
+      service_type: SERVICE_CATEGORIES[0],
+      visit_date: defaultVisitDate(),
+      visit_time: "09:00",
+    },
   });
 
   const startRecording = async () => {
@@ -73,13 +98,13 @@ export function ServiceRequestForm({ service }: { service: any }) {
 
       mediaRecorder.start();
       setIsRecording(true);
-      
+
       let duration = 0;
       timerRef.current = setInterval(() => {
         duration += 1;
         setRecordingDuration(duration);
-        if (duration >= 60) { // Max 60 seconds
-           stopRecording();
+        if (duration >= 60) {
+          stopRecording();
         }
       }, 1000);
     } catch {
@@ -90,7 +115,7 @@ export function ServiceRequestForm({ service }: { service: any }) {
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
       setIsRecording(false);
       if (timerRef.current) clearInterval(timerRef.current);
     }
@@ -103,13 +128,13 @@ export function ServiceRequestForm({ service }: { service: any }) {
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const files = Array.from(e.target.files).slice(0, 3); // Max 3 photos
-      setSelectedPhotos(prev => [...prev, ...files].slice(0, 3));
+      const files = Array.from(e.target.files).slice(0, 3);
+      setSelectedPhotos((prev) => [...prev, ...files].slice(0, 3));
     }
   };
 
   const removePhoto = (index: number) => {
-    setSelectedPhotos(prev => prev.filter((_, i) => i !== index));
+    setSelectedPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,16 +153,15 @@ export function ServiceRequestForm({ service }: { service: any }) {
 
   const onSubmit = async (values: RequestInput) => {
     setIsSubmitting(true);
-    let audio_url = null;
+    let audio_url: string | null = null;
     const media_urls: string[] = [];
 
     try {
-      const uniqueId = Math.random().toString(36).substring(7);
-      const base = `requests/${service.id}`;
+      const folderId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+      const base = `requests/general/${folderId}`;
 
-      // Upload Audio
       if (audioBlob) {
-        const path = `${base}/${Date.now()}-${uniqueId}.webm`;
+        const path = `${base}/${Date.now()}-audio.webm`;
         const { error: uploadError } = await supabase.storage
           .from("maintenance-media")
           .upload(path, audioBlob, { contentType: "audio/webm" });
@@ -146,12 +170,9 @@ export function ServiceRequestForm({ service }: { service: any }) {
         audio_url = path;
       }
 
-      // Upload Photos
       for (const photo of selectedPhotos) {
         const path = `${base}/${Date.now()}-${sanitizeFileName(photo.name)}`;
-        const { error: uploadError } = await supabase.storage
-          .from("maintenance-media")
-          .upload(path, photo);
+        const { error: uploadError } = await supabase.storage.from("maintenance-media").upload(path, photo);
 
         if (uploadError) throw new Error(`Failed to upload ${photo.name}`);
         media_urls.push(path);
@@ -166,14 +187,13 @@ export function ServiceRequestForm({ service }: { service: any }) {
         media_urls.push(path);
       }
 
-      // Save Request via API route
       const apiRes = await fetch("/api/maintenance-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          service_id: service.id,
-          agent_id: service.agent_id,
-          service_type: service.category,
+          service_id: null,
+          agent_id: null,
+          service_type: values.service_type,
           customer_name: values.customer_name,
           customer_email: values.customer_email,
           customer_phone: values.customer_phone,
@@ -185,12 +205,11 @@ export function ServiceRequestForm({ service }: { service: any }) {
         }),
       });
 
-      const apiData = await apiRes.json();
+      const apiData = (await apiRes.json()) as { error?: string };
       if (!apiRes.ok) throw new Error(apiData.error || "Failed to submit request");
 
       setSubmitted(true);
       toast.success("Request submitted successfully!");
-
     } catch (err: unknown) {
       toast.error((err as Error).message || "Failed to submit request.");
     } finally {
@@ -203,9 +222,9 @@ export function ServiceRequestForm({ service }: { service: any }) {
       <Card className="border-emerald-200 bg-emerald-50 shadow-sm text-center py-10">
         <CardContent className="flex flex-col items-center">
           <CheckCircle2 className="w-16 h-16 text-emerald-500 mb-4" />
-          <h3 className="text-xl font-bold text-emerald-900 mb-2">Request Received!</h3>
+          <h3 className="text-xl font-bold text-emerald-900 mb-2">Request received</h3>
           <p className="text-emerald-700 max-w-sm">
-            Your request has been sent securely. Our administration team will review it and coordinate with the service provider shortly.
+            Our team will review your request and match you with a suitable maintenance professional.
           </p>
         </CardContent>
       </Card>
@@ -215,13 +234,36 @@ export function ServiceRequestForm({ service }: { service: any }) {
   return (
     <Card className="shadow-lg border-primary/10">
       <CardHeader>
-        <CardTitle>Request this Service</CardTitle>
+        <CardTitle>Request maintenance help</CardTitle>
         <CardDescription>
-          Fill out the details below. You can also leave a voice message explaining the issue.
+          Tell us what you need — no need to pick a provider yet. Optional voice note, photos, or a short video.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="space-y-2">
+            <Label>Category</Label>
+            <Controller
+              name="service_type"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SERVICE_CATEGORIES.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.service_type && <p className="text-xs text-destructive">{errors.service_type.message}</p>}
+          </div>
+
           <div className="space-y-2">
             <Label>Name</Label>
             <Input {...register("customer_name")} placeholder="John Doe" />
@@ -239,7 +281,7 @@ export function ServiceRequestForm({ service }: { service: any }) {
             control={control}
             render={({ field }) => (
               <PhoneInput
-                label="WhatsApp Number"
+                label="WhatsApp number"
                 value={field.value ?? ""}
                 onChange={field.onChange}
                 error={errors.customer_phone}
@@ -250,25 +292,24 @@ export function ServiceRequestForm({ service }: { service: any }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Preferred Date</Label>
-              <Input type="date" {...register("visit_date")} min={new Date().toISOString().split("T")[0]} />
+              <Label>Preferred date</Label>
+              <Input type="date" {...register("visit_date")} min={defaultVisitDate()} />
               {errors.visit_date && <p className="text-xs text-destructive">{errors.visit_date.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label>Preferred Time</Label>
+              <Label>Preferred time</Label>
               <Input type="time" {...register("visit_time")} />
               {errors.visit_time && <p className="text-xs text-destructive">{errors.visit_time.message}</p>}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Problem Details (Optional)</Label>
-            <Textarea {...register("details")} placeholder="Describe the issue in detail..." className="min-h-[100px]" />
+            <Label>Problem details (optional)</Label>
+            <Textarea {...register("details")} placeholder="Describe the issue…" className="min-h-[100px]" />
           </div>
 
-          {/* Audio Recording */}
           <div className="space-y-2">
-            <Label>Voice Message (Optional)</Label>
+            <Label>Voice message (optional)</Label>
             {!audioBlob ? (
               <div className="flex items-center gap-3">
                 {isRecording ? (
@@ -276,14 +317,14 @@ export function ServiceRequestForm({ service }: { service: any }) {
                     <Button type="button" variant="destructive" size="icon" onClick={stopRecording} className="animate-pulse">
                       <Square className="w-4 h-4" />
                     </Button>
-                    <span className="text-sm font-medium text-destructive">Recording... {recordingDuration}s</span>
+                    <span className="text-sm font-medium text-destructive">Recording… {recordingDuration}s</span>
                   </>
                 ) : (
                   <>
                     <Button type="button" variant="outline" size="icon" onClick={startRecording} className="rounded-full">
                       <Mic className="w-4 h-4 text-primary" />
                     </Button>
-                    <span className="text-sm text-muted-foreground">Click to record a voice message (Max 60s)</span>
+                    <span className="text-sm text-muted-foreground">Record up to 60s</span>
                   </>
                 )}
               </div>
@@ -297,21 +338,20 @@ export function ServiceRequestForm({ service }: { service: any }) {
             )}
           </div>
 
-          {/* Photo Upload */}
           <div className="space-y-2">
-            <Label>Photos of the Problem (Max 3)</Label>
+            <Label>Photos (max 3)</Label>
             <div className="flex items-center gap-3">
-              <Button type="button" variant="outline" onClick={() => document.getElementById('photo-upload')?.click()}>
+              <Button type="button" variant="outline" onClick={() => document.getElementById("general-photo-upload")?.click()}>
                 <Paperclip className="w-4 h-4 mr-2" />
-                Attach Photos
+                Attach photos
               </Button>
-              <span className="text-sm text-muted-foreground">{selectedPhotos.length}/3 selected</span>
-              <input 
-                id="photo-upload" 
-                type="file" 
-                accept="image/*" 
-                multiple 
-                className="hidden" 
+              <span className="text-sm text-muted-foreground">{selectedPhotos.length}/3</span>
+              <input
+                id="general-photo-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
                 onChange={handlePhotoSelect}
                 disabled={selectedPhotos.length >= 3}
               />
@@ -321,8 +361,12 @@ export function ServiceRequestForm({ service }: { service: any }) {
                 {selectedPhotos.map((photo, idx) => (
                   <div key={idx} className="relative group rounded-md overflow-hidden border">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={URL.createObjectURL(photo)} alt="preview" className="w-16 h-16 object-cover" />
-                    <button type="button" onClick={() => removePhoto(idx)} className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <img src={URL.createObjectURL(photo)} alt="" className="w-16 h-16 object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(idx)}
+                      className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
                       <X className="w-4 h-4 text-white" />
                     </button>
                   </div>
@@ -333,25 +377,25 @@ export function ServiceRequestForm({ service }: { service: any }) {
 
           <div className="space-y-2">
             <Label>Short video (optional, one file, max 50MB)</Label>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button type="button" variant="outline" onClick={() => document.getElementById("service-video-upload")?.click()}>
+            <div className="flex items-center gap-3">
+              <Button type="button" variant="outline" onClick={() => document.getElementById("general-video-upload")?.click()}>
                 <Video className="w-4 h-4 mr-2" />
                 Attach video
               </Button>
+              {selectedVideo && (
+                <span className="text-sm text-muted-foreground truncate max-w-[200px]">{selectedVideo.name}</span>
+              )}
               <input
-                id="service-video-upload"
+                id="general-video-upload"
                 type="file"
                 accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
                 className="hidden"
                 onChange={handleVideoSelect}
               />
               {selectedVideo && (
-                <>
-                  <span className="text-sm text-muted-foreground truncate max-w-[180px]">{selectedVideo.name}</span>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedVideo(null)}>
-                    Remove
-                  </Button>
-                </>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedVideo(null)}>
+                  Remove
+                </Button>
               )}
             </div>
           </div>
@@ -360,10 +404,10 @@ export function ServiceRequestForm({ service }: { service: any }) {
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Submitting...
+                Submitting…
               </>
             ) : (
-              "Submit Request"
+              "Submit request"
             )}
           </Button>
         </form>

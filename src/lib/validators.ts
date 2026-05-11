@@ -206,9 +206,15 @@ export const buyRequestSchema = z.object({
     .optional(),
 });
 
+const maintenanceMediaStoragePath = z
+  .string()
+  .min(3)
+  .max(512)
+  .regex(/^requests\//, "Invalid media path");
+
 export const maintenanceRequestSchema = z.object({
-  service_id: z.string().optional(),
-  agent_id: z.string().optional(),
+  service_id: z.string().uuid().nullish(),
+  agent_id: z.string().uuid().nullish(),
   service_type: z
     .string()
     .min(2, "Service type is required")
@@ -228,11 +234,12 @@ export const maintenanceRequestSchema = z.object({
   details: z
     .string()
     .max(5000, "Details must not exceed 5000 characters")
-    .optional(),
-  visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
-  visit_time: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format").optional(),
-  audio_url: z.string().url().optional().or(z.literal("")),
-  media_urls: z.array(z.string().url()).optional(),
+    .optional()
+    .nullable(),
+  visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional().nullable(),
+  visit_time: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format").optional().nullable(),
+  audio_url: maintenanceMediaStoragePath.nullish(),
+  media_urls: z.array(maintenanceMediaStoragePath).max(15).optional(),
 });
 
 export const maintenanceServiceSchema = z.object({
@@ -260,7 +267,14 @@ export const maintenanceServiceSchema = z.object({
     .min(1, "City is required")
     .max(100, "City name must not exceed 100 characters"),
   images: z.array(z.string().url()).max(20).default([]),
+  videos: z.array(z.string().url()).max(3).default([]),
 });
+
+export const adminMaintenanceServicePatchSchema = maintenanceServiceSchema
+  .partial()
+  .extend({
+    status: z.enum(["active", "inactive", "suspended"]).optional(),
+  });
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;

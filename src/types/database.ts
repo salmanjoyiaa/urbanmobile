@@ -177,6 +177,7 @@ export interface MaintenanceService {
   price: number | null;
   city: string;
   images: string[];
+  videos: string[];
   status: MaintenanceServiceStatus;
   created_at: string;
   updated_at: string;

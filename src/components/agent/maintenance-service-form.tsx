@@ -16,6 +16,8 @@ import {
 import type { MaintenanceService } from "@/types/database";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { ImageUploader } from "@/components/dashboard/image-uploader";
+import { MaintenanceVideoUploader } from "@/components/maintenance/maintenance-video-uploader";
 
 const SERVICE_CATEGORIES = [
   "Plumbing",
@@ -32,9 +34,15 @@ const SERVICE_CATEGORIES = [
 type MaintenanceServiceFormProps = {
   mode: "create" | "edit";
   initialData?: MaintenanceService;
+  /** Admin edits use the service-role PATCH route; agents use /api/agent/... */
+  submitTarget?: "agent" | "admin";
 };
 
-export function MaintenanceServiceForm({ mode, initialData }: MaintenanceServiceFormProps) {
+export function MaintenanceServiceForm({
+  mode,
+  initialData,
+  submitTarget = "agent",
+}: MaintenanceServiceFormProps) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -48,7 +56,8 @@ export function MaintenanceServiceForm({ mode, initialData }: MaintenanceService
     initialData?.price != null && initialData.price !== undefined ? String(initialData.price) : ""
   );
   const [city, setCity] = useState(initialData?.city || "");
-  const [imageUrl, setImageUrl] = useState(initialData?.images?.[0] || "");
+  const [images, setImages] = useState<string[]>(initialData?.images ?? []);
+  const [videos, setVideos] = useState<string[]>(initialData?.videos ?? []);
   const [cities, setCities] = useState<string[]>([]);
 
   useEffect(() => {
@@ -59,9 +68,17 @@ export function MaintenanceServiceForm({ mode, initialData }: MaintenanceService
   }, []);
 
   const submit = async () => {
+    if (submitTarget === "admin" && mode !== "edit") {
+      toast.error("Admin form is only used for editing.");
+      return;
+    }
+    if (submitTarget === "admin" && !initialData?.id) {
+      toast.error("Missing service id.");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const images = imageUrl.trim() ? [imageUrl.trim()] : [];
       const payload: Record<string, unknown> = {
         title: title.trim(),
         description: description.trim(),
@@ -69,15 +86,18 @@ export function MaintenanceServiceForm({ mode, initialData }: MaintenanceService
         provider_type: providerType,
         city: city.trim(),
         images,
+        videos,
       };
       if (price.trim() !== "") {
         payload.price = Number(price);
       }
 
       const endpoint =
-        mode === "create"
-          ? "/api/agent/maintenance-services"
-          : `/api/agent/maintenance-services/${initialData?.id}`;
+        submitTarget === "admin"
+          ? `/api/admin/maintenance-services/${initialData!.id}`
+          : mode === "create"
+            ? "/api/agent/maintenance-services"
+            : `/api/agent/maintenance-services/${initialData?.id}`;
       const method = mode === "create" ? "POST" : "PATCH";
 
       const response = await fetch(endpoint, {
@@ -92,7 +112,7 @@ export function MaintenanceServiceForm({ mode, initialData }: MaintenanceService
       toast.success(
         mode === "create" ? "Service created. Redirecting…" : "Service updated. Redirecting…"
       );
-      router.push("/agent/maintenance-services");
+      router.push(submitTarget === "admin" ? "/admin/maintenance-services" : "/agent/maintenance-services");
       router.refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Save failed");
@@ -105,7 +125,12 @@ export function MaintenanceServiceForm({ mode, initialData }: MaintenanceService
     <div className="space-y-6 max-w-xl">
       <div className="space-y-2">
         <Label htmlFor="ms-title">Title</Label>
-        <Input id="ms-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Emergency plumbing" />
+        <Input
+          id="ms-title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="e.g. Emergency plumbing"
+        />
       </div>
 
       <div className="space-y-2">
@@ -185,15 +210,14 @@ export function MaintenanceServiceForm({ mode, initialData }: MaintenanceService
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="ms-img">Image URL (optional)</Label>
-        <Input
-          id="ms-img"
-          type="url"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="https://…"
-        />
-        <p className="text-xs text-muted-foreground">First image shown on your listing. You can add more later.</p>
+        <Label>Listing photos</Label>
+        <ImageUploader bucket="maintenance-services" values={images} onChange={setImages} maxFiles={20} />
+        <p className="text-xs text-muted-foreground">First image is the primary thumbnail when no video is set.</p>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Listing videos</Label>
+        <MaintenanceVideoUploader values={videos} onChange={setVideos} maxFiles={3} />
       </div>
 
       <div className="flex gap-3">

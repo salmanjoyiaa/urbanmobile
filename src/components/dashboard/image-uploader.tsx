@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 type ImageUploaderProps = {
-  bucket: "property-images" | "product-images" | "avatars";
+  bucket: "property-images" | "product-images" | "avatars" | "maintenance-services";
   values: string[];
   onChange: (values: string[]) => void;
   maxFiles?: number;

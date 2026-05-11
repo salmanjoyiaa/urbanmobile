@@ -18,7 +18,9 @@ export default async function ServiceDetailPage({
 
     const { data: serviceData, error } = await supabase
         .from("maintenance_services")
-        .select("*, agents(company_name, profile_id, profiles(full_name, avatar_url, phone))")
+        .select(
+            "*, agents!maintenance_services_agent_id_fkey(company_name, profiles!agents_profile_id_fkey(full_name, avatar_url, phone))"
+        )
         .eq("id", serviceId)
         .eq("status", "active")
         .single();
@@ -78,10 +80,30 @@ export default async function ServiceDetailPage({
                         </div>
                     </div>
 
-                    {/* Images */}
-                    {service.images && service.images.length > 0 && (
-                        <div className="rounded-2xl overflow-hidden border">
-                            <img src={service.images[0]} alt={service.title} className="w-full h-auto max-h-[500px] object-cover" />
+                    {/* Media: videos and images */}
+                    {((service.videos && service.videos.length > 0) || (service.images && service.images.length > 0)) && (
+                        <div className="space-y-4">
+                            <h2 className="text-xl font-bold">Photos & videos</h2>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {service.videos?.map((src: string) => (
+                                    <video
+                                        key={src}
+                                        src={src}
+                                        controls
+                                        className="w-full rounded-2xl border bg-black object-contain max-h-[420px]"
+                                        playsInline
+                                    />
+                                ))}
+                                {service.images?.map((src: string) => (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        key={src}
+                                        src={src}
+                                        alt={service.title}
+                                        className="w-full rounded-2xl border object-cover max-h-[420px]"
+                                    />
+                                ))}
+                            </div>
                         </div>
                     )}
 

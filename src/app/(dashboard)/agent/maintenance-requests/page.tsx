@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Calendar, Clock, Phone, Mail, Mic, Paperclip } from "lucide-react";
+import { isMaintenanceMediaVideoPath } from "@/lib/maintenance-request-paths";
 
 export const metadata: Metadata = {
     title: "Service Requests - Agent Dashboard",
@@ -128,14 +129,26 @@ export default async function AgentMaintenanceRequestsPage() {
                                 {req.media_urls && req.media_urls.length > 0 && (
                                     <div className="flex-1">
                                         <div className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
-                                            <Paperclip className="w-3.5 h-3.5" /> Attached Photos
+                                            <Paperclip className="w-3.5 h-3.5" /> Photos & video
                                         </div>
-                                        <div className="flex gap-2">
-                                            {req.media_urls.map((url: string, i: number) => (
-                                                <a key={i} href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/maintenance-media/${url}`} target="_blank" rel="noopener noreferrer">
-                                                    <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/maintenance-media/${url}`} alt={`Attachment ${i+1}`} className="w-12 h-12 rounded object-cover border hover:opacity-80 transition-opacity" />
-                                                </a>
-                                            ))}
+                                        <div className="flex flex-wrap gap-2">
+                                            {req.media_urls.map((url: string, i: number) => {
+                                                const full = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/maintenance-media/${url}`;
+                                                return isMaintenanceMediaVideoPath(url) ? (
+                                                    <video
+                                                        key={i}
+                                                        src={full}
+                                                        controls
+                                                        className="w-28 h-20 rounded object-cover border bg-black"
+                                                        playsInline
+                                                    />
+                                                ) : (
+                                                    <a key={i} href={full} target="_blank" rel="noopener noreferrer">
+                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                        <img src={full} alt={`Attachment ${i + 1}`} className="w-12 h-12 rounded object-cover border hover:opacity-80 transition-opacity" />
+                                                    </a>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 )}

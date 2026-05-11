@@ -1,46 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
+import { maintenanceRequestSchema } from "@/lib/validators";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: NextRequest) {
+  try {
+    let body: unknown;
     try {
-        const body = await request.json();
-
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-        const res = await fetch(`${supabaseUrl}/rest/v1/maintenance_requests`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                apikey: supabaseKey,
-                Authorization: `Bearer ${supabaseKey}`,
-                Prefer: "return=minimal",
-            },
-            body: JSON.stringify({
-                service_id: body.service_id || null,
-                agent_id: body.agent_id || null,
-                service_type: body.service_type,
-                customer_name: body.customer_name,
-                customer_email: body.customer_email,
-                customer_phone: body.customer_phone,
-                details: body.details || null,
-                visit_date: body.visit_date || null,
-                visit_time: body.visit_time || null,
-                audio_url: body.audio_url || null,
-                media_urls: body.media_urls || [],
-                status: "pending",
-            }),
-        });
-
-        if (!res.ok) {
-            const errText = await res.text();
-            return NextResponse.json({ error: errText }, { status: res.status });
-        }
-
-        return NextResponse.json({ success: true });
-    } catch (err) {
-        return NextResponse.json(
-            { error: err instanceof Error ? err.message : "Internal error" },
-            { status: 500 }
-        );
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
+
+    const parsed = maintenanceRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Invalid request" },
+        { status: 400 }
+      );
+    }
+
+    const row = {
+      service_id: parsed.data.service_id ?? null,
+      agent_id: parsed.data.agent_id ?? null,
+      service_type: parsed.data.service_type,
+      customer_name: parsed.data.customer_name,
+      customer_email: parsed.data.customer_email,
+      customer_phone: parsed.data.customer_phone,
+      details: parsed.data.details ?? null,
+      visit_date: parsed.data.visit_date ?? null,
+      visit_time: parsed.data.visit_time ?? null,
+      audio_url: parsed.data.audio_url ?? null,
+      media_urls: parsed.data.media_urls?.length ? parsed.data.media_urls : [],
+      status: "pending" as const,
+    };
+
+    const admin = createAdminClient();
+    const { error } = await admin.from("maintenance_requests").insert(row as never);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Internal error" },
+      { status: 500 }
+    );
+  }
 }

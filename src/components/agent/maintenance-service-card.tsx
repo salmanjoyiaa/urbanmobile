@@ -14,6 +14,7 @@ type Service = {
   price: number | null;
   status: string;
   images?: string[] | null;
+  videos?: string[] | null;
 };
 
 export function MaintenanceServiceCard({ service }: { service: Service }) {
@@ -34,7 +35,15 @@ export function MaintenanceServiceCard({ service }: { service: Service }) {
 
   return (
     <div className="bg-card border rounded-xl overflow-hidden flex flex-col">
-      {service.images && service.images.length > 0 ? (
+      {service.videos && service.videos.length > 0 ? (
+        <video
+          src={service.videos[0]}
+          className="w-full h-40 object-cover"
+          muted
+          playsInline
+          preload="metadata"
+        />
+      ) : service.images && service.images.length > 0 ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={service.images[0]} alt={service.title} className="w-full h-40 object-cover" />
       ) : (
