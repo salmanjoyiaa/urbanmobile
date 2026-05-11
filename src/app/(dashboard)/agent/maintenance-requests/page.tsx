@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Calendar, Clock, Phone, Mail, Mic, Paperclip } from "lucide-react";
 
@@ -11,25 +12,28 @@ export const revalidate = 0;
 export default async function AgentMaintenanceRequestsPage() {
     const supabase = await createClient();
 
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) return null;
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) redirect("/login");
 
     const { data: agentData } = await supabase
         .from("agents")
-        .select("id")
+        .select("id, agent_type, status")
         .eq("profile_id", user.id)
         .single();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const agent = agentData as any;
 
-    if (!agent) return null;
+    if (!agent || agent.status !== "approved") redirect("/pending-approval");
+    if (agent.agent_type !== "maintenance") redirect("/agent");
 
     // Fetch approved requests for this agent
     const { data: requestsData, error } = await supabase
         .from("maintenance_requests")
-        .select("*, maintenance_services(title)")
+        .select("*, maintenance_services!maintenance_requests_service_id_fkey(title)")
         .eq("agent_id", agent.id)
         .in("status", ["approved", "completed"])
         .order("created_at", { ascending: false });

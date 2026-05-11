@@ -26,6 +26,48 @@ export default async function AgentOverviewPage() {
     redirect("/pending-approval");
   }
 
+  if (agent.agent_type === "maintenance") {
+    const [{ count: servicesListed }, { count: servicesActive }, { count: serviceRequests }] = await Promise.all([
+      supabase.from("maintenance_services").select("id", { count: "exact", head: true }).eq("agent_id", agent.id),
+      supabase
+        .from("maintenance_services")
+        .select("id", { count: "exact", head: true })
+        .eq("agent_id", agent.id)
+        .eq("status", "active"),
+      supabase
+        .from("maintenance_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("agent_id", agent.id)
+        .in("status", ["approved", "completed"]),
+    ]);
+
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-navy">Maintenance Overview</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Track your marketplace listings and customer service requests.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <StatCard title="Listed services" value={servicesListed || 0} />
+          <StatCard title="Active listings" value={servicesActive || 0} />
+          <StatCard title="Service requests" value={serviceRequests || 0} />
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Approval Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm capitalize text-muted-foreground">Current account status: {agent.status}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const [{ count: propertiesCount }, { count: productsCount }] = await Promise.all([
     supabase.from("properties").select("id", { count: "exact", head: true }).eq("agent_id", agent.id),
     supabase.from("products").select("id", { count: "exact", head: true }).eq("agent_id", agent.id),
@@ -72,19 +114,19 @@ export default async function AgentOverviewPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-navy">
-          {agent.agent_type === 'seller' ? 'Seller Overview' : agent.agent_type === 'visiting' ? 'Visiting Team Overview' : 'Agent Overview'}
+          {agent.agent_type === "seller" ? "Seller Overview" : agent.agent_type === "visiting" ? "Visiting Team Overview" : "Agent Overview"}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">Track your listings, requests, and activity.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {agent.agent_type === 'visiting' ? (
+        {agent.agent_type === "visiting" ? (
           <>
             <StatCard title="Confirmed Visits" value={outputVisits || 0} />
             <StatCard title="Confirmed Deals" value={outputLeads || 0} />
             <StatCard title="Failed Deals" value={failedDeals || 0} />
           </>
-        ) : agent.agent_type === 'seller' ? (
+        ) : agent.agent_type === "seller" ? (
           <>
             <StatCard title="Products" value={productsCount || 0} />
             <StatCard title="Confirmed Leads" value={propertyAgentLeads || 0} />
