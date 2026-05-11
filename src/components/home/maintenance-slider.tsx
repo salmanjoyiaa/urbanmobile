@@ -2,71 +2,104 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Zap, Droplets, Thermometer, Wrench, Paintbrush, Sparkles, Star, Hammer, ShieldCheck, TreePine } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Zap,
+  Droplets,
+  Thermometer,
+  Wrench,
+  Paintbrush,
+  Sparkles,
+  Star,
+  Hammer,
+  ShieldCheck,
+  TreePine,
+  ArrowRight,
+  type LucideIcon,
+} from "lucide-react";
 
-const SERVICES = [
+type ServiceItem = {
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+  color: string;
+  iconColor: string;
+  ctaClass: string;
+};
+
+const SERVICES: ServiceItem[] = [
   {
     icon: Droplets,
     title: "Plumbing",
     desc: "Leaks, pipes, fixtures & water heaters",
-    color: "from-blue-50 to-blue-100/60 border-blue-200",
+    color: "from-blue-50 to-blue-100/60 border-blue-200/80",
     iconColor: "text-blue-600",
+    ctaClass: "text-blue-700 group-hover:text-blue-800",
   },
   {
     icon: Zap,
     title: "Electrical",
     desc: "Wiring, outlets, panels & lighting",
-    color: "from-amber-50 to-amber-100/60 border-amber-200",
+    color: "from-amber-50 to-amber-100/60 border-amber-200/80",
     iconColor: "text-amber-600",
+    ctaClass: "text-amber-800 group-hover:text-amber-900",
   },
   {
     icon: Thermometer,
     title: "HVAC",
     desc: "AC, heating, ventilation & duct cleaning",
-    color: "from-red-50 to-red-100/60 border-red-200",
+    color: "from-red-50 to-red-100/60 border-red-200/80",
     iconColor: "text-red-600",
+    ctaClass: "text-red-700 group-hover:text-red-800",
   },
   {
     icon: Wrench,
     title: "Appliance Repair",
     desc: "Fridge, washer, dryer & oven repairs",
-    color: "from-purple-50 to-purple-100/60 border-purple-200",
+    color: "from-purple-50 to-purple-100/60 border-purple-200/80",
     iconColor: "text-purple-600",
+    ctaClass: "text-purple-700 group-hover:text-purple-800",
   },
   {
     icon: Paintbrush,
     title: "Painting",
     desc: "Interior & exterior, touch-ups & full jobs",
-    color: "from-emerald-50 to-emerald-100/60 border-emerald-200",
+    color: "from-emerald-50 to-emerald-100/60 border-emerald-200/80",
     iconColor: "text-emerald-600",
+    ctaClass: "text-emerald-700 group-hover:text-emerald-800",
   },
   {
     icon: Sparkles,
     title: "Deep Cleaning",
     desc: "Move-in/out, post-construction & regular",
-    color: "from-cyan-50 to-cyan-100/60 border-cyan-200",
+    color: "from-cyan-50 to-cyan-100/60 border-cyan-200/80",
     iconColor: "text-cyan-600",
+    ctaClass: "text-cyan-700 group-hover:text-cyan-800",
   },
   {
     icon: Hammer,
     title: "Carpentry",
     desc: "Furniture assembly, doors & custom woodwork",
-    color: "from-orange-50 to-orange-100/60 border-orange-200",
+    color: "from-orange-50 to-orange-100/60 border-orange-200/80",
     iconColor: "text-orange-600",
+    ctaClass: "text-orange-700 group-hover:text-orange-800",
   },
   {
     icon: ShieldCheck,
     title: "Safety & Security",
     desc: "CCTV, locks, alarms & fire systems",
-    color: "from-indigo-50 to-indigo-100/60 border-indigo-200",
+    color: "from-indigo-50 to-indigo-100/60 border-indigo-200/80",
     iconColor: "text-indigo-600",
+    ctaClass: "text-indigo-700 group-hover:text-indigo-800",
   },
   {
     icon: TreePine,
     title: "Landscaping",
     desc: "Garden, lawn care & outdoor maintenance",
-    color: "from-green-50 to-green-100/60 border-green-200",
+    color: "from-green-50 to-green-100/60 border-green-200/80",
     iconColor: "text-green-600",
+    ctaClass: "text-green-700 group-hover:text-green-800",
   },
 ];
 
@@ -133,33 +166,45 @@ export function MaintenanceSlider() {
             style={{ scrollSnapType: "x mandatory" }}
           >
             {SERVICES.map((service) => (
-              <div
+              <Link
                 key={service.title}
-                className={`flex-none w-[85%] sm:w-[45%] lg:w-[calc(33.333%-14px)] p-6 rounded-2xl bg-gradient-to-br ${service.color} border transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`}
+                href={`/maintenance?category=${encodeURIComponent(service.title)}`}
+                aria-label={`Browse ${service.title} providers on the marketplace`}
+                className={`group flex-none w-[85%] sm:w-[45%] lg:w-[calc(33.333%-14px)] flex flex-col min-h-[260px] sm:min-h-[280px] p-6 sm:p-7 rounded-2xl bg-gradient-to-br ${service.color} border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background`}
                 style={{ scrollSnapAlign: "start" }}
               >
-                <div className="w-12 h-12 rounded-xl bg-white/80 flex items-center justify-center mb-4 shadow-sm">
-                  <service.icon className={`h-6 w-6 ${service.iconColor}`} />
+                <div className="relative mb-5 shrink-0">
+                  <div
+                    className="pointer-events-none absolute -inset-1 rounded-3xl bg-gradient-to-br from-white/60 to-white/0 opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100"
+                    aria-hidden
+                  />
+                  <div className="relative flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-white/95 shadow-md ring-1 ring-black/[0.06]">
+                    <service.icon className={`h-7 w-7 sm:h-8 sm:w-8 ${service.iconColor}`} strokeWidth={1.5} />
+                  </div>
                 </div>
-                <h3 className="font-display font-bold text-gray-900 text-lg mb-2">
+                <h3 className="font-display font-bold text-gray-900 text-lg sm:text-xl mb-2 tracking-tight">
                   {service.title}
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4 flex-grow">
+                <p className="text-gray-600/95 text-sm leading-relaxed mb-5 flex-grow">
                   {service.desc}
                 </p>
-                <Link
-                  href={`/maintenance?category=${encodeURIComponent(service.title)}`}
-                  className="mt-auto inline-flex items-center font-medium text-sm hover:underline"
-                  style={{ color: service.iconColor.replace('text-', '') }} // Approximate color match
+                <span
+                  className={`mt-auto inline-flex items-center gap-2 text-sm font-semibold transition-colors ${service.ctaClass}`}
                 >
-                  View Providers
-                </Link>
-              </div>
+                  Browse providers
+                  <ArrowRight className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
+                </span>
+              </Link>
             ))}
           </div>
 
           <button
-            onClick={prev}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              prev();
+            }}
             aria-label="Previous service"
             className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/95 shadow-lg hidden md:flex items-center justify-center hover:bg-white transition-all hover:scale-105 active:scale-95"
           >
@@ -167,7 +212,12 @@ export function MaintenanceSlider() {
           </button>
 
           <button
-            onClick={next}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              next();
+            }}
             aria-label="Next service"
             className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/95 shadow-lg hidden md:flex items-center justify-center hover:bg-white transition-all hover:scale-105 active:scale-95"
           >
@@ -179,6 +229,7 @@ export function MaintenanceSlider() {
         <div className="flex justify-center gap-2 mt-8">
           {SERVICES.map((_, i) => (
             <button
+              type="button"
               key={i}
               onClick={() => scrollToIndex(i)}
               aria-label={`Go to service ${i + 1}`}
