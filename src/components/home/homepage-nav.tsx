@@ -7,6 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -36,64 +37,50 @@ export function HomepageNav() {
           : "gradient-primary"
       }`}
     >
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-5 lg:px-12 flex flex-col gap-3 md:gap-3.5 py-3 sm:py-4 md:py-4">
-        {/* Row 1: logo + mobile menu */}
-        <div className="flex items-center justify-between w-full gap-3">
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-5 lg:px-12 py-3 sm:py-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <Link href="/" className="flex flex-col group shrink-0 min-w-0">
             <span className="text-[17px] sm:text-[22px] md:text-[26px] font-black tracking-tight leading-tight text-white">
               TheUrbanRealEstateSaudi
             </span>
-            <span className="hidden md:block text-[11px] sm:text-xs text-white/55 font-medium tracking-wide mt-0.5">
+            <span className="hidden sm:block text-[11px] sm:text-xs text-white/55 font-medium tracking-wide mt-0.5">
               Properties, products & maintenance — verified agents
             </span>
           </Link>
 
-          <div className="md:hidden flex items-center shrink-0">
-            <button
-              type="button"
-              className="flex items-center justify-center w-10 h-10 -mr-1 text-white rounded-xl hover:bg-white/10 active:scale-95 transition-all duration-150"
-              onClick={() => setOpen(!open)}
-              aria-label="Toggle menu"
-              aria-expanded={open}
-            >
-              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Row 2: desktop nav + CTAs */}
-        <div className="hidden md:flex items-center justify-between w-full border-t border-white/10 pt-3 gap-6">
-          <nav className="flex items-center gap-8 flex-wrap">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="relative text-[15px] font-semibold tracking-wide text-white/90 hover:text-white transition-colors after:absolute after:left-0 after:bottom-[-2px] after:h-[2px] after:w-0 after:bg-current after:transition-[width] after:duration-200 hover:after:w-full"
-              >
-                {link.title}
-              </Link>
-            ))}
+          <nav className="hidden md:flex flex-1 min-w-0 justify-center px-2">
+            <div className="flex items-center gap-6 lg:gap-8 flex-wrap justify-center">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="relative text-[15px] font-semibold tracking-wide text-white/90 hover:text-white transition-colors after:absolute after:left-0 after:bottom-[-2px] after:h-[2px] after:w-0 after:bg-current after:transition-[width] after:duration-200 hover:after:w-full whitespace-nowrap"
+                >
+                  {link.title}
+                </Link>
+              ))}
+            </div>
           </nav>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <Link
-              href="/login?type=property"
-              className="inline-flex items-center justify-center min-h-11 rounded-xl bg-white text-primary px-5 py-2.5 text-[14px] font-bold transition-all hover:bg-white/90 shadow-sm"
-            >
-              AQARI Login
-            </Link>
+          <div className="flex items-center gap-2 shrink-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   type="button"
                   variant="outline"
-                  className="min-h-11 rounded-xl border-2 border-white/85 bg-transparent text-white px-4 py-2.5 text-[14px] font-bold hover:bg-white/10 hover:text-white gap-1.5"
+                  className="hidden md:inline-flex min-h-11 rounded-xl border-2 border-white/85 bg-transparent text-white px-4 py-2.5 text-[14px] font-bold hover:bg-white/10 hover:text-white gap-1.5"
                 >
                   Partner logins
                   <ChevronDown className="h-4 w-4 opacity-90" aria-hidden />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 z-[100]">
+              <DropdownMenuContent align="end" className="w-56 z-[100]">
+                <DropdownMenuItem asChild>
+                  <Link href="/login?type=property" className="cursor-pointer font-bold">
+                    AQARI Login
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/login?type=visiting" className="cursor-pointer font-medium">
                     Team Login
@@ -111,11 +98,20 @@ export function HomepageNav() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <button
+              type="button"
+              className="md:hidden flex items-center justify-center w-10 h-10 text-white rounded-xl hover:bg-white/10 active:scale-95 transition-all duration-150"
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle menu"
+              aria-expanded={open}
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
       {open && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-[#1a1a2e]/95 backdrop-blur-xl border-b border-white/10 shadow-2xl z-50 pb-5 animate-slide-down origin-top">
           <nav className="flex flex-col px-4 pt-3 pb-1 gap-0.5">
@@ -129,7 +125,10 @@ export function HomepageNav() {
                 {link.title}
               </Link>
             ))}
-            <div className="pt-4 border-t border-white/10 mt-3 flex flex-col gap-2.5">
+            <div className="pt-4 border-t border-white/10 mt-3 flex flex-col gap-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-white/45 px-1">
+                Partner logins
+              </p>
               <Link
                 href="/login?type=property"
                 onClick={() => setOpen(false)}
@@ -137,9 +136,6 @@ export function HomepageNav() {
               >
                 AQARI Login
               </Link>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-white/45 px-1 pt-1">
-                Partner logins
-              </p>
               <Link
                 href="/login?type=visiting"
                 onClick={() => setOpen(false)}

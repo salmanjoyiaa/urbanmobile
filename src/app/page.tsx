@@ -207,18 +207,18 @@ export default async function HomePage() {
               <div className="animate-fade-in-up flex justify-center lg:hidden mb-8" style={{ animationDelay: "0.35s" }}>
                 <div className="relative w-full max-w-sm animate-hero-card-float">
                   <div className="absolute inset-0 bg-white/5 rounded-3xl blur-xl" />
-                  <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-xl animate-hero-card-glow">
-                    <div className="grid grid-cols-2 gap-4">
+                  <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-4 sm:p-6 shadow-xl animate-hero-card-glow">
+                    <div className="grid grid-cols-4 gap-2 sm:gap-3">
                       {[
                         { label: "Properties Listed", value: heroStats.propertiesCount.toLocaleString(), icon: Building2 },
                         { label: "Property Agents", value: heroStats.propertyAgentsCount.toLocaleString(), icon: Shield },
                         { label: "Visit Team Agents", value: heroStats.visitTeamCount.toLocaleString(), icon: MessageCircle },
                         { label: "Properties Rent Out", value: (712 + heroStats.rentedCount).toLocaleString(), icon: Star },
                       ].map((stat) => (
-                        <div key={stat.label} className="hero-stat-cell bg-white/10 rounded-2xl p-4 text-center">
-                          <stat.icon className="h-6 w-6 text-white/70 mx-auto mb-2" />
-                          <div className="text-2xl font-bold text-white">{stat.value}</div>
-                          <div className="text-xs text-white/60">{stat.label}</div>
+                        <div key={stat.label} className="hero-stat-cell bg-white/10 rounded-xl sm:rounded-2xl p-2 sm:p-3 text-center min-w-0">
+                          <stat.icon className="h-4 w-4 sm:h-5 sm:w-5 text-white/70 mx-auto mb-1 sm:mb-1.5" />
+                          <div className="text-base sm:text-lg md:text-xl font-bold text-white tabular-nums leading-tight">{stat.value}</div>
+                          <div className="text-[9px] sm:text-[10px] leading-tight text-white/60 mt-0.5 line-clamp-2">{stat.label}</div>
                         </div>
                       ))}
                     </div>
@@ -243,18 +243,18 @@ export default async function HomePage() {
             <div className="animate-fade-in-up hidden lg:flex justify-center lg:justify-end" style={{ animationDelay: "0.4s" }}>
               <div className="relative w-full max-w-sm animate-hero-card-float">
                 <div className="absolute inset-0 bg-white/5 rounded-3xl blur-xl" />
-                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-xl transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:border-white/30 animate-hero-card-glow">
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 lg:p-8 shadow-xl transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:border-white/30 animate-hero-card-glow max-w-xl lg:max-w-none w-full">
+                  <div className="grid grid-cols-4 gap-3 lg:gap-4">
                     {[
                       { label: "Properties Listed", value: heroStats.propertiesCount.toLocaleString(), icon: Building2 },
                       { label: "Property Agents", value: heroStats.propertyAgentsCount.toLocaleString(), icon: Shield },
                       { label: "Visit Team Agents", value: heroStats.visitTeamCount.toLocaleString(), icon: MessageCircle },
                       { label: "Properties Rent Out", value: (712 + heroStats.rentedCount).toLocaleString(), icon: Star },
                     ].map((stat) => (
-                      <div key={stat.label} className="hero-stat-cell bg-white/10 rounded-2xl p-4 text-center transition-transform duration-300 hover:bg-white/15 hover:scale-[1.03]">
-                        <stat.icon className="h-6 w-6 text-white/70 mx-auto mb-2" />
-                        <div className="text-2xl font-bold text-white">{stat.value}</div>
-                        <div className="text-xs text-white/60">{stat.label}</div>
+                      <div key={stat.label} className="hero-stat-cell bg-white/10 rounded-2xl p-3 lg:p-4 text-center transition-transform duration-300 hover:bg-white/15 hover:scale-[1.03] min-w-0">
+                        <stat.icon className="h-5 w-5 lg:h-6 lg:w-6 text-white/70 mx-auto mb-2" />
+                        <div className="text-xl lg:text-2xl font-bold text-white tabular-nums">{stat.value}</div>
+                        <div className="text-[10px] lg:text-xs text-white/60 leading-snug mt-1 line-clamp-2">{stat.label}</div>
                       </div>
                     ))}
                   </div>
