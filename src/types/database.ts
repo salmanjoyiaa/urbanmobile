@@ -2,6 +2,7 @@ import type {
   UserRole,
   AgentStatus,
   AgentType,
+  MaintenanceProviderType,
   PropertyType,
   ListingStatus,
   ListingPurpose,
@@ -147,13 +148,36 @@ export interface BuyRequest {
 
 export interface MaintenanceRequest {
   id: string;
+  service_id: string | null;
+  agent_id: string | null;
   service_type: string;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
   details: string | null;
+  visit_date: string | null;
+  visit_time: string | null;
+  audio_url: string | null;
+  media_urls: string[];
   status: MaintenanceStatus;
   admin_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type MaintenanceServiceStatus = "active" | "inactive" | "suspended";
+
+export interface MaintenanceService {
+  id: string;
+  agent_id: string;
+  category: string;
+  provider_type: MaintenanceProviderType;
+  title: string;
+  description: string;
+  price: number | null;
+  city: string;
+  images: string[];
+  status: MaintenanceServiceStatus;
   created_at: string;
   updated_at: string;
 }
@@ -272,8 +296,13 @@ export interface Database {
       };
       maintenance_requests: {
         Row: MaintenanceRequest;
-        Insert: Omit<MaintenanceRequest, "id" | "created_at" | "updated_at" | "status" | "admin_notes"> & { id?: string; status?: MaintenanceStatus };
+        Insert: Omit<MaintenanceRequest, "id" | "created_at" | "updated_at" | "status" | "admin_notes" | "service_id" | "agent_id" | "visit_date" | "visit_time" | "audio_url" | "media_urls"> & { id?: string; status?: MaintenanceStatus; service_id?: string; agent_id?: string; visit_date?: string; visit_time?: string; audio_url?: string; media_urls?: string[] };
         Update: Partial<Omit<MaintenanceRequest, "id" | "created_at">>;
+      };
+      maintenance_services: {
+        Row: MaintenanceService;
+        Insert: Omit<MaintenanceService, "id" | "created_at" | "updated_at" | "status"> & { id?: string; status?: MaintenanceServiceStatus };
+        Update: Partial<Omit<MaintenanceService, "id" | "created_at">>;
       };
       notifications: {
         Row: Notification;

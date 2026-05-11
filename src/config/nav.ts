@@ -39,6 +39,12 @@ export const sellerNav: NavItem[] = [
   { title: "Buy Requests", href: "/agent/leads", icon: ShoppingBag },
 ];
 
+export const maintenanceNav: NavItem[] = [
+  { title: "Overview", href: "/agent", icon: LayoutDashboard },
+  { title: "My Services", href: "/agent/maintenance-services", icon: Wrench },
+  { title: "Service Requests", href: "/agent/maintenance-requests", icon: ScrollText },
+];
+
 export const adminNav: NavItem[] = [
   { title: "Overview", href: "/admin", icon: LayoutDashboard },
   { title: "AQARI Team", href: "/admin/agents", icon: Users },
@@ -51,7 +57,8 @@ export const adminNav: NavItem[] = [
   { title: "Visit Team Performance", href: "/admin/visit-team-performance", icon: MapPin },
   { title: "Visit Hours", href: "/admin/slots", icon: Clock },
   { title: "Buy Requests", href: "/admin/leads", icon: ShoppingBag },
-  { title: "Maintenance", href: "/admin/maintenance", icon: Wrench },
+  { title: "Maintenance Requests", href: "/admin/maintenance", icon: ScrollText },
+  { title: "Maintenance Services", href: "/admin/maintenance-services", icon: Wrench },
   { title: "Testimonials", href: "/admin/testimonials", icon: Star },
   { title: "Message Logs", href: "/admin/logs", icon: MessageSquare },
   { title: "Audit Log", href: "/admin/audit-log", icon: ScrollText },

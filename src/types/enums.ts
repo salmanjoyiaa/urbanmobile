@@ -2,7 +2,7 @@ export type UserRole = "customer" | "agent" | "admin";
 
 export type AgentStatus = "pending" | "approved" | "rejected" | "suspended";
 
-export type AgentType = "property" | "visiting" | "seller";
+export type AgentType = "property" | "visiting" | "seller" | "maintenance";
 
 export type PropertyType =
   | "apartment"
@@ -37,3 +37,5 @@ export type VisitingStatus = "view" | "contact_done" | "customer_confirmed" | "c
 export type LeadStatus = "pending" | "confirmed" | "rejected" | "completed";
 
 export type MaintenanceStatus = "pending" | "approved" | "completed" | "rejected";
+
+export type MaintenanceProviderType = "single_person" | "company";

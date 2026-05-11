@@ -46,7 +46,7 @@ export const agentSignupSchema = signupSchema.extend({
     .string()
     .max(50, "License number must not exceed 50 characters")
     .optional(),
-  agent_type: z.enum(["property", "visiting", "seller"]),
+  agent_type: z.enum(["property", "visiting", "seller", "maintenance"]),
 });
 
 export const propertySchema = z.object({
@@ -207,6 +207,8 @@ export const buyRequestSchema = z.object({
 });
 
 export const maintenanceRequestSchema = z.object({
+  service_id: z.string().optional(),
+  agent_id: z.string().optional(),
   service_type: z
     .string()
     .min(2, "Service type is required")
@@ -227,6 +229,37 @@ export const maintenanceRequestSchema = z.object({
     .string()
     .max(5000, "Details must not exceed 5000 characters")
     .optional(),
+  visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
+  visit_time: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format").optional(),
+  audio_url: z.string().url().optional().or(z.literal("")),
+  media_urls: z.array(z.string().url()).optional(),
+});
+
+export const maintenanceServiceSchema = z.object({
+  title: z
+    .string()
+    .min(3, "Title must be at least 3 characters")
+    .max(255, "Title must not exceed 255 characters"),
+  description: z
+    .string()
+    .min(10, "Description must be at least 10 characters")
+    .max(5000, "Description must not exceed 5000 characters"),
+  category: z
+    .string()
+    .min(2, "Category is required")
+    .max(100, "Category must not exceed 100 characters"),
+  provider_type: z.enum(["single_person", "company"]),
+  price: z
+    .coerce
+    .number()
+    .min(0, "Price must be zero or positive")
+    .max(1000000, "Price exceeds maximum limit")
+    .optional(),
+  city: z
+    .string()
+    .min(1, "City is required")
+    .max(100, "City name must not exceed 100 characters"),
+  images: z.array(z.string().url()).max(20).default([]),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -237,3 +270,4 @@ export type ProductInput = z.infer<typeof productSchema>;
 export type VisitRequestInput = z.infer<typeof visitRequestSchema>;
 export type BuyRequestInput = z.infer<typeof buyRequestSchema>;
 export type MaintenanceRequestInput = z.infer<typeof maintenanceRequestSchema>;
+export type MaintenanceServiceInput = z.infer<typeof maintenanceServiceSchema>;

@@ -1,14 +1,14 @@
 "use client";
 
-import { agentNav, visitingAgentNav, sellerNav } from "@/config/nav";
+import { agentNav, visitingAgentNav, sellerNav, maintenanceNav } from "@/config/nav";
 import { Sidebar } from "@/components/layout/sidebar";
 
 import { UserMenu } from "@/components/layout/user-menu";
 
 export function AgentShell({ children, agentType = "property", userName }: { children: React.ReactNode, agentType?: string, userName?: string }) {
-    const nav = agentType === "visiting" ? visitingAgentNav : agentType === "seller" ? sellerNav : agentNav;
-    const title = agentType === "visiting" ? "Visiting Team" : agentType === "seller" ? "Seller Panel" : "Agent Panel";
-    const roleLabel = agentType === "visiting" ? "Visiting Agent" : agentType === "seller" ? "Seller" : "Agent";
+    const nav = agentType === "visiting" ? visitingAgentNav : agentType === "seller" ? sellerNav : agentType === "maintenance" ? maintenanceNav : agentNav;
+    const title = agentType === "visiting" ? "Visiting Team" : agentType === "seller" ? "Seller Panel" : agentType === "maintenance" ? "Maintenance Panel" : "Agent Panel";
+    const roleLabel = agentType === "visiting" ? "Visiting Agent" : agentType === "seller" ? "Seller" : agentType === "maintenance" ? "Maintenance Agent" : "Agent";
 
     const actions = (
         <>

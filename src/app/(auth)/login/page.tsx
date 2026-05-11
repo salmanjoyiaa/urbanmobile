@@ -18,7 +18,7 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const supabase = createClient();
 
-  const loginType = searchParams.get("type") as "property" | "visiting" | "seller" | null;
+  const loginType = searchParams.get("type") as "property" | "visiting" | "seller" | "maintenance" | null;
 
   const {
     register,
@@ -110,7 +110,9 @@ function LoginContent() {
               ? "Team Login"
               : loginType === "seller"
                 ? "Seller Login"
-                : "Agent Login"}
+                : loginType === "maintenance"
+                  ? "Maintenance Login"
+                  : "Agent Login"}
         </CardTitle>
         <CardDescription className="text-muted-foreground">Access your UrbanSaudi account.</CardDescription>
       </CardHeader>
@@ -148,15 +150,23 @@ function LoginContent() {
                 Signing in...
               </>
             ) : (
-              `Sign In${loginType ? ` as ${loginType === "property" ? "AQARI" : loginType === "visiting" ? "Team" : "Seller"} Agent` : ""}`
+              `Sign In${loginType ? ` as ${loginType === "property" ? "AQARI" : loginType === "visiting" ? "Team" : loginType === "seller" ? "Seller" : "Maintenance"} Agent` : ""}`
             )}
           </Button>
         </form>
 
         <div className="mt-6 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/signup/agent" className="font-bold text-primary hover:underline">
-            Apply to become an agent
+          <Link href={`/signup/agent${loginType ? `?type=${loginType}` : ""}`} className="font-bold text-primary hover:underline">
+            {loginType === "property" 
+              ? "Apply to become an AQARI agent"
+              : loginType === "visiting"
+                ? "Apply to become a Team Agent"
+                : loginType === "seller"
+                  ? "Apply to become a Seller Agent"
+                  : loginType === "maintenance"
+                    ? "Apply to become a Maintenance Agent"
+                    : "Apply to become an agent"}
           </Link>
         </div>
       </CardContent>

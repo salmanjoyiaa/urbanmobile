@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Zap, Droplets, Thermometer, Wrench, Paintbrush, Sparkles, Star, Hammer, ShieldCheck, TreePine, MessageCircle } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, Zap, Droplets, Thermometer, Wrench, Paintbrush, Sparkles, Star, Hammer, ShieldCheck, TreePine } from "lucide-react";
 
 const SERVICES = [
   {
@@ -111,15 +112,13 @@ export function MaintenanceSlider() {
               Professional repairs and upkeep for every part of your property
             </p>
           </div>
-          <a
-            href="https://wa.me/923177779990?text=Hi%2C%20I%20need%20maintenance%20help%20for%20my%20property"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/maintenance"
             className="inline-flex items-center gap-2 self-start px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-emerald-500/25 whitespace-nowrap"
           >
-            <MessageCircle className="h-5 w-5 shrink-0" />
-            Request on WhatsApp
-          </a>
+            <Wrench className="h-5 w-5 shrink-0" />
+            Explore Services
+          </Link>
         </div>
 
         {/* Slider */}
@@ -145,9 +144,16 @@ export function MaintenanceSlider() {
                 <h3 className="font-display font-bold text-gray-900 text-lg mb-2">
                   {service.title}
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-sm leading-relaxed mb-4 flex-grow">
                   {service.desc}
                 </p>
+                <Link
+                  href={`/maintenance?category=${encodeURIComponent(service.title)}`}
+                  className="mt-auto inline-flex items-center font-medium text-sm hover:underline"
+                  style={{ color: service.iconColor.replace('text-', '') }} // Approximate color match
+                >
+                  View Providers
+                </Link>
               </div>
             ))}
           </div>
