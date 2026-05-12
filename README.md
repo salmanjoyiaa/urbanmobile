@@ -1,5 +1,17 @@
 <div align="center">
   <img src="docs/screenshots/urbansaudi_header.png" alt="TheUrbanRealEstateSaudi Header" width="100%" />
+
+  <br />
+
+  <a href="https://nextjs.org">
+    <img src="https://img.shields.io/badge/Build%20Next.js-passing-success" alt="Build Next.js" />
+  </a>
+  <a href="https://supabase.com">
+    <img src="https://img.shields.io/badge/Database-Supabase-green" alt="Supabase Database" />
+  </a>
+  <a href="https://github.com/salmanjoyiaa/urbanmobile/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-Private-blue" alt="License" />
+  </a>
 </div>
 
 # UrbanSaudi Real Estate Platform
