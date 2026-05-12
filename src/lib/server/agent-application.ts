@@ -9,7 +9,7 @@ export async function upsertAgentRowAndSetAgentRole(
   params: {
     profileId: string;
     agent_type: AgentProgramType;
-    company_name: string;
+    company_name: string | null;
     license_number?: string | null;
     document_url?: string | null;
     bio?: string | null;
@@ -22,7 +22,7 @@ export async function upsertAgentRowAndSetAgentRole(
       {
         profile_id: params.profileId,
         agent_type: params.agent_type,
-        company_name: params.company_name,
+        company_name: params.company_name ?? null,
         license_number: params.license_number ?? null,
         document_url: params.document_url ?? null,
         bio: params.bio ?? null,

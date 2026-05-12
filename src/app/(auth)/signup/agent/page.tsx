@@ -69,8 +69,13 @@ function AgentSignupPage() {
   });
 
   const agentTypeWatch = watch("agent_type");
+  const asksCompany = agentTypeWatch === "property" || agentTypeWatch === "visiting";
 
-  // Pre-select agent type from URL params (e.g., /signup/agent?type=visiting)
+  useEffect(() => {
+    if (agentTypeWatch === "seller" || agentTypeWatch === "maintenance") {
+      setValue("company_name", "");
+    }
+  }, [agentTypeWatch, setValue]);
   useEffect(() => {
     const typeParam = searchParams.get("type");
     if (typeParam === "property" || typeParam === "visiting" || typeParam === "seller" || typeParam === "maintenance") {
@@ -79,21 +84,26 @@ function AgentSignupPage() {
   }, [searchParams, setValue]);
 
   const onSubmit = async (values: AgentSignupInput) => {
+    const asksCompanySubmit = values.agent_type === "property" || values.agent_type === "visiting";
     const fileInput = document.getElementById("document") as HTMLInputElement | null;
     const documentFile = fileInput?.files?.[0];
+
+    const meta: Record<string, unknown> = {
+      full_name: values.full_name,
+      phone: values.phone || null,
+      role: "agent",
+      agent_type: values.agent_type,
+      license_number: values.license_number || null,
+    };
+    if (asksCompanySubmit) {
+      meta.company_name = values.company_name?.trim() || null;
+    }
 
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: {
-        data: {
-          full_name: values.full_name,
-          phone: values.phone || null,
-          role: "agent",
-          agent_type: values.agent_type,
-          company_name: values.company_name,
-          license_number: values.license_number || null,
-        },
+        data: meta,
       },
     });
 
@@ -122,7 +132,7 @@ function AgentSignupPage() {
           user_id: userId,
           email: values.email,
           agent_type: values.agent_type,
-          company_name: values.company_name,
+          company_name: asksCompanySubmit ? (values.company_name?.trim() || null) : null,
           license_number: values.license_number || null,
           document_url: null,
           bio: null,
@@ -161,7 +171,7 @@ function AgentSignupPage() {
 
     const payloadForApi = {
       agent_type: values.agent_type,
-      company_name: values.company_name,
+      company_name: asksCompanySubmit ? values.company_name : null,
       license_number: values.license_number || null,
       document_url: documentPath || null,
       bio: null,
@@ -223,13 +233,15 @@ function AgentSignupPage() {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="company_name">Company name</Label>
-            <Input id="company_name" {...register("company_name")} />
-            {errors.company_name && (
-              <p className="text-sm text-destructive">{errors.company_name.message}</p>
-            )}
-          </div>
+          {asksCompany && (
+            <div className="space-y-2">
+              <Label htmlFor="company_name">Company name</Label>
+              <Input id="company_name" {...register("company_name")} />
+              {errors.company_name && (
+                <p className="text-sm text-destructive">{errors.company_name.message}</p>
+              )}
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="license_number">License number</Label>
@@ -289,7 +301,11 @@ function AgentSignupPage() {
             control={control}
             render={({ field }) => (
               <PhoneInput
-                label="WhatsApp Number"
+                label={
+                  agentTypeWatch === "seller" || agentTypeWatch === "maintenance"
+                    ? "WhatsApp number (required)"
+                    : "WhatsApp Number"
+                }
                 value={field.value ?? ""}
                 onChange={field.onChange}
                 onCountryChange={setSelectedCountry}

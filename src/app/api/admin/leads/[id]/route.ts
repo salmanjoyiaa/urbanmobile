@@ -30,7 +30,10 @@ export async function PUT(request: Request, context: { params: { id: string } })
 
   const editSchema = z.object({
     buyer_name: z.string().min(1).max(100),
-    buyer_email: z.string().email().max(255),
+    buyer_email: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? null : v),
+      z.union([z.string().email().max(255), z.null()])
+    ),
     buyer_phone: z.string().min(1).max(20),
     message: z.string().max(1000).optional().nullable(),
   });
@@ -114,7 +117,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     .single()) as {
       data: {
         buyer_name: string;
-        buyer_email: string;
+        buyer_email: string | null;
         buyer_phone: string;
         products: {
           title: string;

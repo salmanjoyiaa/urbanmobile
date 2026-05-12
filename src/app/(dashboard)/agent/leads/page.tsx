@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 type LeadRow = {
   id: string;
   buyer_name: string;
-  buyer_email: string;
+  buyer_email: string | null;
   buyer_phone: string;
   message: string | null;
   status: string;
@@ -48,7 +48,6 @@ export default async function AgentLeadsPage() {
     `
       )
       .in("product_id", leadIdList)
-      .neq("status", "pending")
       .order("created_at", { ascending: false })) as { data: LeadRow[] | null };
 
     rows = data || [];
@@ -58,7 +57,7 @@ export default async function AgentLeadsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-navy">Buy Requests</h1>
-        <p className="text-sm text-muted-foreground">Read-only queue for leads on your products.</p>
+        <p className="text-sm text-muted-foreground">Leads on your products (including new inquiries).</p>
       </div>
 
       <DataTable
@@ -66,7 +65,7 @@ export default async function AgentLeadsPage() {
         columns={[
           { key: "product", title: "Product", render: (row) => row.products?.title || "—" },
           { key: "buyer_name", title: "Buyer" },
-          { key: "buyer_email", title: "Email" },
+          { key: "buyer_email", title: "Email", render: (row) => row.buyer_email || "—" },
           { key: "buyer_phone", title: "Phone" },
           {
             key: "message",

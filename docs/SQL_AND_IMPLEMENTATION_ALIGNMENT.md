@@ -11,7 +11,7 @@
 - **properties** — agent_id, type, purpose, status, price, city, images, etc.
 - **products** — agent_id, category, condition, price, is_available, etc.
 - **visit_requests** — property_id, visitor_*, visit_date/time, status (pending | confirmed | cancelled | completed | assigned), visiting_agent_id, visiting_status (view | visit_done | customer_remarks | deal_pending | deal_fail | commission_got | deal_close), customer_remarks, admin_notes
-- **buy_requests (leads)** — product_id, buyer_*, message, status (pending | confirmed | rejected | completed)
+- **buy_requests (leads)** — product_id, buyer_name, buyer_phone, buyer_email (nullable), message, status (pending | confirmed | rejected | completed)
 - **maintenance_requests** — customer_*, details, status
 - **testimonials**, **notifications**, **audit_log**, **notification_logs**, etc.
 

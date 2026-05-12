@@ -8,7 +8,7 @@ import { MessageCircle } from "lucide-react";
 type LeadRow = {
   id: string;
   buyer_name: string;
-  buyer_email: string;
+  buyer_email: string | null;
   buyer_phone: string;
   message: string | null;
   status: string;
@@ -43,7 +43,7 @@ export default async function AdminLeadsPage() {
         columns={[
           { key: "product", title: "Product", render: (row) => row.products?.title || "—" },
           { key: "buyer_name", title: "Buyer" },
-          { key: "buyer_email", title: "Email" },
+          { key: "buyer_email", title: "Email", render: (row) => row.buyer_email || "—" },
           {
             key: "buyer_phone",
             title: "Phone",

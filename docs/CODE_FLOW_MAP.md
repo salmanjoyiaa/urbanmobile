@@ -13,7 +13,7 @@
 ### Public Flows
 - `/properties`, `/products`: Server/client data (Supabase, React Query); filters and listing.
 - `/properties/[id]`: Property detail + **VisitScheduler** (POST `/api/visits`).
-- `/products/[id]`: Product detail + **BuyRequestForm** (POST `/api/leads`).
+- `/products/[id]`: Product detail + **BuyRequestForm** (POST `/api/leads` — name + phone, notifies admin + seller, returns `whatsapp_url` for redirect).
 - `/maintenance`: **MaintenanceRequestForm** → POST `/api/maintenance` (rate-limited).
 - All use **(public)/layout.tsx** (no theme tokens by default; should use `bg-background` / `text-foreground` for full theme support).
 

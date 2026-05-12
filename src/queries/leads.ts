@@ -14,7 +14,12 @@ export function useCreateLeadRequest() {
         body: JSON.stringify(payload),
       });
 
-      const result = (await response.json()) as { success?: boolean; error?: string };
+      const result = (await response.json()) as {
+        success?: boolean;
+        error?: string;
+        whatsapp_url?: string;
+        id?: string;
+      };
 
       if (!response.ok) {
         throw new Error(result.error || "Could not submit buy request");

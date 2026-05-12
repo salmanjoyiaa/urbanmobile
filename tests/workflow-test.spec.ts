@@ -157,47 +157,25 @@ test.describe('End-to-End Request Workflow', () => {
     await page.waitForLoadState('networkidle');
 
     // Scroll to buy request form if needed
-    const buyForm = page.locator('text=/Request to buy|buy request/i');
+    const buyForm = page.locator('text=/Contact on WhatsApp|Request to buy|WhatsApp/i');
     if (await buyForm.count() > 0) {
       await buyForm.first().scrollIntoViewIfNeeded();
       await page.waitForTimeout(500);
     }
 
-    // Fill buy request form
+    // Fill buy request form (name + WhatsApp only; then redirect to wa.me)
     const buyerName = 'Test Buyer ' + Date.now();
-    const buyerEmail = 'buyer-' + Date.now() + '@test.com';
-    const buyerPhone = '+966509876543';
-    const message = 'Interested in this product, affordable and good condition.';
+    const buyerPhoneDigits = '509876543';
 
-    // Find and fill form inputs
-    await page.fill('input[id*="name" i]:not([type="email"]):not([type="phone"])', buyerName);
-    let emailInputs = page.locator('input[type="email"]');
-    if (await emailInputs.count() > 0) {
-      await emailInputs.last().fill(buyerEmail);
-    }
-    let phoneInputs = page.locator('input[id*="phone" i]');
-    if (await phoneInputs.count() > 0) {
-      await phoneInputs.last().fill(buyerPhone);
-    }
+    await page.fill('#buyer-name', buyerName);
+    await page.locator('#phone-input').fill(buyerPhoneDigits);
 
-    // Fill message
-    const messageArea = page.locator('textarea, input[id*="message"]');
-    if (await messageArea.count() > 0) {
-      await messageArea.first().fill(message);
-    }
+    await page.getByRole('button', { name: /Contact on WhatsApp/i }).click();
 
-    // Submit form
-    const submitBtn = page
-      .locator(
-        'button:has-text("Submit"), button:has-text("buy"), button:has-text("Send")'
-      )
-      .first();
-    await submitBtn.click();
-
-    // Wait for success notification
-    const successToast = page.locator('text=/submitted|success|request/i');
-    await expect(successToast).toBeVisible({ timeout: 5000 });
-    console.log('Buy request submitted - success notification appeared');
+    await page.waitForURL(/wa\.(me|web)/, { timeout: 20000 });
+    console.log('Buy request submitted — WhatsApp redirect');
+    await page.goto(`${BASE_URL}/login`);
+    await page.waitForLoadState('domcontentloaded');
 
     // Step 3: Admin checks leads
     console.log('Step 3: Admin checking leads in admin dashboard');
@@ -230,8 +208,8 @@ test.describe('End-to-End Request Workflow', () => {
     // Logout
     await logout(page);
 
-    // Step 5: Agent checks leads dashboard
-    console.log('Step 5: Agent checking leads for confirmed purchase');
+    // Step 5: Agent checks leads dashboard (includes pending inquiries)
+    console.log('Step 5: Agent checking leads');
     await login(page, AGENT.email, AGENT.password);
     await page.goto(`${BASE_URL}/agent/leads`);
     await page.waitForLoadState('networkidle');
@@ -312,23 +290,19 @@ test.describe('End-to-End Request Workflow', () => {
       await page.goto(`${BASE_URL}/products/${productId}`);
       await page.waitForLoadState('networkidle');
 
-      const buyForm = page.locator('text=/Request to buy/i');
+      const buyForm = page.locator('text=/Contact on WhatsApp|Request to buy/i');
       if (await buyForm.count() > 0) {
         await buyForm.first().scrollIntoViewIfNeeded();
       }
 
-      await page.fill('input[id*="name"]:not([type="email"]):not([type="phone"])', `Buyer ${i + 1} ` + Date.now());
-      let emailInputs = page.locator('input[type="email"]');
-      if (await emailInputs.count() > 0) {
-        await emailInputs.last().fill(`buyer${i}@test.com`);
-      }
-      let phoneInputs = page.locator('input[id*="phone"]');
-      if (await phoneInputs.count() > 0) {
-        await phoneInputs.last().fill('+966' + (50 + i) + '8000000' + i);
-      }
+      await page.fill('#buyer-name', `Buyer ${i + 1} ` + Date.now());
+      await page.locator('#phone-input').fill(`50123456${i}`);
 
-      await page.click('button:has-text("Submit"), button:has-text("buy")');
-      await page.waitForLoadState('networkidle');
+      await page.getByRole('button', { name: /Contact on WhatsApp/i }).click();
+      await page.waitForURL(/wa\.(me|web)/, { timeout: 20000 }).catch(() => {
+        console.log('WhatsApp redirect not observed for buy request', i + 1);
+      });
+      await page.goto(`${BASE_URL}/products/${productId}`);
       console.log(`Buy request ${i + 1} created`);
     }
 

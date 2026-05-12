@@ -5,15 +5,28 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { upsertAgentRowAndSetAgentRole } from "@/lib/server/agent-application";
 import { enforceAgentSignupRateLimit, getClientIp } from "@/lib/server/agent-rate-limit";
 
-const bodySchema = z.object({
-  user_id: z.string().uuid(),
-  email: z.string().email(),
-  agent_type: z.enum(["property", "visiting", "seller", "maintenance"]),
-  company_name: z.string().min(2).max(100),
-  license_number: z.string().max(50).optional().nullable(),
-  document_url: z.string().max(1000).optional().nullable(),
-  bio: z.string().max(5000).optional().nullable(),
-});
+const bodySchema = z
+  .object({
+    user_id: z.string().uuid(),
+    email: z.string().email(),
+    agent_type: z.enum(["property", "visiting", "seller", "maintenance"]),
+    company_name: z.string().min(2).max(100).optional().nullable(),
+    license_number: z.string().max(50).optional().nullable(),
+    document_url: z.string().max(1000).optional().nullable(),
+    bio: z.string().max(5000).optional().nullable(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.agent_type === "property" || data.agent_type === "visiting") {
+      const c = (data.company_name ?? "").trim();
+      if (c.length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Company name is required",
+          path: ["company_name"],
+        });
+      }
+    }
+  });
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
@@ -60,10 +73,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email does not match this account" }, { status: 403 });
     }
 
+    const companyTrim =
+      parsed.data.agent_type === "property" || parsed.data.agent_type === "visiting"
+        ? (parsed.data.company_name ?? "").trim()
+        : null;
+
     const result = await upsertAgentRowAndSetAgentRole(admin, {
       profileId: parsed.data.user_id,
       agent_type: parsed.data.agent_type,
-      company_name: parsed.data.company_name,
+      company_name: companyTrim && companyTrim.length > 0 ? companyTrim : null,
       license_number: parsed.data.license_number ?? null,
       document_url: parsed.data.document_url ?? null,
       bio: parsed.data.bio ?? null,

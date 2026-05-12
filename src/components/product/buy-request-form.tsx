@@ -1,19 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useCreateLeadRequest } from "@/queries/leads";
-import { buyRequestSchema, type BuyRequestInput } from "@/lib/validators";
+import { buyRequestPublicFormSchema, type BuyRequestPublicFormInput, type BuyRequestInput } from "@/lib/validators";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { SuccessState } from "@/components/ui/success-state";
 
 type BuyRequestFormProps = {
   productId: string;
@@ -21,7 +18,6 @@ type BuyRequestFormProps = {
 };
 
 export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps) {
-  const [isSuccess, setIsSuccess] = useState(false);
   const createLead = useCreateLeadRequest();
 
   const {
@@ -29,32 +25,29 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
-    reset,
-  } = useForm<BuyRequestInput>({
-    resolver: zodResolver(buyRequestSchema),
+  } = useForm<BuyRequestPublicFormInput>({
+    resolver: zodResolver(buyRequestPublicFormSchema),
     mode: "onTouched",
     defaultValues: {
-      product_id: productId,
       buyer_name: "",
-      buyer_email: "",
       buyer_phone: "",
-      message: "",
     },
   });
 
-  const onSubmit = async (values: BuyRequestInput) => {
+  const onSubmit = async (values: BuyRequestPublicFormInput) => {
     try {
-      await createLead.mutateAsync({
+      const result = await createLead.mutateAsync({
         product_id: productId,
         buyer_name: values.buyer_name,
-        buyer_email: values.buyer_email,
         buyer_phone: values.buyer_phone,
-        message: values.message || undefined,
-      });
+      } satisfies BuyRequestInput);
 
-      toast.success("Buy request submitted successfully!");
-      setIsSuccess(true);
-      reset();
+      if (result.whatsapp_url) {
+        toast.success("Opening WhatsApp…");
+        window.location.assign(result.whatsapp_url);
+      } else {
+        toast.error("Could not open WhatsApp. Please try again.");
+      }
     } catch (error) {
       const messageText = error instanceof Error ? error.message : "Could not submit request";
       toast.error(messageText);
@@ -63,27 +56,13 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
 
   const isLoading = isSubmitting || createLead.isPending;
 
-  if (isSuccess) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <SuccessState
-            title="Request Sent!"
-            description={`Your interest in ${productTitle} has been sent to the seller.`}
-            actionLabel="Browse More"
-            actionHref="/products"
-            className="p-0"
-          />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Request to buy</CardTitle>
-        <CardDescription>Send your interest for {productTitle}.</CardDescription>
+        <CardTitle>Contact on WhatsApp</CardTitle>
+        <CardDescription>
+          We will save your details and open WhatsApp with a message about {productTitle}. The seller and our team are notified.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -99,25 +78,12 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
               <p className="text-sm text-destructive">{errors.buyer_name.message}</p>
             )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="buyer-email">Email</Label>
-            <Input
-              id="buyer-email"
-              type="email"
-              {...register("buyer_email")}
-              disabled={isLoading}
-              placeholder="your@email.com"
-            />
-            {errors.buyer_email && (
-              <p className="text-sm text-destructive">{errors.buyer_email.message}</p>
-            )}
-          </div>
           <Controller
             name="buyer_phone"
             control={control}
             render={({ field }) => (
               <PhoneInput
-                label="WhatsApp Number"
+                label="Your WhatsApp number"
                 value={field.value}
                 onChange={field.onChange}
                 error={errors.buyer_phone}
@@ -126,28 +92,15 @@ export function BuyRequestForm({ productId, productTitle }: BuyRequestFormProps)
               />
             )}
           />
-          <div className="space-y-2">
-            <Label htmlFor="buyer-message">Message (optional)</Label>
-            <Textarea
-              id="buyer-message"
-              {...register("message")}
-              disabled={isLoading}
-              placeholder="Tell the seller more about your interest..."
-              rows={3}
-            />
-            {errors.message && (
-              <p className="text-sm text-destructive">{errors.message.message}</p>
-            )}
-          </div>
 
           <Button type="submit" disabled={isLoading} className="w-full" size="lg">
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
+                Saving…
               </>
             ) : (
-              "Submit buy request"
+              "Contact on WhatsApp"
             )}
           </Button>
         </form>

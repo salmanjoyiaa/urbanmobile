@@ -115,7 +115,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <h2 className="text-[17px] font-bold text-[#0f1419]">Seller</h2>
             <div className="mt-4 space-y-2 text-[14px]">
               <p className="font-bold text-[#0f1419]">{agentName}</p>
-              <p className="text-[#536471]">Company: {product.agents?.company_name || "—"}</p>
+              {product.agents?.company_name ? (
+                <p className="text-[#536471]">Company: {product.agents.company_name}</p>
+              ) : null}
               <p className="text-[#536471]">Phone: {maskedPhone}</p>
             </div>
           </div>

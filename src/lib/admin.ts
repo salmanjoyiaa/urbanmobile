@@ -103,3 +103,25 @@ export async function notifyAdmins(params: {
 
   await supabase.from("notifications").insert(notifications as never);
 }
+
+export async function notifyUsers(params: {
+  userIds: string[];
+  title: string;
+  body: string;
+  type: string;
+  metadata?: Record<string, unknown>;
+}) {
+  const ids = Array.from(new Set(params.userIds.filter(Boolean)));
+  if (ids.length === 0) return;
+
+  const supabase = createAdminClient();
+  const notifications = ids.map((userId) => ({
+    user_id: userId,
+    title: params.title,
+    body: params.body,
+    type: params.type,
+    metadata: params.metadata || {},
+  }));
+
+  await supabase.from("notifications").insert(notifications as never);
+}

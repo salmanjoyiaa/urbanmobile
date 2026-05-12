@@ -135,7 +135,7 @@ export interface BuyRequest {
   id: string;
   product_id: string;
   buyer_name: string;
-  buyer_email: string;
+  buyer_email: string | null;
   buyer_phone: string;
   message: string | null;
   status: LeadStatus;

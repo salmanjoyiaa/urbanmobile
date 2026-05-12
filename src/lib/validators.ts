@@ -38,15 +38,33 @@ export const signupSchema = z.object({
 });
 
 export const agentSignupSchema = signupSchema.extend({
-  company_name: z
-    .string()
-    .min(2, "Company name is required")
-    .max(100, "Company name must not exceed 100 characters"),
+  company_name: z.string().max(100, "Company name must not exceed 100 characters").optional(),
   license_number: z
     .string()
     .max(50, "License number must not exceed 50 characters")
     .optional(),
   agent_type: z.enum(["property", "visiting", "seller", "maintenance"]),
+}).superRefine((data, ctx) => {
+  if (data.agent_type === "property" || data.agent_type === "visiting") {
+    const c = typeof data.company_name === "string" ? data.company_name.trim() : "";
+    if (c.length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Company name is required",
+        path: ["company_name"],
+      });
+    }
+  }
+  if (data.agent_type === "seller" || data.agent_type === "maintenance") {
+    const p = (data.phone ?? "").trim();
+    if (!p || !/^\+\d{10,15}$/.test(p)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "WhatsApp number is required (format +966XXXXXXXXX)",
+        path: ["phone"],
+      });
+    }
+  }
 });
 
 export const propertySchema = z.object({
@@ -186,25 +204,19 @@ export const visitRequestSchema = z.object({
   visit_time: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format"),
 });
 
+/** Public product lead: name + phone only; stored without email for dashboard + WhatsApp handoff */
 export const buyRequestSchema = z.object({
   product_id: z.string().regex(safeUUIDRegex, "Invalid product ID"),
   buyer_name: z
     .string()
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name must not exceed 100 characters"),
-  buyer_email: z
-    .string()
-    .min(1, "Email is required")
-    .max(255, "Email must not exceed 255 characters")
-    .regex(emailRegex, "Valid email is required"),
   buyer_phone: z
     .string()
     .regex(/^\+\d{10,15}$/, "Invalid phone number format"),
-  message: z
-    .string()
-    .max(5000, "Message must not exceed 5000 characters")
-    .optional(),
 });
+
+export const buyRequestPublicFormSchema = buyRequestSchema.omit({ product_id: true });
 
 const maintenanceMediaStoragePath = z
   .string()
@@ -311,5 +323,6 @@ export type PropertyInput = z.infer<typeof propertySchema>;
 export type ProductInput = z.infer<typeof productSchema>;
 export type VisitRequestInput = z.infer<typeof visitRequestSchema>;
 export type BuyRequestInput = z.infer<typeof buyRequestSchema>;
+export type BuyRequestPublicFormInput = z.infer<typeof buyRequestPublicFormSchema>;
 export type MaintenanceRequestInput = z.infer<typeof maintenanceRequestSchema>;
 export type MaintenanceServiceInput = z.infer<typeof maintenanceServiceSchema>;

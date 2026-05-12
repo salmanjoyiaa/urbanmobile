@@ -19,7 +19,7 @@ import { toast } from "sonner";
 type LeadRow = {
     id: string;
     buyer_name: string;
-    buyer_email: string;
+    buyer_email: string | null;
     buyer_phone: string;
     message: string | null;
 };
@@ -35,7 +35,7 @@ export function EditLeadDialog({ lead, triggerNode }: EditLeadDialogProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [form, setForm] = useState({
         buyer_name: lead.buyer_name,
-        buyer_email: lead.buyer_email,
+        buyer_email: lead.buyer_email ?? "",
         buyer_phone: lead.buyer_phone,
         message: lead.message || "",
     });
@@ -85,7 +85,7 @@ export function EditLeadDialog({ lead, triggerNode }: EditLeadDialogProps) {
                         <Input id="buyer_name" name="buyer_name" value={form.buyer_name} onChange={handleChange} />
                     </div>
                     <div className="space-y-1">
-                        <Label htmlFor="buyer_email">Email</Label>
+                        <Label htmlFor="buyer_email">Email (optional)</Label>
                         <Input id="buyer_email" name="buyer_email" type="email" value={form.buyer_email} onChange={handleChange} />
                     </div>
                     <div className="space-y-1">
