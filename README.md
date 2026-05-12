@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="docs/screenshots/urbansaudi_header.png" alt="TheUrbanRealEstateSaudi Header" width="100%" />
+</div>
+
 # UrbanSaudi Real Estate Platform
 
 A production-ready real estate platform for Saudi Arabia built with Next.js 14, Supabase, and Twilio WhatsApp integration.
