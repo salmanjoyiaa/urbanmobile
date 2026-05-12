@@ -1,5 +1,8 @@
+import { siteConfig } from "@/config/site";
+
 /**
  * Customer → seller WhatsApp deep link for product inquiries (wa.me).
+ * Written as the buyer addressing the seller (message is sent from the buyer's WhatsApp).
  */
 
 export function formatProductLeadWhatsAppBody(params: {
@@ -9,16 +12,25 @@ export function formatProductLeadWhatsAppBody(params: {
   productUrl: string;
   leadId: string;
 }): string {
+  const brand = siteConfig.name;
   const lines = [
-    `Hello — I'm interested in your listing on UrbanSaudi.`,
+    `Hello,`,
     ``,
-    `Product: ${params.productTitle}`,
-    `Link: ${params.productUrl}`,
+    `I am contacting you through ${brand} regarding this listing:`,
     ``,
-    `My name: ${params.buyerName}`,
-    `My WhatsApp: ${params.buyerPhone}`,
+    params.productTitle,
+    params.productUrl,
     ``,
-    `Reference (for your dashboard): ${params.leadId}`,
+    `My details:`,
+    `Name: ${params.buyerName}`,
+    `Phone: ${params.buyerPhone}`,
+    ``,
+    `Lead reference ID:`,
+    params.leadId,
+    `(You can find this inquiry under Buy requests in your seller dashboard.)`,
+    ``,
+    `Thank you,`,
+    params.buyerName,
   ];
   return lines.join("\n");
 }

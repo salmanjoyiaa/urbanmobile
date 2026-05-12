@@ -4,7 +4,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyAdmins, notifyUsers } from "@/lib/admin";
 import { buyRequestSchema } from "@/lib/validators";
-import { siteConfig } from "@/config/site";
+import { getPublicShareBaseUrl } from "@/config/site";
 import { buildProductLeadWhatsAppUrl, formatProductLeadWhatsAppBody } from "@/lib/product-lead-whatsapp";
 import * as Sentry from "@sentry/nextjs";
 
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
   }
 
   const leadId = inserted?.id;
-  const productUrl = `${siteConfig.url.replace(/\/$/, "")}/products/${parsed.data.product_id}`;
+  const productUrl = `${getPublicShareBaseUrl()}/products/${parsed.data.product_id}`;
   const whatsappBody = formatProductLeadWhatsAppBody({
     buyerName: parsed.data.buyer_name,
     buyerPhone: parsed.data.buyer_phone,

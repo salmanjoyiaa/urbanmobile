@@ -51,6 +51,8 @@ flowchart LR
 
 On a product detail page, **Contact on WhatsApp** collects the customer name and phone, creates a **buy request** for admins and the listing seller (in-app notifications), and redirects the browser to **WhatsApp** (`wa.me`) with a prefilled message to the seller phone on file. **Seller** and **maintenance** agent applications require a WhatsApp number at signup; **property** and **visiting** programs still collect an optional company name.
 
+The product link inside that message uses **`getPublicShareBaseUrl()`** ([`src/config/site.ts`](src/config/site.ts)): optional `NEXT_PUBLIC_SHARE_BASE_URL`, else `NEXT_PUBLIC_SITE_URL` when it is not localhost, else **`https://www.theurbanrealestate.com`** so local development still sends a working storefront URL to sellers.
+
 ## ✨ Features
 
 ### For Customers
@@ -191,6 +193,7 @@ Required:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon/public key
 - `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key (server-side only)
 - `NEXT_PUBLIC_SITE_URL` - Your site URL (e.g., `https://urbansaudi.com`)
+- `NEXT_PUBLIC_SHARE_BASE_URL` (optional) - Canonical URL for product links in WhatsApp messages; overrides the share-base logic when set (see [src/config/site.ts](src/config/site.ts))
 
 Optional (for full functionality):
 - `UPSTASH_REDIS_REST_URL` - Upstash Redis URL (caching)
