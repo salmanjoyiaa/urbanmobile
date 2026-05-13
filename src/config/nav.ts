@@ -44,7 +44,7 @@ export const visitingAgentNav: NavItem[] = [
 export const sellerNav: NavItem[] = [
   { title: "Overview", href: "/agent", icon: LayoutDashboard },
   { title: "My Products", href: "/agent/products", icon: Package },
-  { title: "Buy Requests", href: "/agent/leads", icon: ShoppingBag },
+  { title: "Product contacts", href: "/agent/leads", icon: ShoppingBag },
 ];
 
 export const maintenanceNav: NavItem[] = [
@@ -83,7 +83,7 @@ export const adminNavGroups: NavGroup[] = [
     label: "Requests",
     items: [
       { title: "Visit Requests", href: "/admin/visits", icon: Calendar },
-      { title: "Buy Requests", href: "/admin/leads", icon: ShoppingBag },
+      { title: "Product contacts", href: "/admin/leads", icon: ShoppingBag },
       { title: "Maintenance Requests", href: "/admin/maintenance", icon: ClipboardList },
     ],
   },

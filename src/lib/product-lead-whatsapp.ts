@@ -1,36 +1,19 @@
 import { siteConfig } from "@/config/site";
 
 /**
- * Customer → seller WhatsApp deep link for product inquiries (wa.me).
- * Written as the buyer addressing the seller (message is sent from the buyer's WhatsApp).
+ * Anonymous customer → seller WhatsApp prefilled text (no PII; customer introduces themselves in chat).
  */
-
-export function formatProductLeadWhatsAppBody(params: {
-  buyerName: string;
-  buyerPhone: string;
-  productTitle: string;
-  productUrl: string;
-  leadId: string;
-}): string {
+export function formatProductContactWhatsAppBody(params: { productTitle: string; productUrl: string }): string {
   const brand = siteConfig.name;
   const lines = [
     `Hello,`,
     ``,
-    `I am contacting you through ${brand} regarding this listing:`,
+    `I found your listing on ${brand} and would like more information.`,
     ``,
     params.productTitle,
     params.productUrl,
     ``,
-    `My details:`,
-    `Name: ${params.buyerName}`,
-    `Phone: ${params.buyerPhone}`,
-    ``,
-    `Lead reference ID:`,
-    params.leadId,
-    `(You can find this inquiry under Buy requests in your seller dashboard.)`,
-    ``,
-    `Thank you,`,
-    params.buyerName,
+    `Thank you.`,
   ];
   return lines.join("\n");
 }
@@ -46,4 +29,13 @@ export function buildProductLeadWhatsAppUrl(sellerPhone: string, messageBody: st
   const digits = phoneToWhatsAppDigits(sellerPhone);
   if (!digits) return null;
   return `https://wa.me/${digits}?text=${encodeURIComponent(messageBody)}`;
+}
+
+/** tel: URI for device dialer (E.164 preferred) */
+export function buildTelUrl(phoneE164: string): string | null {
+  const trimmed = phoneE164.trim();
+  if (!trimmed) return null;
+  const digits = phoneToWhatsAppDigits(trimmed);
+  if (!digits) return null;
+  return `tel:+${digits}`;
 }

@@ -39,7 +39,7 @@ export default async function AdminOverviewPage() {
     { count: activeProperties },
     { count: pendingProperties },
     { count: pendingVisits },
-    { count: pendingLeads },
+    { count: productContactClicks },
     { count: pendingMaintenance },
     { count: totalCustomers },
     { data: activity },
@@ -54,7 +54,7 @@ export default async function AdminOverviewPage() {
     supabase.from("properties").select("id", { count: "exact", head: true }).eq("status", "available"),
     supabase.from("properties").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("visit_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
-    supabase.from("buy_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("product_contact_events").select("id", { count: "exact", head: true }),
     supabase.from("maintenance_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "customer"),
     supabase
@@ -97,14 +97,13 @@ export default async function AdminOverviewPage() {
       {/* Pending / Action Required */}
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Action Required</h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <Link href="/admin/properties?status=pending" className="block">
             <StatCard title="Pending Properties" value={pendingProperties || 0} description="Awaiting approval" />
           </Link>
           <StatCard title="Pending Property Agents" value={pendingPropertyAgents || 0} />
           <StatCard title="Pending Visiting Agents" value={pendingVisitingAgents || 0} />
           <StatCard title="Pending Visits" value={pendingVisits || 0} />
-          <StatCard title="Pending Leads" value={pendingLeads || 0} />
           <StatCard title="Pending Maintenance" value={pendingMaintenance || 0} />
         </div>
       </div>
@@ -112,13 +111,20 @@ export default async function AdminOverviewPage() {
       {/* Totals */}
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Platform Totals</h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
           <StatCard title="Active Properties" value={activeProperties || 0} description={`${totalProperties || 0} total`} />
           <StatCard title="Property Agents" value={approvedPropertyAgents || 0} description="Approved" />
           <StatCard title="Visiting Team" value={approvedVisitingAgents || 0} description="Approved" />
           <StatCard title="Customers" value={totalCustomers || 0} />
           <Link href="/admin/visits?status=confirmed" className="block">
             <StatCard title="Confirmed Visits" value={totalConfirmedVisits || 0} description="All time" />
+          </Link>
+          <Link href="/admin/leads" className="block">
+            <StatCard
+              title="Product contact clicks"
+              value={productContactClicks || 0}
+              description="WhatsApp + call (all time)"
+            />
           </Link>
         </div>
       </div>

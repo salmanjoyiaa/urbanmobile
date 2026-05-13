@@ -204,20 +204,6 @@ export const visitRequestSchema = z.object({
   visit_time: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format"),
 });
 
-/** Public product lead: name + phone only; stored without email for dashboard + WhatsApp handoff */
-export const buyRequestSchema = z.object({
-  product_id: z.string().regex(safeUUIDRegex, "Invalid product ID"),
-  buyer_name: z
-    .string()
-    .min(2, "Name must be at least 2 characters")
-    .max(100, "Name must not exceed 100 characters"),
-  buyer_phone: z
-    .string()
-    .regex(/^\+\d{10,15}$/, "Invalid phone number format"),
-});
-
-export const buyRequestPublicFormSchema = buyRequestSchema.omit({ product_id: true });
-
 const maintenanceMediaStoragePath = z
   .string()
   .min(3)
@@ -322,7 +308,5 @@ export type AgentSignupInput = z.infer<typeof agentSignupSchema>;
 export type PropertyInput = z.infer<typeof propertySchema>;
 export type ProductInput = z.infer<typeof productSchema>;
 export type VisitRequestInput = z.infer<typeof visitRequestSchema>;
-export type BuyRequestInput = z.infer<typeof buyRequestSchema>;
-export type BuyRequestPublicFormInput = z.infer<typeof buyRequestPublicFormSchema>;
 export type MaintenanceRequestInput = z.infer<typeof maintenanceRequestSchema>;
 export type MaintenanceServiceInput = z.infer<typeof maintenanceServiceSchema>;

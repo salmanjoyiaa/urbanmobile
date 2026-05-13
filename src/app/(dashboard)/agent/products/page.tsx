@@ -9,10 +9,14 @@ import { createClient } from "@/lib/supabase/server";
 import { formatSAR } from "@/lib/format";
 import type { Product } from "@/types/database";
 
+type ProductRow = Product & { contact_clicks: number };
+
 export default async function AgentProductsPage() {
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: agent } = (await supabase
@@ -30,7 +34,23 @@ export default async function AgentProductsPage() {
     .eq("agent_id", agent.id)
     .order("created_at", { ascending: false })) as { data: Product[] | null };
 
-  const rows = data || [];
+  const baseRows = data || [];
+  const ids = baseRows.map((p) => p.id);
+  const clickMap: Record<string, number> = {};
+
+  if (ids.length > 0) {
+    const { data: events } = (await supabase.from("product_contact_events").select("product_id").in("product_id", ids)) as {
+      data: { product_id: string }[] | null;
+    };
+    for (const e of events || []) {
+      clickMap[e.product_id] = (clickMap[e.product_id] || 0) + 1;
+    }
+  }
+
+  const rows: ProductRow[] = baseRows.map((p) => ({
+    ...p,
+    contact_clicks: clickMap[p.id] || 0,
+  }));
 
   return (
     <div className="space-y-6">
@@ -58,6 +78,11 @@ export default async function AgentProductsPage() {
             key: "price",
             title: "Price",
             render: (row) => formatSAR(row.price),
+          },
+          {
+            key: "contact_clicks",
+            title: "Clicks",
+            render: (row) => <span className="tabular-nums font-medium">{row.contact_clicks}</span>,
           },
           {
             key: "actions",

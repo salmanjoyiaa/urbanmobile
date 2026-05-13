@@ -11,7 +11,8 @@
 - **properties** — agent_id, type, purpose, status, price, city, images, etc.
 - **products** — agent_id, category, condition, price, is_available, etc.
 - **visit_requests** — property_id, visitor_*, visit_date/time, status (pending | confirmed | cancelled | completed | assigned), visiting_agent_id, visiting_status (view | visit_done | customer_remarks | deal_pending | deal_fail | commission_got | deal_close), customer_remarks, admin_notes
-- **buy_requests (leads)** — product_id, buyer_name, buyer_phone, buyer_email (nullable), message, status (pending | confirmed | rejected | completed)
+- **buy_requests (legacy leads)** — product_id, buyer_name, buyer_phone, buyer_email (nullable), message, status (pending | confirmed | rejected | completed); new product traffic uses **product_contact_events** instead.
+- **product_contact_events** — product_id, channel (`whatsapp` | `phone`), created_at; anonymous analytics; inserted via service-role API only.
 - **maintenance_requests** — customer_*, details, status
 - **testimonials**, **notifications**, **audit_log**, **notification_logs**, etc.
 
@@ -26,7 +27,8 @@
 | Properties | — (agent-created) | Admin properties | PATCH /api/admin/properties/[id] | — | Yes |
 | Products | — (agent-created) | Admin products | PATCH /api/admin/products/[id] | — | Yes |
 | Visits | — (public form) | Admin visits | PATCH/PUT /api/admin/visits/[id], assign visiting agent | DELETE | Yes |
-| Leads (buy requests) | — (public form) | Admin leads | PUT/PATCH /api/admin/leads/[id] | — | Yes |
+| Product contact events | — (POST /api/products/[id]/contact) | Admin/agent “Product contacts” | — | — | Yes (read activity) |
+| Leads (buy_requests, legacy) | — | Admin PATCH /api/admin/leads/[id] | — | — | Legacy rows only |
 | Maintenance | — (public form) | Admin maintenance | PATCH /api/admin/maintenance/[id] | — | Yes |
 | Testimonials | POST /api/admin/testimonials | Public + admin | PATCH /api/admin/testimonials/[id] | DELETE | Yes |
 

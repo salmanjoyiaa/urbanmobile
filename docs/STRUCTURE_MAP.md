@@ -35,7 +35,7 @@ src/
 ├── providers/                      # theme-provider, query-provider, auth-provider, toast-provider
 ├── config/                         # nav.ts, env.ts, site.ts
 ├── hooks/                          # use-auth, use-form-submission, use-realtime*, use-toast
-├── queries/                        # properties, products, agents, leads, visits, notifications
+├── queries/                        # properties, products, agents, product-contact, visits, notifications
 ├── stores/                         # auth-store, notification-store
 ├── types/                          # database.ts, models.ts, enums.ts
 public/                             # images (3d.png, home_hero.png), favicon
@@ -49,7 +49,7 @@ public/                             # images (3d.png, home_hero.png), favicon
 | `/properties` | `(public)/properties/page.tsx` | (public) | List |
 | `/properties/[id]` | `(public)/properties/[id]/page.tsx` | (public) | Detail + visit scheduler |
 | `/products` | `(public)/products/page.tsx` | (public) | List |
-| `/products/[id]` | `(public)/products/[id]/page.tsx` | (public) | Detail + buy request |
+| `/products/[id]` | `(public)/products/[id]/page.tsx` | (public) | Detail + ProductContactActions |
 | `/maintenance` | `(public)/maintenance/page.tsx` | (public) | Maintenance request form |
 | `/login` | `(auth)/login/page.tsx` | (auth) | Supabase signInWithPassword |
 | `/signup`, `/signup/agent` | `(auth)/signup/*` | (auth) | Agent signup + POST /api/agents |
@@ -65,7 +65,8 @@ public/                             # images (3d.png, home_hero.png), favicon
 | GET | `/api/properties`, `/api/properties/[id]` | Public | List / single property |
 | GET | `/api/products` | Public | List products |
 | GET/POST | `/api/visits` | Public | Visit slots + create (rate limit via app logic) |
-| POST | `/api/leads` | Public | Buy request; rate-limited (3/h) |
+| POST | `/api/products/[id]/contact` | Public | Anonymous product contact event; rate-limited; returns wa.me / tel |
+| POST | `/api/leads` | Public | **410 Gone** — use `/api/products/[id]/contact` |
 | POST | `/api/maintenance` | Public | Maintenance request; rate-limited (3/h) |
 | GET | `/api/testimonials` | Public | Testimonials |
 | POST | `/api/agents` | Session (post signup) | Agent application |
@@ -74,7 +75,7 @@ public/                             # images (3d.png, home_hero.png), favicon
 | GET/POST | `/api/agent/products` | Agent | Own products |
 | GET/PATCH/DELETE | `/api/agent/products/[id]` | Agent | Own product CRUD |
 | PATCH | `/api/agent/visits/[id]` | Agent | Update visit |
-| * | `/api/admin/*` | Admin | getAdminRouteContext(); CRUD agents, visiting-team, properties, products, visits, leads, maintenance, testimonials |
+| * | `/api/admin/*` | Admin | getAdminRouteContext(); CRUD agents, visiting-team, properties, products, visits, leads (legacy buy_requests), maintenance, testimonials |
 | GET/PATCH | `/api/notifications` | Admin | Notifications |
 | POST | `/api/whatsapp/webhook` | Twilio signature | Delivery status logging |
 
@@ -83,7 +84,7 @@ public/                             # images (3d.png, home_hero.png), favicon
 - **Theme:** next-themes (ThemeProvider in root layout; `attribute="class"`, `defaultTheme="light"`, `storageKey="urbansaudi-theme"`). ThemeToggle in home, public, admin, and agent layouts; light/dark and persistence apply site-wide.
 - **Auth:** AuthProvider (context) + auth-store (Zustand); middleware updates Supabase session on each request.
 - **Notifications:** notification-store + use-realtime-notifications (Supabase realtime).
-- **Server state:** React Query (properties, products, leads, visits, notifications).
+- **Server state:** React Query (properties, products, visits, notifications); product contact uses a small mutation hook in `queries/product-contact.ts`.
 
 ## 6. Styling System
 

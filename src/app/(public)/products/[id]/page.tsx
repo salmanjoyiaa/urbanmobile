@@ -4,7 +4,7 @@ import { MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatPhone, formatSAR } from "@/lib/format";
 import { PropertyGallery } from "@/components/property/property-gallery";
-import { BuyRequestForm } from "@/components/product/buy-request-form";
+import { ProductContactActions } from "@/components/product/product-contact-actions";
 
 type ProductDetail = {
   id: string;
@@ -122,7 +122,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          <BuyRequestForm productId={product.id} productTitle={product.title} />
+          <ProductContactActions
+            productId={product.id}
+            sellerPhone={product.agents?.profiles?.phone ?? null}
+          />
         </div>
       </div>
     </div>

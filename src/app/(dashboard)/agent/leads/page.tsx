@@ -2,23 +2,23 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/dashboard/data-table";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { formatDate } from "@/lib/format";
 
-type LeadRow = {
+type ContactRow = {
   id: string;
-  buyer_name: string;
-  buyer_email: string | null;
-  buyer_phone: string;
-  message: string | null;
-  status: string;
+  channel: string;
+  created_at: string;
   products: {
     title: string;
   } | null;
 };
 
-export default async function AgentLeadsPage() {
+export default async function AgentProductContactsPage() {
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: agent } = (await supabase
@@ -30,25 +30,27 @@ export default async function AgentLeadsPage() {
   if (!agent) redirect("/pending-approval");
   if (agent.agent_type !== "seller") redirect("/agent");
 
-  const { data: productIds } = (await supabase
-    .from("products")
-    .select("id")
-    .eq("agent_id", agent.id)) as { data: Array<{ id: string }> | null };
-  const leadIdList = (productIds || []).map((item) => item.id);
+  const { data: productIds } = (await supabase.from("products").select("id").eq("agent_id", agent.id)) as {
+    data: Array<{ id: string }> | null;
+  };
+  const idList = (productIds || []).map((item) => item.id);
 
-  let rows: LeadRow[] = [];
+  let rows: ContactRow[] = [];
 
-  if (leadIdList.length > 0) {
+  if (idList.length > 0) {
     const { data } = (await supabase
-      .from("buy_requests")
+      .from("product_contact_events")
       .select(
         `
-      id, buyer_name, buyer_email, buyer_phone, message, status,
+      id,
+      channel,
+      created_at,
       products:product_id (title)
     `
       )
-      .in("product_id", leadIdList)
-      .order("created_at", { ascending: false })) as { data: LeadRow[] | null };
+      .in("product_id", idList)
+      .order("created_at", { ascending: false })
+      .limit(500)) as { data: ContactRow[] | null };
 
     rows = data || [];
   }
@@ -56,26 +58,25 @@ export default async function AgentLeadsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-navy">Buy Requests</h1>
-        <p className="text-sm text-muted-foreground">Leads on your products (including new inquiries).</p>
+        <h1 className="text-2xl font-bold text-navy">Product contact activity</h1>
+        <p className="text-sm text-muted-foreground">
+          WhatsApp and call taps on your listings (combined analytics; no customer details stored).
+        </p>
       </div>
 
       <DataTable
         rows={rows}
         columns={[
+          { key: "created_at", title: "Time", render: (row) => formatDate(row.created_at) },
           { key: "product", title: "Product", render: (row) => row.products?.title || "—" },
-          { key: "buyer_name", title: "Buyer" },
-          { key: "buyer_email", title: "Email", render: (row) => row.buyer_email || "—" },
-          { key: "buyer_phone", title: "Phone" },
           {
-            key: "message",
-            title: "Message",
-            render: (row) => row.message || "—",
-          },
-          {
-            key: "status",
-            title: "Status",
-            render: (row) => <Badge className="capitalize">{row.status}</Badge>,
+            key: "channel",
+            title: "Channel",
+            render: (row) => (
+              <Badge variant="outline" className="capitalize">
+                {row.channel === "whatsapp" ? "WhatsApp" : "Phone"}
+              </Badge>
+            ),
           },
         ]}
       />

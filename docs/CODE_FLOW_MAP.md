@@ -13,7 +13,7 @@
 ### Public Flows
 - `/properties`, `/products`: Server/client data (Supabase, React Query); filters and listing.
 - `/properties/[id]`: Property detail + **VisitScheduler** (POST `/api/visits`).
-- `/products/[id]`: Product detail + **BuyRequestForm** (POST `/api/leads` — name + phone, notifies admin + seller, returns `whatsapp_url` for redirect).
+- `/products/[id]`: Product detail + **ProductContactActions** (POST `/api/products/[id]/contact` — anonymous `product_contact_events`, returns `whatsapp_url` or `tel_url`; legacy POST `/api/leads` is **410**).
 - `/maintenance`: **MaintenanceRequestForm** → POST `/api/maintenance` (rate-limited).
 - All use **(public)/layout.tsx** (no theme tokens by default; should use `bg-background` / `text-foreground` for full theme support).
 
@@ -59,7 +59,7 @@ Dashboard agent (app/(dashboard)/agent/layout.tsx)
 
 - **Server (RSC):** `createClient()` from `@/lib/supabase/server` in layout and page components (e.g. FeaturedSliders, dashboard list pages).
 - **Client:** React Query in `queries/*` (useQuery/useMutation); Supabase realtime via `use-realtime*` hooks.
-- **API:** Admin routes call **getAdminRouteContext()** (returns supabase + user + profile or 401/403). Public POSTs validate body with **Zod** (validators.ts); leads and maintenance use **Upstash** or in-memory rate limit by IP.
+- **API:** Admin routes call **getAdminRouteContext()** (returns supabase + user + profile or 401/403). Public POSTs validate body with **Zod** (validators.ts); product contact and maintenance use **Upstash** or in-memory rate limit by IP.
 
 ## 4. Critical Flows
 

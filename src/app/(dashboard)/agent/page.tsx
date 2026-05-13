@@ -97,8 +97,9 @@ export default async function AgentOverviewPage() {
     visitIdList.length > 0 ? supabase.from("visit_requests").select("id", { count: "exact", head: true })
       .in("property_id", visitIdList).eq("status", "confirmed") : Promise.resolve({ count: 0 }),
     // Property Agents Metric 2
-    leadIdList.length > 0 ? supabase.from("buy_requests").select("id", { count: "exact", head: true })
-      .in("product_id", leadIdList).eq("status", "confirmed") : Promise.resolve({ count: 0 }),
+    leadIdList.length > 0
+      ? supabase.from("product_contact_events").select("id", { count: "exact", head: true }).in("product_id", leadIdList)
+      : Promise.resolve({ count: 0 }),
   ]);
 
   const [{ count: failedDeals }] = await Promise.all([
@@ -129,7 +130,7 @@ export default async function AgentOverviewPage() {
         ) : agent.agent_type === "seller" ? (
           <>
             <StatCard title="Products" value={productsCount || 0} />
-            <StatCard title="Confirmed Leads" value={propertyAgentLeads || 0} />
+            <StatCard title="Product contact clicks" value={propertyAgentLeads || 0} />
           </>
         ) : (
           <>

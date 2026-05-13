@@ -146,6 +146,15 @@ export interface BuyRequest {
   updated_at: string;
 }
 
+export type ProductContactChannel = "whatsapp" | "phone";
+
+export interface ProductContactEvent {
+  id: string;
+  product_id: string;
+  channel: ProductContactChannel;
+  created_at: string;
+}
+
 export interface MaintenanceRequest {
   id: string;
   service_id: string | null;
@@ -294,6 +303,11 @@ export interface Database {
         Row: BuyRequest;
         Insert: Omit<BuyRequest, "id" | "created_at" | "updated_at" | "status" | "admin_notes" | "confirmed_by" | "confirmed_at"> & { id?: string; status?: LeadStatus };
         Update: Partial<Omit<BuyRequest, "id" | "created_at">>;
+      };
+      product_contact_events: {
+        Row: ProductContactEvent;
+        Insert: Omit<ProductContactEvent, "id" | "created_at"> & { id?: string };
+        Update: never;
       };
       maintenance_requests: {
         Row: MaintenanceRequest;

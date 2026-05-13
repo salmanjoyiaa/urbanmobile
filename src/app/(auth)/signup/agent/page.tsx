@@ -70,6 +70,7 @@ function AgentSignupPage() {
 
   const agentTypeWatch = watch("agent_type");
   const asksCompany = agentTypeWatch === "property" || agentTypeWatch === "visiting";
+  const isSellerMinimal = agentTypeWatch === "seller";
 
   useEffect(() => {
     if (agentTypeWatch === "seller" || agentTypeWatch === "maintenance") {
@@ -85,7 +86,8 @@ function AgentSignupPage() {
 
   const onSubmit = async (values: AgentSignupInput) => {
     const asksCompanySubmit = values.agent_type === "property" || values.agent_type === "visiting";
-    const fileInput = document.getElementById("document") as HTMLInputElement | null;
+    const isSeller = values.agent_type === "seller";
+    const fileInput = !isSeller ? (document.getElementById("document") as HTMLInputElement | null) : null;
     const documentFile = fileInput?.files?.[0];
 
     const meta: Record<string, unknown> = {
@@ -93,7 +95,7 @@ function AgentSignupPage() {
       phone: values.phone || null,
       role: "agent",
       agent_type: values.agent_type,
-      license_number: values.license_number || null,
+      license_number: isSeller ? null : values.license_number || null,
     };
     if (asksCompanySubmit) {
       meta.company_name = values.company_name?.trim() || null;
@@ -133,7 +135,7 @@ function AgentSignupPage() {
           email: values.email,
           agent_type: values.agent_type,
           company_name: asksCompanySubmit ? (values.company_name?.trim() || null) : null,
-          license_number: values.license_number || null,
+          license_number: values.agent_type === "seller" ? null : values.license_number || null,
           document_url: null,
           bio: null,
         }),
@@ -172,7 +174,7 @@ function AgentSignupPage() {
     const payloadForApi = {
       agent_type: values.agent_type,
       company_name: asksCompanySubmit ? values.company_name : null,
-      license_number: values.license_number || null,
+      license_number: isSeller ? null : values.license_number || null,
       document_url: documentPath || null,
       bio: null,
     };
@@ -199,7 +201,9 @@ function AgentSignupPage() {
       <CardHeader>
         <CardTitle>Agent registration</CardTitle>
         <CardDescription>
-          Submit your profile and license details. You&apos;ll be redirected once approved.
+          {isSellerMinimal
+            ? "Enter your name, email, WhatsApp number, and password. You will be notified once approved."
+            : "Submit your profile and license details. You will be redirected once approved."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -209,6 +213,7 @@ function AgentSignupPage() {
             <Select
               value={agentTypeWatch}
               onValueChange={(val: "property" | "visiting" | "seller" | "maintenance") => setValue("agent_type", val)}
+              disabled={isSellerMinimal && typeParam === "seller"}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select Agent Program" />
@@ -243,11 +248,15 @@ function AgentSignupPage() {
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="license_number">License number</Label>
-            <Input id="license_number" {...register("license_number")} />
-          </div>
+          {!isSellerMinimal && (
+            <div className="space-y-2">
+              <Label htmlFor="license_number">License number</Label>
+              <Input id="license_number" {...register("license_number")} />
+            </div>
+          )}
 
+          {!isSellerMinimal && (
+          <>
           {/* Country selector */}
           <div className="space-y-2">
             <Label>Country</Label>
@@ -287,6 +296,8 @@ function AgentSignupPage() {
               </Select>
             </div>
           )}
+          </>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -324,10 +335,12 @@ function AgentSignupPage() {
             )}
           </div>
 
+          {!isSellerMinimal && (
           <div className="space-y-2">
             <Label htmlFor="document">License document (optional)</Label>
             <Input id="document" type="file" accept=".pdf,.jpg,.jpeg,.png" />
           </div>
+          )}
 
           <Button type="submit" className="w-full bg-primary text-white" disabled={isSubmitting}>
             {isSubmitting ? (

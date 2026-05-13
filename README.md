@@ -47,9 +47,9 @@ flowchart LR
   Api --> Sentry
 ```
 
-## Product leads and WhatsApp
+## Product contact and WhatsApp
 
-On a product detail page, **Contact on WhatsApp** collects the customer name and phone, creates a **buy request** for admins and the listing seller (in-app notifications), and redirects the browser to **WhatsApp** (`wa.me`) with a prefilled message to the seller phone on file. **Seller** and **maintenance** agent applications require a WhatsApp number at signup; **property** and **visiting** programs still collect an optional company name.
+On a product detail page, **Contact on WhatsApp** and **Call** each POST to **`/api/products/[id]/contact`**, which records an anonymous **`product_contact_events`** row (channel `whatsapp` or `phone`), returns a **`wa.me`** URL or **`tel:`** link, and redirects the browser — **no** buyer PII, **no** `buy_requests` insert, **no** admin/seller notifications. The legacy **`POST /api/leads`** endpoint returns **410 Gone**. **Seller** signup uses a minimal field set (name, email, phone, password); **maintenance** and other agent programs keep their existing fields.
 
 The product link inside that message uses **`getPublicShareBaseUrl()`** ([`src/config/site.ts`](src/config/site.ts)): optional `NEXT_PUBLIC_SHARE_BASE_URL`, else `NEXT_PUBLIC_SITE_URL` when it is not localhost, else **`https://www.theurbanrealestate.com`** so local development still sends a working storefront URL to sellers.
 
@@ -57,7 +57,7 @@ The product link inside that message uses **`getPublicShareBaseUrl()`** ([`src/c
 
 ### For Customers
 - 🏠 Browse properties for sale/rent with advanced filters
-- 🛋️ Product marketplace with **Contact on WhatsApp** (lead saved for admin + seller, then opens WhatsApp on the customer device)
+- 🛋️ Product marketplace with **Contact on WhatsApp** / **Call** (anonymous click counts for dashboards, then opens WhatsApp or the phone dialer)
 - 📅 Schedule property visits with real-time slot availability
 - 💬 WhatsApp notifications for visit confirmations
 - 🔔 Real-time in-app notifications
@@ -73,7 +73,7 @@ The product link inside that message uses **`getPublicShareBaseUrl()`** ([`src/c
 
 ### For Administrators
 - 👥 Agent approval/rejection system
-- ✔️ Visit & buy request confirmation workflows
+- ✔️ Visit confirmation workflows; **Product contacts** activity (read-only) replaces buy-request moderation for new traffic
 - 📜 Comprehensive audit logging
 - 💬 Automated WhatsApp notifications to customers
 - 📊 Platform-wide statistics and metrics
@@ -114,8 +114,9 @@ urbansaudi/
 │   │   └── api/                 # API routes
 │   │       ├── admin/
 │   │       ├── agent/
+│   │       ├── products/
 │   │       ├── visits/
-│   │       ├── leads/
+│   │       ├── leads/             # legacy 410 handler
 │   │       └── whatsapp/
 │   ├── components/
 │   │   ├── ui/                  # shadcn/ui components

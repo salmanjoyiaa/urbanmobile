@@ -37,7 +37,7 @@
 
 | Finding | Severity | Location | Recommendation |
 |--------|----------|----------|-----------------|
-| API request bodies validated with Zod | OK | e.g. src/app/api/leads/route.ts, maintenance/route.ts, api/agents/route.ts | Validators (validators.ts) used; invalid payloads rejected. |
+| API request bodies validated with Zod | OK | e.g. src/app/api/products/[id]/contact/route.ts, maintenance/route.ts, api/agents/route.ts | Validators (validators.ts) used; invalid payloads rejected. |
 | Supabase queries | OK | All API routes | Parameterized via Supabase client; no raw SQL from user input. |
 | sanitize.ts present, not used on all free text | Low | src/lib/sanitize.ts | Used for file names (signup agent, image-uploader). Consider applying sanitizeText/sanitizeHTML to user-supplied description/message fields before DB/email. |
 | Email/phone in validators | OK | src/lib/validators.ts | Email regex, length limits; phone normalized. |
@@ -50,7 +50,7 @@
 
 | Finding | Severity | Location | Recommendation |
 |--------|----------|----------|-----------------|
-| Rate limiting on leads | OK | src/app/api/leads/route.ts | 3 per hour per IP (Upstash or in-memory). |
+| Rate limiting on product contact | OK | src/app/api/products/[id]/contact/route.ts | Per IP (Upstash or in-memory). |
 | Rate limiting on maintenance | OK | src/app/api/maintenance/route.ts | Same. |
 | Audit log for sensitive actions | OK | src/lib/admin.ts writeAuditLog | Used by admin agent/visit/lead actions. |
 | No rate limit on agent signup | Low | src/app/api/agents/route.ts | Consider rate limit by IP or email to prevent abuse. |
