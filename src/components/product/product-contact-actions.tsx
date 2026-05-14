@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { MessageCircle, Phone, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,16 +12,23 @@ type ProductContactActionsProps = {
   sellerPhone: string | null;
 };
 
+type ContactChannel = "whatsapp" | "phone";
+
+const buttonLayoutClass =
+  "min-h-11 w-full shrink-0 rounded-lg px-4 py-3 text-base sm:h-10 sm:min-h-0 sm:flex-1 sm:px-6 sm:py-2";
+
 export function ProductContactActions({ productId, sellerPhone }: ProductContactActionsProps) {
   const record = useRecordProductContact(productId);
-  const busy = record.isPending;
+  const [activeChannel, setActiveChannel] = useState<ContactChannel | null>(null);
   const disabled = !sellerPhone?.trim();
+  const requestInFlight = activeChannel !== null;
 
-  const run = async (channel: "whatsapp" | "phone") => {
+  const run = async (channel: ContactChannel) => {
     if (disabled) {
       toast.error("Seller phone is not available for this listing.");
       return;
     }
+    setActiveChannel(channel);
     try {
       const result = await record.mutateAsync(channel);
       if (channel === "whatsapp" && result.whatsapp_url) {
@@ -33,6 +41,8 @@ export function ProductContactActions({ productId, sellerPhone }: ProductContact
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setActiveChannel(null);
     }
   };
 
@@ -49,22 +59,30 @@ export function ProductContactActions({ productId, sellerPhone }: ProductContact
         <Button
           type="button"
           size="lg"
-          className="flex-1"
-          disabled={disabled || busy}
+          className={buttonLayoutClass}
+          disabled={disabled || requestInFlight}
           onClick={() => run("whatsapp")}
         >
-          {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageCircle className="mr-2 h-4 w-4" />}
+          {activeChannel === "whatsapp" ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <MessageCircle className="mr-2 h-4 w-4" />
+          )}
           Contact on WhatsApp
         </Button>
         <Button
           type="button"
           size="lg"
           variant="outline"
-          className="flex-1"
-          disabled={disabled || busy}
+          className={buttonLayoutClass}
+          disabled={disabled || requestInFlight}
           onClick={() => run("phone")}
         >
-          {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Phone className="mr-2 h-4 w-4" />}
+          {activeChannel === "phone" ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Phone className="mr-2 h-4 w-4" />
+          )}
           Call
         </Button>
       </CardContent>

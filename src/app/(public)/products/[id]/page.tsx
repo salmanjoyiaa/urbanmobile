@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, formatPhone, formatSAR } from "@/lib/format";
+import { formatDate, formatPhoneFull, formatSAR } from "@/lib/format";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { ProductContactActions } from "@/components/product/product-contact-actions";
 
@@ -74,8 +74,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
   }
 
   const agentName = product.agents?.profiles?.full_name || "Verified Agent";
-  const maskedPhone = product.agents?.profiles?.phone
-    ? formatPhone(product.agents.profiles.phone)
+  const sellerPhoneDisplay = product.agents?.profiles?.phone
+    ? formatPhoneFull(product.agents.profiles.phone)
     : "Not provided";
 
   return (
@@ -118,7 +118,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
               {product.agents?.company_name ? (
                 <p className="text-[#536471]">Company: {product.agents.company_name}</p>
               ) : null}
-              <p className="text-[#536471]">Phone: {maskedPhone}</p>
+              <p className="text-[#536471]">Phone: {sellerPhoneDisplay}</p>
             </div>
           </div>
 
