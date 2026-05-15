@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Package } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getListProductFreeHref } from "@/lib/server/list-product-href";
 import type { Product } from "@/types/database";
 import { ProductCard } from "@/components/product/product-card";
 import { ProductFilters } from "@/components/product/product-filters";
+import { Button } from "@/components/ui/button";
 
 export const revalidate = 60;
 
@@ -31,6 +33,7 @@ export async function generateMetadata({ searchParams }: ProductsPageProps): Pro
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const supabase = await createClient();
+  const listProductHref = await getListProductFreeHref(supabase);
   const city = searchParams.city && searchParams.city !== "all" ? searchParams.city : undefined;
   const category =
     searchParams.category && searchParams.category !== "all"
@@ -91,6 +94,15 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <div>
         <h1 className="text-[24px] font-extrabold text-foreground">Products</h1>
         <p className="mt-1 text-[15px] text-muted-foreground">Find quality used household items from trusted agents.</p>
+      </div>
+
+      <div className="flex justify-center sm:justify-end">
+        <Button
+          asChild
+          className="rounded-full bg-[#1d9bf0] px-5 font-bold text-white shadow-sm hover:bg-[#1a8cd8]"
+        >
+          <Link href={listProductHref}>List your products free</Link>
+        </Button>
       </div>
 
       <ProductFilters initialValues={searchParams} />

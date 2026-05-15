@@ -168,8 +168,8 @@ export function MaintenanceSlider() {
         <div className="relative">
           <div
             ref={trackRef}
-            className="flex touch-pan-x gap-5 overflow-x-auto overflow-y-hidden scrollbar-hide overscroll-x-contain"
-            style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
+            className="flex [touch-action:pan-x_pan-y] touch-manipulation gap-5 overflow-x-auto overflow-y-hidden scrollbar-hide overscroll-x-contain"
+            style={{ scrollSnapType: "x proximity", WebkitOverflowScrolling: "touch" }}
             onScroll={syncCurrentFromScroll}
           >
             {SERVICES.map((service) => (
