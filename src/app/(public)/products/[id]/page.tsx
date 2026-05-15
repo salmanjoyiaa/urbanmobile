@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
@@ -6,6 +7,7 @@ import { getPublicShareBaseUrl } from "@/config/site";
 import { formatDate, formatPhoneFull, formatSAR } from "@/lib/format";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { ProductContactActions } from "@/components/product/product-contact-actions";
+import { Button } from "@/components/ui/button";
 
 type ProductDetail = {
   id: string;
@@ -37,9 +39,10 @@ function absoluteShareUrl(base: string, src: string | undefined): string | undef
   }
 }
 
-async function getProduct(id: string) {
-  const supabase = await createClient();
-
+async function getProduct(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  id: string
+) {
   const { data } = (await supabase
     .from("products")
     .select(
@@ -62,7 +65,8 @@ type PageProps = {
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const product = await getProduct(params.id);
+  const supabase = await createClient();
+  const product = await getProduct(supabase, params.id);
 
   if (!product) {
     return { title: "Product not found" };
@@ -101,10 +105,33 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
-  const product = await getProduct(params.id);
+  const supabase = await createClient();
+  const product = await getProduct(supabase, params.id);
 
   if (!product) {
     notFound();
+  }
+
+  let listProductHref = "/sell";
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    const { data: profile } = (await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single()) as { data: { role: string } | null };
+    if (profile?.role === "agent") {
+      const { data: agent } = (await supabase
+        .from("agents")
+        .select("agent_type, status")
+        .eq("profile_id", user.id)
+        .single()) as { data: { agent_type: string; status: string } | null };
+      if (agent?.agent_type === "seller" && agent.status === "approved") {
+        listProductHref = "/agent/products/new";
+      }
+    }
   }
 
   const agentName = product.agents?.profiles?.full_name || "Verified Agent";
@@ -122,6 +149,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <MapPin className="h-4 w-4" />
           {locationLine}
         </p>
+        <div className="mt-4">
+          <Button asChild className="rounded-full bg-[#1d9bf0] px-5 font-bold text-white hover:bg-[#1a8cd8]">
+            <Link href={listProductHref}>List your product free</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">

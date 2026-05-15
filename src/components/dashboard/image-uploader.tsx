@@ -13,11 +13,11 @@ type ImageUploaderProps = {
   maxFiles?: number;
 };
 
-function sanitizeName(name: string) {
+export function sanitizeStorageFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
-function isHeif(file: File): boolean {
+export function isHeif(file: File): boolean {
   const type = file.type.toLowerCase();
   if (type === "image/heic" || type === "image/heif" || type === "image/heic-sequence" || type === "image/heif-sequence") return true;
   const ext = file.name.split(".").pop()?.toLowerCase();
@@ -25,7 +25,7 @@ function isHeif(file: File): boolean {
 }
 
 // Convert HEIC via API backstop if needed
-async function convertHeifToJpeg(file: File): Promise<File> {
+export async function convertHeifToJpeg(file: File): Promise<File> {
   const formData = new FormData();
   formData.append("image", file);
   const response = await fetch("/api/convert-heic", { method: "POST", body: formData });
@@ -36,7 +36,7 @@ async function convertHeifToJpeg(file: File): Promise<File> {
 }
 
 // Optimize to WEBP & check resolution
-async function optimizeImage(file: File): Promise<File> {
+export async function optimizeImage(file: File): Promise<File> {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -127,7 +127,7 @@ export function ImageUploader({ bucket, values, onChange, maxFiles = 20 }: Image
         // Optimize and resize
         file = await optimizeImage(file);
 
-        const path = `${Date.now()}-${sanitizeName(file.name)}`;
+        const path = `${Date.now()}-${sanitizeStorageFileName(file.name)}`;
         const { error } = await supabase.storage.from(bucket).upload(path, file, {
           cacheControl: "3600",
           upsert: false,

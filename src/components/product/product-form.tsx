@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS } from "@/lib/constants";
+import {
+  sellListingDraftSchema,
+} from "@/lib/validators";
 import type { Product } from "@/types/database";
 import { ImageUploader } from "@/components/dashboard/image-uploader";
 import { toast } from "sonner";
@@ -25,9 +28,17 @@ type ProductFormProps = {
   initialData?: Product;
   submitEndpoint?: string;
   redirectPath?: string;
+  /** When set on create, reads JSON from sessionStorage once and clears the key if valid. */
+  restoreDraftStorageKey?: string;
 };
 
-export function ProductForm({ mode, initialData, submitEndpoint, redirectPath }: ProductFormProps) {
+export function ProductForm({
+  mode,
+  initialData,
+  submitEndpoint,
+  redirectPath,
+  restoreDraftStorageKey,
+}: ProductFormProps) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -38,14 +49,36 @@ export function ProductForm({ mode, initialData, submitEndpoint, redirectPath }:
   const [price, setPrice] = useState(String(initialData?.price || ""));
   const [city, setCity] = useState(initialData?.city || "");
   const [district, setDistrict] = useState(initialData?.district ?? "");
-  const [cities, setCities] = useState<string[]>([]);
-  useEffect(() => {
-    fetch('/api/cities')
-      .then(res => res.json())
-      .then(data => setCities(data.cities || []))
-      .catch(console.error);
-  }, []);
   const [images, setImages] = useState<string[]>(initialData?.images || []);
+  const draftRestored = useRef(false);
+
+  useEffect(() => {
+    if (mode !== "create" || !restoreDraftStorageKey || draftRestored.current) return;
+    if (typeof window === "undefined") return;
+    const raw = sessionStorage.getItem(restoreDraftStorageKey);
+    if (!raw) return;
+    draftRestored.current = true;
+    try {
+      const json = JSON.parse(raw) as unknown;
+      const parsed = sellListingDraftSchema.safeParse(json);
+      if (!parsed.success) {
+        sessionStorage.removeItem(restoreDraftStorageKey);
+        return;
+      }
+      const d = parsed.data;
+      setTitle(d.title);
+      setDescription(d.description);
+      setCategory(d.category);
+      setCondition(d.condition);
+      setPrice(d.price);
+      setCity(d.city);
+      setDistrict(d.district ?? "");
+      sessionStorage.removeItem(restoreDraftStorageKey);
+      toast.message("Your listing details were restored. Add photos and publish when ready.");
+    } catch {
+      sessionStorage.removeItem(restoreDraftStorageKey);
+    }
+  }, [mode, restoreDraftStorageKey]);
 
   const submit = async () => {
     setSubmitting(true);
@@ -155,14 +188,14 @@ export function ProductForm({ mode, initialData, submitEndpoint, redirectPath }:
           </div>
           <div className="space-y-2">
             <Label>City</Label>
-            <Select value={city} onValueChange={(value) => setCity(value as typeof city)} disabled={isSubmitting}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {cities.map((item) => (
-                  <SelectItem key={item} value={item}>{item}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              value={city}
+              onChange={(event) => setCity(event.target.value)}
+              disabled={isSubmitting}
+              placeholder="e.g., Riyadh, Jeddah"
+              maxLength={100}
+              required
+            />
           </div>
         </div>
         <div className="space-y-2">

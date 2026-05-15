@@ -145,9 +145,15 @@ function AgentSignupPage() {
         toast.error(afterJson?.error || "Failed to submit agent application. Please contact support.");
         return;
       }
-      toast.success(
-        "Application submitted. Check your email to verify your account, then sign in. You can upload license documents later from your profile if needed."
-      );
+      if (isSeller) {
+        toast.success(
+          "Verify your email, then sign in to finish listing your product. Your seller account will be active once you confirm."
+        );
+      } else {
+        toast.success(
+          "Application submitted. Check your email to verify your account, then sign in. You can upload license documents later from your profile if needed."
+        );
+      }
       window.location.href = "/login";
       return;
     }
@@ -192,6 +198,12 @@ function AgentSignupPage() {
       return;
     }
 
+    if (isSeller) {
+      toast.success("Your product seller account is active. You can create listings now.");
+      window.location.href = "/agent/products/new";
+      return;
+    }
+
     toast.success("Agent application submitted. Awaiting admin approval.");
     window.location.href = "/pending-approval";
   };
@@ -199,10 +211,10 @@ function AgentSignupPage() {
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Agent registration</CardTitle>
+        <CardTitle>{isSellerMinimal ? "Create a Product Seller Account" : "Agent registration"}</CardTitle>
         <CardDescription>
           {isSellerMinimal
-            ? "Enter your name, email, WhatsApp number, and password. You will be notified once approved."
+            ? "Enter your name, email, WhatsApp number, and password. You can list products as soon as you are signed in (or after you verify your email if confirmation is required)."
             : "Submit your profile and license details. You will be redirected once approved."}
         </CardDescription>
       </CardHeader>
@@ -221,7 +233,7 @@ function AgentSignupPage() {
               <SelectContent>
                 <SelectItem value="property">Property Agent (Listings & Rentals)</SelectItem>
                 <SelectItem value="visiting">Visiting Team (Tours & Deals)</SelectItem>
-                <SelectItem value="seller">Seller (Products & Sales)</SelectItem>
+                <SelectItem value="seller">Product seller — create listings</SelectItem>
                 <SelectItem value="maintenance">Maintenance Agent (Repairs & Services)</SelectItem>
               </SelectContent>
             </Select>

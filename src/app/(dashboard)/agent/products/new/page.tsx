@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProductForm } from "@/components/product/product-form";
+import { SELL_LISTING_DRAFT_STORAGE_KEY } from "@/lib/validators";
 
 export default async function AgentNewProductPage() {
   const supabase = await createClient();
@@ -20,7 +21,7 @@ export default async function AgentNewProductPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold text-navy">Create Product</h1>
-      <ProductForm mode="create" />
+      <ProductForm mode="create" restoreDraftStorageKey={SELL_LISTING_DRAFT_STORAGE_KEY} />
     </div>
   );
 }

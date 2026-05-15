@@ -78,6 +78,8 @@ export async function POST(request: NextRequest) {
         ? (parsed.data.company_name ?? "").trim()
         : null;
 
+    const agentStatus = parsed.data.agent_type === "seller" ? "approved" : "pending";
+
     const result = await upsertAgentRowAndSetAgentRole(admin, {
       profileId: parsed.data.user_id,
       agent_type: parsed.data.agent_type,
@@ -85,7 +87,7 @@ export async function POST(request: NextRequest) {
       license_number: parsed.data.license_number ?? null,
       document_url: parsed.data.document_url ?? null,
       bio: parsed.data.bio ?? null,
-      status: "pending",
+      status: agentStatus,
     });
 
     if (!result.ok) {

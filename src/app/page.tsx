@@ -418,7 +418,7 @@ export default async function HomePage() {
                   {[
                     { href: "/signup/agent?type=property", label: "Apply as Aqari" },
                     { href: "/signup/agent?type=visiting", label: "Apply as Team Agent" },
-                    { href: "/signup/agent?type=seller", label: "Apply as Seller" },
+                    { href: "/signup/agent?type=seller", label: "Create a product seller account" },
                     { href: "/signup/agent?type=maintenance", label: "Apply as Maintenance Agent" },
                   ].map((link) => (
                     <li key={link.href}>

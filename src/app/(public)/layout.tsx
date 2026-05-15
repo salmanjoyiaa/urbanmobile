@@ -115,7 +115,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             <span className="text-border">•</span>
             <Link href="/signup/agent?type=visiting" className="hover:text-foreground transition-colors">Become a Team Agent</Link>
             <span className="text-border">•</span>
-            <Link href="/signup/agent?type=seller" className="hover:text-foreground transition-colors">Become a Seller</Link>
+            <Link href="/signup/agent?type=seller" className="hover:text-foreground transition-colors">Create a product seller account</Link>
             <span className="text-border">•</span>
             <Link href="/signup/agent?type=maintenance" className="hover:text-foreground transition-colors">Become a Maintenance Agent</Link>
           </div>

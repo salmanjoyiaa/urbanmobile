@@ -109,7 +109,7 @@ function LoginContent() {
             : loginType === "visiting"
               ? "Team Login"
               : loginType === "seller"
-                ? "Seller Login"
+                ? "Product seller login"
                 : loginType === "maintenance"
                   ? "Maintenance Login"
                   : "Agent Login"}
@@ -150,7 +150,13 @@ function LoginContent() {
                 Signing in...
               </>
             ) : (
-              `Sign In${loginType ? ` as ${loginType === "property" ? "AQARI" : loginType === "visiting" ? "Team" : loginType === "seller" ? "Seller" : "Maintenance"} Agent` : ""}`
+              `Sign In${
+                loginType
+                  ? loginType === "seller"
+                    ? " as Product Seller"
+                    : ` as ${loginType === "property" ? "AQARI" : loginType === "visiting" ? "Team" : "Maintenance"} Agent`
+                  : ""
+              }`
             )}
           </Button>
         </form>
@@ -163,7 +169,7 @@ function LoginContent() {
               : loginType === "visiting"
                 ? "Apply to become a Team Agent"
                 : loginType === "seller"
-                  ? "Apply to become a Seller Agent"
+                  ? "Create a product seller account"
                   : loginType === "maintenance"
                     ? "Apply to become a Maintenance Agent"
                     : "Apply to become an agent"}

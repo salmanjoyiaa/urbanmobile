@@ -183,6 +183,25 @@ export const productSchema = z.object({
   images: z.array(z.string().url()).max(20).default([]),
 });
 
+/** SessionStorage key for listing draft when email confirmation is required before upload. */
+export const SELL_LISTING_DRAFT_STORAGE_KEY = "urbansaudi_seller_listing_draft_v1" as const;
+
+/** Subset of product fields persisted as JSON (no files). */
+export const sellListingDraftSchema = productSchema
+  .pick({
+    title: true,
+    description: true,
+    category: true,
+    condition: true,
+    city: true,
+    district: true,
+  })
+  .extend({
+    price: z.union([z.string(), z.number()]).transform((v) => String(v)),
+  });
+
+export type SellListingDraft = z.infer<typeof sellListingDraftSchema>;
+
 export const visitRequestSchema = z.object({
   property_id: z.string().regex(safeUUIDRegex, "Invalid property ID"),
   visitor_name: z
