@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getPublicShareBaseUrl } from "@/config/site";
 import { formatDate, formatPhoneFull, formatSAR } from "@/lib/format";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { ProductContactActions } from "@/components/product/product-contact-actions";
@@ -13,17 +14,28 @@ type ProductDetail = {
   category: string;
   condition: string;
   city: string;
+  district: string | null;
   price: number;
   images: string[];
   created_at: string;
   agents: {
-    company_name: string | null;
     profiles: {
       full_name: string;
       phone: string | null;
     } | null;
   } | null;
 };
+
+function absoluteShareUrl(base: string, src: string | undefined): string | undefined {
+  if (!src?.trim()) return undefined;
+  const s = src.trim();
+  if (/^https?:\/\//i.test(s)) return s;
+  try {
+    return new URL(s.startsWith("/") ? s : `/${s}`, base).href;
+  } catch {
+    return undefined;
+  }
+}
 
 async function getProduct(id: string) {
   const supabase = await createClient();
@@ -32,9 +44,8 @@ async function getProduct(id: string) {
     .from("products")
     .select(
       `
-      id, title, description, category, condition, city, price, images, created_at,
+      id, title, description, category, condition, city, district, price, images, created_at,
       agents:agent_id (
-        company_name,
         profiles:profile_id (full_name, phone)
       )
     `
@@ -57,11 +68,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: "Product not found" };
   }
 
+  const base = getPublicShareBaseUrl();
+  const canonicalUrl = `${base}/products/${params.id}`;
+  const desc = product.description.slice(0, 200);
+  const ogImage = absoluteShareUrl(base, product.images?.[0]);
+
   return {
+    metadataBase: new URL(base),
     title: `${product.title} | Products`,
-    description: product.description.slice(0, 140),
+    description: desc,
     openGraph: {
-      images: product.images?.[0] ? [product.images[0]] : undefined,
+      type: "website",
+      url: canonicalUrl,
+      title: product.title,
+      description: desc,
+      images: ogImage
+        ? [
+            {
+              url: ogImage,
+              alt: product.title,
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.title,
+      description: desc,
+      images: ogImage ? [ogImage] : undefined,
     },
   };
 }
@@ -78,13 +112,15 @@ export default async function ProductDetailPage({ params }: PageProps) {
     ? formatPhoneFull(product.agents.profiles.phone)
     : "Not provided";
 
+  const locationLine = [product.city, product.district?.trim()].filter(Boolean).join(", ");
+
   return (
     <div className="container mx-auto space-y-6 px-4 py-8">
       <div>
         <h1 className="text-[24px] font-extrabold text-[#0f1419] sm:text-[28px]">{product.title}</h1>
         <p className="mt-1 inline-flex items-center gap-1 text-[15px] text-[#536471]">
           <MapPin className="h-4 w-4" />
-          {product.city}
+          {locationLine}
         </p>
       </div>
 
@@ -103,8 +139,20 @@ export default async function ProductDetailPage({ params }: PageProps) {
               <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#536471]">{product.description}</p>
               <hr className="border-[#eff3f4]" />
               <div className="grid gap-3 text-[14px] sm:grid-cols-2">
-                <p><span className="font-bold text-[#0f1419]">City:</span> <span className="text-[#536471]">{product.city}</span></p>
-                <p><span className="font-bold text-[#0f1419]">Listed:</span> <span className="text-[#536471]">{formatDate(product.created_at)}</span></p>
+                <p>
+                  <span className="font-bold text-[#0f1419]">City:</span>{" "}
+                  <span className="text-[#536471]">{product.city}</span>
+                </p>
+                {product.district?.trim() ? (
+                  <p>
+                    <span className="font-bold text-[#0f1419]">District:</span>{" "}
+                    <span className="text-[#536471]">{product.district.trim()}</span>
+                  </p>
+                ) : null}
+                <p>
+                  <span className="font-bold text-[#0f1419]">Listed:</span>{" "}
+                  <span className="text-[#536471]">{formatDate(product.created_at)}</span>
+                </p>
               </div>
             </div>
           </div>
@@ -115,9 +163,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <h2 className="text-[17px] font-bold text-[#0f1419]">Seller</h2>
             <div className="mt-4 space-y-2 text-[14px]">
               <p className="font-bold text-[#0f1419]">{agentName}</p>
-              {product.agents?.company_name ? (
-                <p className="text-[#536471]">Company: {product.agents.company_name}</p>
-              ) : null}
               <p className="text-[#536471]">Phone: {sellerPhoneDisplay}</p>
             </div>
           </div>

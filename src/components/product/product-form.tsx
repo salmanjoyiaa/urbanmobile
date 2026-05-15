@@ -37,6 +37,7 @@ export function ProductForm({ mode, initialData, submitEndpoint, redirectPath }:
   const [condition, setCondition] = useState(initialData?.condition || "good");
   const [price, setPrice] = useState(String(initialData?.price || ""));
   const [city, setCity] = useState(initialData?.city || "");
+  const [district, setDistrict] = useState(initialData?.district ?? "");
   const [cities, setCities] = useState<string[]>([]);
   useEffect(() => {
     fetch('/api/cities')
@@ -56,6 +57,7 @@ export function ProductForm({ mode, initialData, submitEndpoint, redirectPath }:
         condition,
         price: Number(price),
         city,
+        district: district.trim() || null,
         images,
       };
 
@@ -162,6 +164,16 @@ export function ProductForm({ mode, initialData, submitEndpoint, redirectPath }:
               </SelectContent>
             </Select>
           </div>
+        </div>
+        <div className="space-y-2">
+          <Label>District / neighborhood (optional)</Label>
+          <Input
+            value={district}
+            onChange={(event) => setDistrict(event.target.value)}
+            disabled={isSubmitting}
+            placeholder="e.g., Thuqbah, Al Hamra"
+            maxLength={150}
+          />
         </div>
 
         <ImageUploader

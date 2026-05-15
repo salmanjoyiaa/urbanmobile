@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
-import Autoplay from "embla-carousel-autoplay";
 import { cn } from "@/lib/utils";
 
 export type SlideItem = {
@@ -21,21 +21,12 @@ type ImageSliderProps = {
 };
 
 export function ImageSlider({ items }: ImageSliderProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    {
-      loop: true,
-      align: "start",
-      skipSnaps: false,
-      dragFree: false,
-    },
-    [
-      Autoplay({
-        delay: 4000,
-        stopOnInteraction: false,
-        stopOnMouseEnter: true,
-      }),
-    ]
-  );
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    align: "start",
+    skipSnaps: false,
+    dragFree: false,
+  });
 
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -58,12 +49,15 @@ export function ImageSlider({ items }: ImageSliderProps) {
     [emblaApi]
   );
 
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+
   if (items.length === 0) return null;
 
   return (
     <div className="relative w-full overflow-hidden">
       <div className="overflow-hidden rounded-3xl pb-4 sm:pb-0" ref={emblaRef}>
-        <div className="flex touch-pan-y -ml-4 sm:-ml-5">
+        <div className="flex touch-pan-x -ml-4 sm:-ml-5">
           {items.map((item, index) => (
             <div
               key={item.id}
@@ -81,10 +75,8 @@ export function ImageSlider({ items }: ImageSliderProps) {
                       selectedIndex === index ? "scale-[1.02]" : "scale-100"
                     )}
                   />
-                  {/* Gradient overlay */}
                   <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-foreground/95 via-foreground/40 to-transparent transition-opacity duration-300 pointer-events-none" />
 
-                  {/* Badge */}
                   {item.badge && (
                     <div className="absolute left-4 top-4">
                       <span className="inline-flex rounded-full bg-white/90 backdrop-blur-md px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-foreground shadow-sm">
@@ -93,7 +85,6 @@ export function ImageSlider({ items }: ImageSliderProps) {
                     </div>
                   )}
 
-                  {/* Content overlay */}
                   <div className="absolute bottom-0 left-0 right-0 p-5 lg:p-6 transform transition-transform duration-500 group-hover:-translate-y-1">
                     <h3 className="text-[17px] sm:text-[18px] font-extrabold leading-tight text-white mb-1.5 line-clamp-2 drop-shadow-md">
                       {item.title}
@@ -105,7 +96,6 @@ export function ImageSlider({ items }: ImageSliderProps) {
                     )}
                   </div>
 
-                  {/* Hover glow highlight */}
                   <div className="absolute inset-0 rounded-3xl border-2 border-white/0 transition-all duration-300 group-hover:border-white/20" />
                 </div>
               </Link>
@@ -114,12 +104,30 @@ export function ImageSlider({ items }: ImageSliderProps) {
         </div>
       </div>
 
-      {/* Dot indicators */}
+      <button
+        type="button"
+        onClick={scrollPrev}
+        aria-label="Previous slide"
+        className="absolute left-1 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 shadow-lg transition-all hover:bg-white hover:scale-105 active:scale-95 sm:h-10 sm:w-10 md:left-2"
+      >
+        <ChevronLeft className="h-5 w-5 text-gray-800" />
+      </button>
+      <button
+        type="button"
+        onClick={scrollNext}
+        aria-label="Next slide"
+        className="absolute right-1 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 shadow-lg transition-all hover:bg-white hover:scale-105 active:scale-95 sm:h-10 sm:w-10 md:right-2"
+      >
+        <ChevronRight className="h-5 w-5 text-gray-800" />
+      </button>
+
       <div className="mt-6 flex items-center justify-center gap-2">
         {items.map((_, index) => (
           <button
             key={index}
+            type="button"
             onClick={() => scrollTo(index)}
+            aria-label={`Go to slide ${index + 1}`}
             className={cn(
               "h-1.5 rounded-full transition-all duration-300",
               selectedIndex === index

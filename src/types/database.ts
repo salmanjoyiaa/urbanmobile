@@ -102,6 +102,7 @@ export interface Product {
   condition: ProductCondition;
   price: number;
   city: string;
+  district: string | null;
   images: string[];
   is_available: boolean;
   views_count: number;

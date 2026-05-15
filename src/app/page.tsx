@@ -101,6 +101,7 @@ type Product = {
   price: number;
   category: string;
   condition: string;
+  district: string | null;
   images: string[] | null;
 };
 
@@ -156,7 +157,7 @@ export default async function HomePage() {
 
     const { data: prodData, error: prodError } = await supabase
       .from("products")
-      .select("id, title, price, category, condition, images")
+      .select("id, title, price, category, condition, district, images")
       .eq("is_available", true)
       .order("created_at", { ascending: false })
       .limit(12);

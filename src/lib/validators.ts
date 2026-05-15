@@ -179,6 +179,7 @@ export const productSchema = z.object({
     .string()
     .min(1, "City is required")
     .max(100, "City name must not exceed 100 characters"),
+  district: z.string().max(150, "District must not exceed 150 characters").nullable().optional(),
   images: z.array(z.string().url()).max(20).default([]),
 });
 

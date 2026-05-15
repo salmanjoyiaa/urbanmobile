@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { ProductCard } from "@/components/product/product-card";
@@ -14,11 +14,8 @@ type Product = {
   images: string[] | null;
 };
 
-const INTERVAL_MS = 4800;
-
 export function ProductSlider({ products }: { products: Product[] }) {
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const total = products.length;
 
@@ -33,11 +30,24 @@ export function ProductSlider({ products }: { products: Product[] }) {
   const next = useCallback(() => scrollToIndex((current + 1) % total), [current, total, scrollToIndex]);
   const prev = useCallback(() => scrollToIndex((current - 1 + total) % total), [current, total, scrollToIndex]);
 
-  useEffect(() => {
-    if (paused || total <= 1) return;
-    const timer = setInterval(next, INTERVAL_MS);
-    return () => clearInterval(timer);
-  }, [next, paused, total]);
+  const syncCurrentFromScroll = useCallback(() => {
+    const track = trackRef.current;
+    if (!track || total === 0) return;
+    const scrollLeft = track.scrollLeft;
+    const trackCenter = scrollLeft + track.clientWidth / 2;
+    let nearest = 0;
+    let nearestDist = Infinity;
+    for (let i = 0; i < track.children.length; i++) {
+      const el = track.children[i] as HTMLElement;
+      const center = el.offsetLeft + el.offsetWidth / 2;
+      const dist = Math.abs(center - trackCenter);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearest = i;
+      }
+    }
+    setCurrent((prev) => (prev !== nearest ? nearest : prev));
+  }, [total]);
 
   if (!total) return null;
 
@@ -64,15 +74,12 @@ export function ProductSlider({ products }: { products: Product[] }) {
         </div>
 
         {/* Track */}
-        <div
-          className="relative"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
+        <div className="relative">
           <div
             ref={trackRef}
-            className="flex gap-5 overflow-x-hidden"
-            style={{ scrollSnapType: "x mandatory" }}
+            className="flex touch-pan-x gap-5 overflow-x-auto overflow-y-hidden scrollbar-hide overscroll-x-contain"
+            style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
+            onScroll={syncCurrentFromScroll}
           >
             {products.map((product) => (
               <div
@@ -86,17 +93,19 @@ export function ProductSlider({ products }: { products: Product[] }) {
           </div>
 
           <button
+            type="button"
             onClick={prev}
             aria-label="Previous product"
-            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/95 shadow-lg hidden md:flex items-center justify-center hover:bg-white transition-all hover:scale-105 active:scale-95"
+            className="absolute left-1 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 shadow-lg transition-all hover:bg-white hover:scale-105 active:scale-95 sm:h-10 sm:w-10 md:-left-4"
           >
             <ChevronLeft className="h-5 w-5 text-gray-800" />
           </button>
 
           <button
+            type="button"
             onClick={next}
             aria-label="Next product"
-            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/95 shadow-lg hidden md:flex items-center justify-center hover:bg-white transition-all hover:scale-105 active:scale-95"
+            className="absolute right-1 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 shadow-lg transition-all hover:bg-white hover:scale-105 active:scale-95 sm:h-10 sm:w-10 md:-right-4"
           >
             <ChevronRight className="h-5 w-5 text-gray-800" />
           </button>
@@ -107,6 +116,7 @@ export function ProductSlider({ products }: { products: Product[] }) {
           {products.map((_, i) => (
             <button
               key={i}
+              type="button"
               onClick={() => scrollToIndex(i)}
               aria-label={`Go to product ${i + 1}`}
               className={`h-2 rounded-full transition-all duration-300 ${

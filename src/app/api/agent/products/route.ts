@@ -69,6 +69,7 @@ export async function POST(request: Request) {
 
   const payload: Database["public"]["Tables"]["products"]["Insert"] = {
     ...parsed.data,
+    district: parsed.data.district ?? null,
     agent_id: agentId,
     is_available: true,
     images: parsed.data.images || [],
